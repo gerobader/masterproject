@@ -9,4 +9,5 @@ const Sphere = (posX, posY, posZ, radius) => {
   sphere.position.z = posZ;
   return sphere;
 };
+
 export default Sphere;

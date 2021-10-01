@@ -1,9 +1,10 @@
 import React, {Component, createRef} from 'react';
 import * as THREE from 'three';
 import getCube from './Elements/cube';
-import Sphere from './Elements/Sphere';
+// import Sphere from './Elements/Sphere';
+import Node from './Elements/Node';
 // import Line from './Elements/Line';
-import arcticData from '../../data/arctic.json';
+// import arcticData from '../../data/arctic.json';
 
 import './Renderer.scss';
 
@@ -16,6 +17,7 @@ class Renderer extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      nodes: [],
       scene: undefined,
       camera: undefined,
       renderer: undefined,
@@ -142,7 +144,7 @@ class Renderer extends Component {
     this.canvasWrapper.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     camera.rotation.order = 'YXZ';
     camera.position.z = 10;
 
@@ -155,9 +157,18 @@ class Renderer extends Component {
     window.addEventListener('keypress', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
-    arcticData.nodes.forEach((node) => {
-      scene.add(Sphere(node.x / 100, node.y / 100, 0, Math.random() / 2));
-    });
+    const nodes = [];
+    // arcticData.nodes.forEach((node) => {
+    // const sphere = Sphere(node.x / 100, node.y / 100, 0, Math.random() / 2);
+    // eslint-disable-next-line max-len
+    // const nodeClass = new Node(node.x / 100, node.y / 100, 0, Math.random() / 2, 0x0000ff);
+    // nodes.push(nodeClass);
+    // scene.add(nodeClass.instance);
+    // });
+
+    const nodeClass = new Node(200 / 100, 400 / 100, -10, 0.5, 0xff0000, 'hallo welt', camera);
+    nodes.push(nodeClass);
+    scene.add(nodeClass.instance);
 
     // arcticData.edges.forEach((edge) => {
     //   const startNode = arcticData.nodes[edge.source];
@@ -182,6 +193,7 @@ class Renderer extends Component {
 
     this.setState((state) => ({
       ...state,
+      nodes,
       renderer,
       scene,
       camera,
@@ -191,12 +203,12 @@ class Renderer extends Component {
 
   animate() {
     const {
-      renderer, scene, camera, cube, cameraForward, cameraBack, cameraLeft, cameraRight
+      renderer, scene, nodes, camera, cube, cameraForward, cameraBack, cameraLeft, cameraRight
     } = this.state;
     const {count} = this.props;
     requestAnimationFrame(this.animate);
     if (cameraForward || cameraBack || cameraLeft || cameraRight) {
-      speed += 0.05;
+      speed += 0.1;
       const dir = new THREE.Vector3(0, 0, 0);
       if (cameraForward) dir.z -= 1;
       if (cameraBack) dir.z += 1;
@@ -208,6 +220,12 @@ class Renderer extends Component {
     } else {
       speed = 1;
     }
+
+    nodes.forEach((node) => {
+      if (node.label) {
+        node.updateLabelPosition(camera);
+      }
+    });
     cube.position.x = count;
     cube.rotation.x += 0.01;
     cube.rotation.y += 0.01;
@@ -222,6 +240,7 @@ class Renderer extends Component {
     }
     return (
       <div
+        id="network-view"
         className={`renderer${mouseDown ? ' hide-cursor' : ''}`}
         ref={(ref) => (this.canvasWrapper = ref)}
         onMouseDown={this.handleMouseDown}

@@ -28,7 +28,7 @@
     "react/prop-types": 0,
     "react/jsx-tag-spacing": ["error", { "beforeSelfClosing": "never" }],
     "comma-dangle": ["error", "never"],
-    "max-len": ["error", { "code": 110 }],
+    "max-len": ["error", { "code": 130 }],
     "no-unneeded-ternary": "error",
     "no-empty-function": "error",
     "no-plusplus": "off",

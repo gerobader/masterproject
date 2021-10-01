@@ -1,0 +1,310 @@
+[
+  {
+    "id": 0,
+    "label": "Myriel"
+  },
+  {
+    "id": 1,
+    "label": "Napoleon"
+  },
+  {
+    "id": 2,
+    "label": "MlleBaptistine"
+  },
+  {
+    "id": 3,
+    "label": "MmeMagloire"
+  },
+  {
+    "id": 4,
+    "label": "CountessDeLo"
+  },
+  {
+    "id": 5,
+    "label": "Geborand"
+  },
+  {
+    "id": 6,
+    "label": "Champtercier"
+  },
+  {
+    "id": 7,
+    "label": "Cravatte"
+  },
+  {
+    "id": 8,
+    "label": "Count"
+  },
+  {
+    "id": 9,
+    "label": "OldMan"
+  },
+  {
+    "id": 10,
+    "label": "Labarre"
+  },
+  {
+    "id": 11,
+    "label": "Valjean"
+  },
+  {
+    "id": 12,
+    "label": "Marguerite"
+  },
+  {
+    "id": 13,
+    "label": "MmeDeR"
+  },
+  {
+    "id": 14,
+    "label": "Isabeau"
+  },
+  {
+    "id": 15,
+    "label": "Gervais"
+  },
+  {
+    "id": 16,
+    "label": "Tholomyes"
+  },
+  {
+    "id": 17,
+    "label": "Listolier"
+  },
+  {
+    "id": 18,
+    "label": "Fameuil"
+  },
+  {
+    "id": 19,
+    "label": "Blacheville"
+  },
+  {
+    "id": 20,
+    "label": "Favourite"
+  },
+  {
+    "id": 21,
+    "label": "Dahlia"
+  },
+  {
+    "id": 22,
+    "label": "Zephine"
+  },
+  {
+    "id": 23,
+    "label": "Fantine"
+  },
+  {
+    "id": 24,
+    "label": "MmeThenardier"
+  },
+  {
+    "id": 25,
+    "label": "Thenardier"
+  },
+  {
+    "id": 26,
+    "label": "Cosette"
+  },
+  {
+    "id": 27,
+    "label": "Javert"
+  },
+  {
+    "id": 28,
+    "label": "Fauchelevent"
+  },
+  {
+    "id": 29,
+    "label": "Bamatabois"
+  },
+  {
+    "id": 30,
+    "label": "Perpetue"
+  },
+  {
+    "id": 31,
+    "label": "Simplice"
+  },
+  {
+    "id": 32,
+    "label": "Scaufflaire"
+  },
+  {
+    "id": 33,
+    "label": "Woman1"
+  },
+  {
+    "id": 34,
+    "label": "Judge"
+  },
+  {
+    "id": 35,
+    "label": "Champmathieu"
+  },
+  {
+    "id": 36,
+    "label": "Brevet"
+  },
+  {
+    "id": 37,
+    "label": "Chenildieu"
+  },
+  {
+    "id": 38,
+    "label": "Cochepaille"
+  },
+  {
+    "id": 39,
+    "label": "Pontmercy"
+  },
+  {
+    "id": 40,
+    "label": "Boulatruelle"
+  },
+  {
+    "id": 41,
+    "label": "Eponine"
+  },
+  {
+    "id": 42,
+    "label": "Anzelma"
+  },
+  {
+    "id": 43,
+    "label": "Woman2"
+  },
+  {
+    "id": 44,
+    "label": "MotherInnocent"
+  },
+  {
+    "id": 45,
+    "label": "Gribier"
+  },
+  {
+    "id": 46,
+    "label": "Jondrette"
+  },
+  {
+    "id": 47,
+    "label": "MmeBurgon"
+  },
+  {
+    "id": 48,
+    "label": "Gavroche"
+  },
+  {
+    "id": 49,
+    "label": "Gillenormand"
+  },
+  {
+    "id": 50,
+    "label": "Magnon"
+  },
+  {
+    "id": 51,
+    "label": "MlleGillenormand"
+  },
+  {
+    "id": 52,
+    "label": "MmePontmercy"
+  },
+  {
+    "id": 53,
+    "label": "MlleVaubois"
+  },
+  {
+    "id": 54,
+    "label": "LtGillenormand"
+  },
+  {
+    "id": 55,
+    "label": "Marius"
+  },
+  {
+    "id": 56,
+    "label": "BaronessT"
+  },
+  {
+    "id": 57,
+    "label": "Mabeuf"
+  },
+  {
+    "id": 58,
+    "label": "Enjolras"
+  },
+  {
+    "id": 59,
+    "label": "Combeferre"
+  },
+  {
+    "id": 60,
+    "label": "Prouvaire"
+  },
+  {
+    "id": 61,
+    "label": "Feuilly"
+  },
+  {
+    "id": 62,
+    "label": "Courfeyrac"
+  },
+  {
+    "id": 63,
+    "label": "Bahorel"
+  },
+  {
+    "id": 64,
+    "label": "Bossuet"
+  },
+  {
+    "id": 65,
+    "label": "Joly"
+  },
+  {
+    "id": 66,
+    "label": "Grantaire"
+  },
+  {
+    "id": 67,
+    "label": "MotherPlutarch"
+  },
+  {
+    "id": 68,
+    "label": "Gueulemer"
+  },
+  {
+    "id": 69,
+    "label": "Babet"
+  },
+  {
+    "id": 70,
+    "label": "Claquesous"
+  },
+  {
+    "id": 71,
+    "label": "Montparnasse"
+  },
+  {
+    "id": 72,
+    "label": "Toussaint"
+  },
+  {
+    "id": 73,
+    "label": "Child1"
+  },
+  {
+    "id": 74,
+    "label": "Child2"
+  },
+  {
+    "id": 75,
+    "label": "Brujon"
+  },
+  {
+    "id": 76,
+    "label": "MmeHucheloup"
+  }
+]

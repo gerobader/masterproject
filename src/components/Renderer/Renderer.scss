@@ -1,4 +1,10 @@
-.renderer{
+#network-view{
+  position: relative;
+  .scene-label{
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+  }
   &.hide-cursor{
     cursor: none;
   }

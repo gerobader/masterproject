@@ -2,12 +2,14 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, r, color, label, camera) {
+  constructor(x, y, z, r, color, id, label, camera) {
     this.label = null;
+    this.id = id;
+    this.labelText = label;
     this.instance = null;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
-      this.addLabel(label, camera);
+      this.addLabel(camera);
     }
   }
 
@@ -20,8 +22,12 @@ class Node {
     this.instance.position.z = z;
   }
 
-  addLabel(text, camera) {
-    this.label = new Label(text, this.instance, camera);
+  addLabel(camera) {
+    this.label = new Label(this.labelText, this.instance, camera);
+  }
+
+  removeLabel() {
+    this.label.removeFromDom();
   }
 
   updateLabelPosition(camera) {

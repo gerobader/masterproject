@@ -1,32 +1,36 @@
-import React, {Component, createRef} from 'react';
+import React, {Component, createRef, memo} from 'react';
+import {connect} from 'react-redux';
 import * as THREE from 'three';
-import getCube from './Elements/cube';
-// import Sphere from './Elements/Sphere';
 import Node from './Elements/Node';
-// import Line from './Elements/Line';
-// import arcticData from '../../data/arctic.json';
+import Edge from './Elements/Edge';
+import {setOrbitPreview} from '../../redux/settings/settings.actions';
+import * as lesMiserablesNodes from '../../data/LesMiserables/nodes.json';
+import * as lesMiserablesEdges from '../../data/LesMiserables/edges.json';
 
 import './Renderer.scss';
 
 let animationRunning = false;
 const sensitivity = 0.002;
-const controllKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'];
+const controlKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'c', ' '];
 let speed = 1;
+const initialCameraZ = 300;
 
 class Renderer extends Component {
   constructor(props) {
     super(props);
     this.state = {
       nodes: [],
+      edges: [],
       scene: undefined,
       camera: undefined,
       renderer: undefined,
-      cube: undefined,
       mouseDown: false,
       cameraForward: false,
       cameraLeft: false,
       cameraRight: false,
-      cameraBack: false
+      cameraBack: false,
+      cameraUp: false,
+      cameraDown: false
     };
     this.canvasWrapper = createRef();
     this.createScene = this.createScene.bind(this);
@@ -44,6 +48,8 @@ class Renderer extends Component {
 
   handleMouseDown(e) {
     e.preventDefault();
+    const {_setOrbitPreview} = this.props;
+    _setOrbitPreview(false);
     this.setState((prevState) => ({
       ...prevState,
       mouseDown: true
@@ -68,7 +74,7 @@ class Renderer extends Component {
 
   handleKeyPress(e) {
     const key = e.key.toLowerCase();
-    if (controllKeys.includes(key)) {
+    if (controlKeys.includes(key)) {
       this.setState((prevState) => {
         switch (key) {
           case 'ArrowUp':
@@ -95,6 +101,16 @@ class Renderer extends Component {
               ...prevState,
               cameraRight: true
             };
+          case ' ':
+            return {
+              ...prevState,
+              cameraUp: true
+            };
+          case 'c':
+            return {
+              ...prevState,
+              cameraDown: true
+            };
           default:
             return prevState;
         }
@@ -104,7 +120,7 @@ class Renderer extends Component {
 
   handleKeyUp(e) {
     const key = e.key.toLowerCase();
-    if (controllKeys.includes(key)) {
+    if (controlKeys.includes(key)) {
       this.setState((prevState) => {
         switch (key) {
           case 'ArrowUp':
@@ -131,6 +147,16 @@ class Renderer extends Component {
               ...prevState,
               cameraRight: false
             };
+          case ' ':
+            return {
+              ...prevState,
+              cameraUp: false
+            };
+          case 'c':
+            return {
+              ...prevState,
+              cameraDown: false
+            };
           default:
             return prevState;
         }
@@ -146,7 +172,7 @@ class Renderer extends Component {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     camera.rotation.order = 'YXZ';
-    camera.position.z = 10;
+    camera.position.z = initialCameraZ;
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -157,63 +183,75 @@ class Renderer extends Component {
     window.addEventListener('keypress', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
-    const nodes = [];
-    // arcticData.nodes.forEach((node) => {
-    // const sphere = Sphere(node.x / 100, node.y / 100, 0, Math.random() / 2);
-    // eslint-disable-next-line max-len
-    // const nodeClass = new Node(node.x / 100, node.y / 100, 0, Math.random() / 2, 0x0000ff);
-    // nodes.push(nodeClass);
-    // scene.add(nodeClass.instance);
-    // });
+    const nodes = lesMiserablesNodes.default.map((node) => {
+      const nodeClass = new Node(
+        Math.random() * 100 - 50,
+        Math.random() * 100 - 50,
+        Math.random() * 100 - 50,
+        1,
+        new THREE.Color(Math.random(), Math.random(), Math.random()),
+        node.id,
+        node.label,
+        camera
+      );
+      scene.add(nodeClass.instance);
+      return nodeClass;
+    });
 
-    const nodeClass = new Node(200 / 100, 400 / 100, -10, 0.5, 0xff0000, 'hallo welt', camera);
-    nodes.push(nodeClass);
-    scene.add(nodeClass.instance);
+    const edges = lesMiserablesEdges.default.map((edge) => {
+      const sourceNode = nodes.filter((node) => node.id === edge.source);
+      const targetNode = nodes.filter((node) => node.id === edge.target);
+      const edgeClass = new Edge(sourceNode[0], targetNode[0]);
+      scene.add(edgeClass.instance);
+      return edgeClass;
+    });
 
-    // arcticData.edges.forEach((edge) => {
-    //   const startNode = arcticData.nodes[edge.source];
-    //   const endNode = arcticData.nodes[edge.target];
-    //   if (!startNode || !endNode) return;
-    //   scene.add(Line(
-    //     {
-    //       x: startNode.x,
-    //       y: startNode.y,
-    //       z: 0
-    //     },
-    //     {
-    //       x: endNode.x,
-    //       y: endNode.y,
-    //       z: 0
-    //     }
-    //   ));
-    // });
-
-    const cube = getCube();
-    scene.add(cube);
-
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, -10, 0),
+      new THREE.Vector3(0, 10, 0)
+    ]);
+    scene.add(new THREE.Line(geometry, material));
+    const geometrytwo = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(-10, 0, 0),
+      new THREE.Vector3(10, 0, 0)
+    ]);
+    scene.add(new THREE.Line(geometrytwo, material));
+    const geometrythree = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, -10),
+      new THREE.Vector3(0, 0, 10)
+    ]);
+    scene.add(new THREE.Line(geometrythree, material));
     this.setState((state) => ({
       ...state,
       nodes,
+      edges,
       renderer,
       scene,
-      camera,
-      cube
+      camera
     }));
   }
 
   animate() {
     const {
-      renderer, scene, nodes, camera, cube, cameraForward, cameraBack, cameraLeft, cameraRight
+      renderer, scene, nodes, camera, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
     } = this.state;
-    const {count} = this.props;
+    const {orbitPreview} = this.props;
     requestAnimationFrame(this.animate);
-    if (cameraForward || cameraBack || cameraLeft || cameraRight) {
+    if (orbitPreview) {
+      camera.position.x = camera.position.x * Math.cos(0.002) - camera.position.z * Math.sin(0.002);
+      camera.position.z = camera.position.z * Math.cos(0.002) + camera.position.x * Math.sin(0.002);
+      camera.lookAt(scene.position);
+    }
+    if (cameraForward || cameraBack || cameraLeft || cameraRight || cameraUp || cameraDown) {
       speed += 0.1;
       const dir = new THREE.Vector3(0, 0, 0);
       if (cameraForward) dir.z -= 1;
       if (cameraBack) dir.z += 1;
       if (cameraLeft) dir.x -= 1;
       if (cameraRight) dir.x += 1;
+      if (cameraUp) dir.y += 1;
+      if (cameraDown) dir.y -= 1;
       dir.applyQuaternion(camera.quaternion).normalize();
       const divideVector = new THREE.Vector3(10 / speed, 10 / speed, 10 / speed);
       camera.position.add(dir.divide(divideVector));
@@ -226,9 +264,6 @@ class Renderer extends Component {
         node.updateLabelPosition(camera);
       }
     });
-    cube.position.x = count;
-    cube.rotation.x += 0.01;
-    cube.rotation.y += 0.01;
     renderer.render(scene, camera);
   }
 
@@ -251,4 +286,12 @@ class Renderer extends Component {
   }
 }
 
-export default React.memo(Renderer);
+const mapStateToPros = (state) => ({
+  orbitPreview: state.settings.orbitPreview
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  _setOrbitPreview: (state) => dispatch(setOrbitPreview(state))
+});
+
+export default connect(mapStateToPros, mapDispatchToProps)(memo(Renderer));

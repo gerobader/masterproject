@@ -1,2 +1,6 @@
-// eslint-disable-next-line import/prefer-default-export
 export const SET_ORBIT_PREVIEW = 'SET_ORBIT_PREVIEW';
+
+export const SET_NODES = 'SET_NODES';
+export const SET_EDGES = 'SET_EDGES';
+export const SET_SELECTED_NODES = 'SET_SELECTED_NODES';
+export const SET_SELECTED_EDGES = 'SET_SELECTED_EDGES';

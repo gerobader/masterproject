@@ -9,12 +9,19 @@ class Edge {
   }
 
   buildGeometry() {
+    const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
+    const material = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
+    this.instance = new THREE.Mesh(geometry, material);
+    this.instance.name = 'Edge';
+    this.updatePosition();
+    this.setRotation();
+  }
+
+  updatePosition() {
     const targetVector = this.targetNode.instance.position.clone();
     const sourceVector = this.sourceNode.instance.position.clone();
     const lineVector = targetVector.clone().sub(sourceVector);
-    const geometry = new THREE.CylinderGeometry(0.1, 0.1, lineVector.length(), 6);
-    const material = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
-    this.instance = new THREE.Mesh(geometry, material);
+    this.instance.scale.y = lineVector.length();
     this.instance.position.set(
       (sourceVector.x + targetVector.x) / 2,
       (sourceVector.y + targetVector.y) / 2,

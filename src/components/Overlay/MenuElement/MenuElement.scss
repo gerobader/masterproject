@@ -1,9 +1,11 @@
+@import '../../../assets/settings';
+
 .menu-element{
   height: 415px;
   width: 415px;
-  border: 1px solid #fff;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid $menuWindowBorderColor;
+  border-radius: $menuWindowBorderRadius;
+  background: $menuWindowBackgroundColor;
   position: absolute;
   top: 20px;
   left: 20px;
@@ -11,6 +13,7 @@
   color: #fff;
   transition: height 0.2s ease-in-out, width 0.2s ease-in-out;
   box-sizing: border-box;
+  backdrop-filter: blur($menuWindowBackgroundBlur);
   .header{
     display: flex;
     flex-direction: row;
@@ -18,7 +21,7 @@
     align-items: center;
     position: relative;
     padding-bottom: 10px;
-    border-bottom: 1px solid #fff;
+    border-bottom: 1px solid $menuWindowBorderColor;
     height: 27px;
     h2{
       margin: 0;

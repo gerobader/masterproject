@@ -1,12 +1,15 @@
-/* eslint-disable */
 import React, {Component, createRef, memo} from 'react';
 import {connect} from 'react-redux';
 import * as THREE from 'three';
 import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
+import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import Node from './Elements/Node';
 import Edge from './Elements/Edge';
+import {
+  setNodes, setEdges, setSelectedNodes, setSelectedEdges
+} from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
 import * as lesMiserablesNodes from '../../data/LesMiserables/nodes.json';
 import * as lesMiserablesEdges from '../../data/LesMiserables/edges.json';
@@ -26,18 +29,18 @@ const mousePosition = new THREE.Vector2(0, 0);
 let hoveredElementOutline;
 let selectedElementOutline;
 
+let group = undefined;
+
 class Renderer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      nodes: [],
-      edges: [],
       scene: undefined,
       camera: undefined,
       renderer: undefined,
       composer: undefined,
-      hoveredElement: [],
-      selectedElements: [],
+      controls: undefined,
+      hoveredElement: undefined,
       mouseDown: false,
       cameraForward: false,
       cameraLeft: false,
@@ -60,52 +63,78 @@ class Renderer extends Component {
     this.createScene();
   }
 
-  checkIntersect(e) {
-    const {camera, scene} = this.state;
-    const {clientX, clientY} = e;
-    mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
-    mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
-    raycaster.setFromCamera(mousePosition, camera);
-    const newHoveredElement = raycaster.intersectObjects(scene.children);
-    this.setState((state) => ({
-      ...state,
-      hoveredElement: newHoveredElement
-    }));
-  }
-
-
   handleClickOnElement(e) {
-    const {hoveredElement, selectedElements, nodes, edges} = this.state;
-    let newSelectedElements = [...selectedElements];
-    if (hoveredElement.length) {
-      let newElement;
-      if (hoveredElement[0].object.geometry.type === 'CylinderGeometry') {
-        newElement = edges.find((edge) => edge.instance.uuid === hoveredElement[0].object.uuid);
-      } else {
-        newElement = nodes.find((node) => node.instance.uuid === hoveredElement[0].object.uuid);
-      }
-      if (e.ctrlKey) {
-        if (selectedElements.includes(newElement)) {
-          newSelectedElements = selectedElements.filter((element) => element !== newElement);
+    const {
+      nodes, edges, selectedNodes, selectedEdges
+    } = this.props;
+    const {hoveredElement, controls} = this.state;
+    let newSelectedEdges = [...selectedEdges];
+    let newSelectedNodes = [...selectedNodes];
+    if (hoveredElement && !controls.dragging) {
+      if (hoveredElement.object.name === 'Edge') {
+        const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.object.uuid);
+        if (e.ctrlKey) {
+          if (selectedEdges.includes(newSelectedEdge)) {
+            newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
+          } else {
+            newSelectedEdges = [...selectedEdges, newSelectedEdge];
+          }
         } else {
-          newSelectedElements = [...selectedElements, newElement];
+          newSelectedNodes = [];
+          newSelectedEdges = [newSelectedEdge];
         }
       } else {
-        newSelectedElements = [newElement];
+        const newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
+        if (e.ctrlKey) {
+          if (selectedNodes.includes(newSelectedNode)) {
+            newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
+          } else {
+            newSelectedNodes = [...selectedNodes, newSelectedNode];
+          }
+        } else {
+          controls.attach(newSelectedNode.instance);
+          newSelectedNodes = [newSelectedNode];
+          newSelectedEdges = [];
+        }
       }
     }
-    return newSelectedElements;
+    return [newSelectedNodes, newSelectedEdges];
   }
 
   handleMouseDown(e) {
     e.preventDefault();
-    const {_setOrbitPreview} = this.props;
-    _setOrbitPreview(false);
-    const newSelectedElements = this.handleClickOnElement(e);
+    const {
+      _setOrbitPreview, orbitPreview, _setSelectedNodes, _setSelectedEdges
+    } = this.props;
+    const {scene, controls} = this.state;
+    if (orbitPreview) {
+      _setOrbitPreview(false);
+    }
+    const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
+    if (newSelectedEdges.length) {
+      controls.detach();
+    } else if (newSelectedNodes.length > 1) {
+      // TODO: move groups of nodes
+      scene.remove(group);
+      group = new THREE.Group();
+      const groupPosition = new THREE.Vector3(0, 0, 0);
+      newSelectedNodes.forEach((node) => {
+        groupPosition.add(node.instance.position);
+      });
+      groupPosition.divideScalar(newSelectedNodes.length);
+      // group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
+      newSelectedNodes.forEach((node) => {
+        group.add(node.instance.clone());
+      });
+      scene.add(group);
+      controls.attach(group);
+      controls.attach(group);
+    }
+    _setSelectedNodes(newSelectedNodes);
+    _setSelectedEdges(newSelectedEdges);
     this.setState((prevState) => ({
       ...prevState,
-      mouseDown: true,
-      selectedElements: newSelectedElements
+      mouseDown: e.buttons === 1
     }));
   }
 
@@ -117,13 +146,11 @@ class Renderer extends Component {
   }
 
   handleMouseMove(e) {
-    const {mouseDown, camera} = this.state;
+    const {mouseDown, camera, controls} = this.state;
     this.checkIntersect(e);
-    if (!mouseDown) return;
-    if (e.buttons === 1) {
-      camera.rotation.y -= e.movementX * sensitivity;
-      camera.rotation.x -= e.movementY * sensitivity;
-    }
+    if (!mouseDown || controls.dragging) return;
+    camera.rotation.y -= e.movementX * sensitivity;
+    camera.rotation.x -= e.movementY * sensitivity;
   }
 
   handleKeyPress(e) {
@@ -173,6 +200,8 @@ class Renderer extends Component {
   }
 
   handleKeyUp(e) {
+    const {scene, controls} = this.state;
+    const {_setSelectedNodes, _setSelectedEdges} = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key)) {
       this.setState((prevState) => {
@@ -212,10 +241,12 @@ class Renderer extends Component {
               cameraDown: false
             };
           case 'escape':
-            return {
-              ...prevState,
-              selectedElements: []
-            };
+            controls.detach();
+            scene.remove(group);
+            group = undefined;
+            _setSelectedNodes([]);
+            _setSelectedEdges([]);
+            return prevState;
           default:
             return prevState;
         }
@@ -223,7 +254,24 @@ class Renderer extends Component {
     }
   }
 
+  checkIntersect(e) {
+    const {camera, scene, hoveredElement} = this.state;
+    const {clientX, clientY} = e;
+    mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
+    mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(mousePosition, camera);
+    let newHoveredElement = raycaster.intersectObjects(scene.children);
+    newHoveredElement = newHoveredElement.length ? newHoveredElement[0] : undefined;
+    if (newHoveredElement !== hoveredElement) {
+      this.setState((state) => ({
+        ...state,
+        hoveredElement: newHoveredElement
+      }));
+    }
+  }
+
   createScene() {
+    const {_setNodes, _setEdges} = this.props;
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     this.canvasWrapper.appendChild(renderer.domElement);
@@ -258,9 +306,11 @@ class Renderer extends Component {
     });
 
     const edges = lesMiserablesEdges.default.map((edge) => {
-      const sourceNode = nodes.filter((node) => node.id === edge.source);
-      const targetNode = nodes.filter((node) => node.id === edge.target);
-      const edgeClass = new Edge(sourceNode[0], targetNode[0]);
+      const sourceNode = nodes.filter((node) => node.id === edge.source)[0];
+      const targetNode = nodes.filter((node) => node.id === edge.target)[0];
+      const edgeClass = new Edge(sourceNode, targetNode);
+      sourceNode.addOutgoingEdge(edgeClass);
+      targetNode.addIncomingEdge(edgeClass);
       scene.add(edgeClass.instance);
       return edgeClass;
     });
@@ -275,22 +325,28 @@ class Renderer extends Component {
     selectedElementOutline.visibleEdgeColor.set(selectedElementOutlineColor);
     composer.addPass(selectedElementOutline);
 
+    const controls = new TransformControls(camera, renderer.domElement);
+    scene.add(controls);
+
+    _setNodes(nodes);
+    _setEdges(edges);
     this.setState((state) => ({
       ...state,
-      nodes,
-      edges,
       renderer,
       composer,
       scene,
-      camera
+      camera,
+      controls
     }));
   }
 
   animate() {
     const {
-      composer, hoveredElement, selectedElements, scene, nodes, camera, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
+      composer, hoveredElement, scene, camera, controls, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
     } = this.state;
-    const {orbitPreview} = this.props;
+    const {
+      orbitPreview, nodes, selectedNodes, selectedEdges
+    } = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) {
       camera.position.x = camera.position.x * Math.cos(0.002) - camera.position.z * Math.sin(0.002);
@@ -317,15 +373,20 @@ class Renderer extends Component {
         node.updateLabelPosition(camera);
       }
     });
-    if (hoveredElement.length) {
-      hoveredElementOutline.selectedObjects = [hoveredElement[0].object];
+    if (hoveredElement) {
+      hoveredElementOutline.selectedObjects = [hoveredElement.object];
     } else {
       hoveredElementOutline.selectedObjects = [];
     }
-    if (selectedElements.length) {
+    if (selectedNodes.length || selectedEdges.length) {
+      const selectedElements = [...selectedNodes, ...selectedEdges];
       selectedElementOutline.selectedObjects = selectedElements.map((selectedElement) => selectedElement.instance);
     } else {
       selectedElementOutline.selectedObjects = [];
+    }
+
+    if (controls.dragging) {
+      selectedNodes[0].updateAssociatedEdgePosition();
     }
 
     composer.render();
@@ -351,11 +412,19 @@ class Renderer extends Component {
 }
 
 const mapStateToPros = (state) => ({
-  orbitPreview: state.settings.orbitPreview
+  orbitPreview: state.settings.orbitPreview,
+  nodes: state.networkElements.nodes,
+  edges: state.networkElements.edges,
+  selectedNodes: state.networkElements.selectedNodes,
+  selectedEdges: state.networkElements.selectedEdges
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  _setOrbitPreview: (state) => dispatch(setOrbitPreview(state))
+  _setOrbitPreview: (state) => dispatch(setOrbitPreview(state)),
+  _setNodes: (nodes) => dispatch(setNodes(nodes)),
+  _setEdges: (edges) => dispatch(setEdges(edges)),
+  _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
+  _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges))
 });
 
 export default connect(mapStateToPros, mapDispatchToProps)(memo(Renderer));

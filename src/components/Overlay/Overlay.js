@@ -1,15 +1,17 @@
 import React from 'react';
 import MenuElement from './MenuElement/MenuElement';
 import Appearance from './Controls/Appearance/Appearance';
+import Footer from './Footer/Footer';
 
 import './Overlay.scss';
 
 const Overlay = () => {
   return (
-    <div id="ui-interface">
+    <div id="user-interface">
       <MenuElement headline="Appearance">
         <Appearance/>
       </MenuElement>
+      <Footer/>
     </div>
   );
 };

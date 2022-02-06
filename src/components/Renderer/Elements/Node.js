@@ -7,6 +7,8 @@ class Node {
     this.id = id;
     this.labelText = label;
     this.instance = null;
+    this.incomingEdges = [];
+    this.outgoingEdges = [];
     this.buildGeometry(x, y, z, r, color);
     if (label) {
       this.addLabel(camera);
@@ -17,9 +19,34 @@ class Node {
     const geometry = new THREE.SphereGeometry(r, 8, 8);
     const material = new THREE.MeshBasicMaterial({color});
     this.instance = new THREE.Mesh(geometry, material);
+    this.instance.name = 'Node';
     this.instance.position.x = x;
     this.instance.position.y = y;
     this.instance.position.z = z;
+  }
+
+  updateAssociatedEdgePosition() {
+    this.incomingEdges.forEach((edge) => {
+      edge.updatePosition();
+    });
+    this.outgoingEdges.forEach((edge) => {
+      edge.updatePosition();
+    });
+  }
+
+  updatePosition(x, y, z) {
+    this.instance.position.x += x;
+    this.instance.position.y += y;
+    this.instance.position.z += z;
+    this.updateAssociatedEdgePosition();
+  }
+
+  addIncomingEdge(edge) {
+    this.incomingEdges.push(edge);
+  }
+
+  addOutgoingEdge(edge) {
+    this.outgoingEdges.push(edge);
   }
 
   addLabel(camera) {

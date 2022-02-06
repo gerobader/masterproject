@@ -1,11 +1,16 @@
 import React from 'react';
+import {useSelector} from 'react-redux';
 
 import './Appearance.scss';
 
 const Appearance = () => {
+  const {nodes} = useSelector((state) => state.networkElements);
+  const testFn = () => {
+    nodes[0].updatePosition(20, 0, 0);
+  };
   return (
     <div>
-      My Controls!!!
+      <button onClick={testFn}>Click here!</button>
     </div>
   );
 };

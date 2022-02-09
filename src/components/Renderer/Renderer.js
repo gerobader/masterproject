@@ -29,7 +29,7 @@ const mousePosition = new THREE.Vector2(0, 0);
 let hoveredElementOutline;
 let selectedElementOutline;
 
-let group = undefined;
+let group;
 
 class Renderer extends Component {
   constructor(props) {
@@ -113,8 +113,7 @@ class Renderer extends Component {
     const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
     if (newSelectedEdges.length) {
       controls.detach();
-    } else if (newSelectedNodes.length > 1) {
-      // TODO: move groups of nodes
+    } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
       scene.remove(group);
       group = new THREE.Group();
       const groupPosition = new THREE.Vector3(0, 0, 0);
@@ -122,12 +121,14 @@ class Renderer extends Component {
         groupPosition.add(node.instance.position);
       });
       groupPosition.divideScalar(newSelectedNodes.length);
-      // group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
+      group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
       newSelectedNodes.forEach((node) => {
-        group.add(node.instance.clone());
+        const clone = node.instance.clone();
+        clone.userData = {originalUuid: node.instance.uuid};
+        clone.position.sub(groupPosition);
+        group.add(clone);
       });
       scene.add(group);
-      controls.attach(group);
       controls.attach(group);
     }
     _setSelectedNodes(newSelectedNodes);
@@ -386,9 +387,19 @@ class Renderer extends Component {
     }
 
     if (controls.dragging) {
-      selectedNodes[0].updateAssociatedEdgePosition();
+      if (selectedNodes.length > 1) {
+        group.children.forEach((nodeCopy) => {
+          const original = selectedNodes.find((selectedNode) => selectedNode.instance.uuid === nodeCopy.userData.originalUuid);
+          if (original) {
+            const newPosition = new THREE.Vector3();
+            nodeCopy.getWorldPosition(newPosition);
+            original.updatePositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
+          }
+        });
+      } else {
+        selectedNodes[0].updateAssociatedEdgePosition();
+      }
     }
-
     composer.render();
   }
 

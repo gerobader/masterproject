@@ -34,10 +34,17 @@ class Node {
     });
   }
 
-  updatePosition(x, y, z) {
+  updatePositionRelative(x, y, z) {
     this.instance.position.x += x;
     this.instance.position.y += y;
     this.instance.position.z += z;
+    this.updateAssociatedEdgePosition();
+  }
+
+  updatePositionAbsolute(x, y, z) {
+    this.instance.position.x = x;
+    this.instance.position.y = y;
+    this.instance.position.z = z;
     this.updateAssociatedEdgePosition();
   }
 

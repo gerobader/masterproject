@@ -6,7 +6,7 @@ import './Appearance.scss';
 const Appearance = () => {
   const {nodes} = useSelector((state) => state.networkElements);
   const testFn = () => {
-    nodes[0].updatePosition(20, 0, 0);
+    nodes[0].updatePositionRelative(20, 0, 0);
   };
   return (
     <div>

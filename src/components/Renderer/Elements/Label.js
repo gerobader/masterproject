@@ -45,6 +45,10 @@ class Label {
   setColor(color) {
     this.label.style.color = color;
   }
+
+  setSize(size) {
+    this.label.style.fontSize = `${size}px`;
+  }
 }
 
 export default Label;

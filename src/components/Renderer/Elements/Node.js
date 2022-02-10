@@ -11,6 +11,7 @@ class Node {
     this.outgoingEdges = [];
     this.color = color;
     this.colorIsMapped = false;
+    this.size = r;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
       this.addLabel(camera);
@@ -18,7 +19,7 @@ class Node {
   }
 
   buildGeometry(x, y, z, r, color) {
-    const geometry = new THREE.SphereGeometry(r, 8, 8);
+    const geometry = new THREE.SphereGeometry(r, 16, 16);
     const material = new THREE.MeshBasicMaterial({color});
     this.instance = new THREE.Mesh(geometry, material);
     this.instance.name = 'Node';
@@ -31,8 +32,58 @@ class Node {
     this.instance.material.color.set(color);
   }
 
+  setSize(size) {
+    if (size !== this.size) {
+      const newSize = size / this.size;
+      this.instance.geometry.scale(newSize, newSize, newSize);
+      this.size = size;
+    }
+  }
+
+  setShape(shape) {
+    this.instance.geometry.dispose();
+    switch (shape) {
+      case 'Box':
+        this.instance.geometry = new THREE.BoxGeometry(this.size * 2, this.size * 2, this.size * 2);
+        break;
+      case 'Cone':
+        this.instance.geometry = new THREE.ConeGeometry(this.size, this.size * 2, 32);
+        break;
+      case 'Cylinder':
+        this.instance.geometry = new THREE.CylinderGeometry(this.size, this.size, this.size * 2, 16);
+        break;
+      case 'Dodecahedron':
+        this.instance.geometry = new THREE.DodecahedronGeometry(this.size);
+        break;
+      case 'Icosahedron':
+        this.instance.geometry = new THREE.IcosahedronGeometry(this.size);
+        break;
+      case 'Octahedron':
+        this.instance.geometry = new THREE.OctahedronGeometry(this.size);
+        break;
+      case 'Sphere':
+        this.instance.geometry = new THREE.SphereGeometry(this.size, 16, 16);
+        break;
+      case 'Tetrahedron':
+        this.instance.geometry = new THREE.TetrahedronGeometry(this.size);
+        break;
+      case 'Torus':
+        this.instance.geometry = new THREE.TorusGeometry(this.size, this.size / 4, 16, 32);
+        break;
+      case 'Torus Knot':
+        this.instance.geometry = new THREE.TorusKnotGeometry(this.size, this.size / 4, 64, 32);
+        break;
+      default:
+        this.instance.geometry = new THREE.SphereGeometry(this.size, 16, 16);
+    }
+  }
+
   setLabelColor(color) {
     this.label.setColor(color);
+  }
+
+  setLabelSize(size) {
+    this.label.setSize(size);
   }
 
   updateAssociatedEdgePosition() {

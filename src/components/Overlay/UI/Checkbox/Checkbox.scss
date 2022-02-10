@@ -6,6 +6,10 @@
   align-items: center;
   justify-content: center;
   margin-right: 10px;
+  &.fade-out{
+    pointer-events: none;
+    opacity: 0.1;
+  }
   label{
     margin-right: 8px;
     white-space: nowrap;

@@ -7,13 +7,18 @@
   position: relative;
   .settings {
     padding: 0 10px;
-    .option {
+    .setting {
       display: flex;
       flex-direction: row;
       margin-bottom: 20px;
       .label {
         width: 50%;
         line-height: $uiElementHeight;
+      }
+      .config{
+        display: flex;
+        flex-direction: row;
+        width: 50%;
       }
     }
   }
@@ -25,5 +30,6 @@
     width: calc(100% - 20px);
     display: flex;
     flex-direction: row;
+    justify-content: flex-end;
   }
 }

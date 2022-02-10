@@ -9,6 +9,14 @@
   border: 1px solid $menuWindowBorderColor;
   box-sizing: border-box;
   border-radius: $uiElementBorderRadius;
+  position: relative;
+  .disabled {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    background: url('../../../../assets/cross.svg') center/15px no-repeat;
+    pointer-events: none;
+  }
   input{
     min-width: 29px;
     min-height: 33px;

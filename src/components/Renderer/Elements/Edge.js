@@ -5,6 +5,7 @@ class Edge {
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
     this.instance = null;
+    this.size = 1;
     this.buildGeometry();
   }
 
@@ -38,6 +39,14 @@ class Edge {
 
   setColor(color) {
     this.instance.material.color.set(color);
+  }
+
+  setSize(size) {
+    if (size !== this.size) {
+      const newSize = size / this.size;
+      this.instance.geometry.scale(newSize, 1, newSize);
+      this.size = size;
+    }
   }
 }
 

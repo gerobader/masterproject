@@ -2,12 +2,17 @@ import React, {useState} from 'react';
 
 import './Select.scss';
 
-const Select = ({options, value, setSelected}) => {
+const Select = ({
+  options, value, setSelected, className, opensUp
+}) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`vis-select${open ? ' open' : ''}`} onClick={() => setOpen(!open)}>
+    <div
+      className={`vis-select${open ? ' open' : ''} ${className || ''}${opensUp ? ' opens-up' : ''}`}
+      onClick={() => setOpen(!open)}
+    >
       <span>{value}</span>
-      <div className={`arrow${open ? ' down' : ''}`}/>
+      <div className={`arrow${open ? ' open' : ''}`}/>
       {open && (
         <div className="options-wrapper">
           {options.map((option) => (

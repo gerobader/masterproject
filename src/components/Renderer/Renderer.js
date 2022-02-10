@@ -63,17 +63,17 @@ class Renderer extends Component {
     this.createScene();
   }
 
-  handleClickOnElement(e) {
+  handleClickOnElement(e, connectedSelect = false) {
     const {
       nodes, edges, selectedNodes, selectedEdges
     } = this.props;
-    const {hoveredElement, controls} = this.state;
+    const {hoveredElement, controls, scene} = this.state;
     let newSelectedEdges = [...selectedEdges];
     let newSelectedNodes = [...selectedNodes];
-    if (hoveredElement && !controls.dragging) {
+    if (!controls.dragging) {
       if (hoveredElement.object.name === 'Edge') {
         const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.object.uuid);
-        if (e.ctrlKey) {
+        if (e.ctrlKey && !connectedSelect) {
           if (selectedEdges.includes(newSelectedEdge)) {
             newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
           } else {
@@ -85,14 +85,17 @@ class Renderer extends Component {
         }
       } else {
         const newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
-        if (e.ctrlKey) {
+        if (e.ctrlKey && !connectedSelect) {
           if (selectedNodes.includes(newSelectedNode)) {
             newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
           } else {
             newSelectedNodes = [...selectedNodes, newSelectedNode];
           }
+          if (newSelectedNodes.length === 1) controls.attach(newSelectedNode.instance);
         } else {
-          controls.attach(newSelectedNode.instance);
+          scene.remove(group);
+          if (!connectedSelect) controls.attach(newSelectedNode.instance);
+          else controls.detach();
           newSelectedNodes = [newSelectedNode];
           newSelectedEdges = [];
         }
@@ -106,33 +109,53 @@ class Renderer extends Component {
     const {
       _setOrbitPreview, orbitPreview, _setSelectedNodes, _setSelectedEdges
     } = this.props;
-    const {scene, controls} = this.state;
+    const {scene, controls, hoveredElement} = this.state;
     if (orbitPreview) {
       _setOrbitPreview(false);
     }
-    const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
-    if (newSelectedEdges.length) {
-      controls.detach();
-    } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
-      scene.remove(group);
-      group = new THREE.Group();
-      const groupPosition = new THREE.Vector3(0, 0, 0);
-      newSelectedNodes.forEach((node) => {
-        groupPosition.add(node.instance.position);
-      });
-      groupPosition.divideScalar(newSelectedNodes.length);
-      group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
-      newSelectedNodes.forEach((node) => {
-        const clone = node.instance.clone();
-        clone.userData = {originalUuid: node.instance.uuid};
-        clone.position.sub(groupPosition);
-        group.add(clone);
-      });
-      scene.add(group);
-      controls.attach(group);
+    if (hoveredElement) {
+      if (e.button === 0) {
+        const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
+        if (newSelectedEdges.length) {
+          controls.detach();
+        } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
+          scene.remove(group);
+          group = new THREE.Group();
+          const groupPosition = new THREE.Vector3(0, 0, 0);
+          newSelectedNodes.forEach((node) => {
+            groupPosition.add(node.instance.position);
+          });
+          groupPosition.divideScalar(newSelectedNodes.length);
+          group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
+          newSelectedNodes.forEach((node) => {
+            const clone = node.instance.clone();
+            clone.userData = {originalUuid: node.instance.uuid};
+            clone.position.sub(groupPosition);
+            group.add(clone);
+          });
+          scene.add(group);
+          controls.attach(group);
+        }
+        _setSelectedNodes(newSelectedNodes);
+        _setSelectedEdges(newSelectedEdges);
+      } else if (e.button === 1) {
+        const [selectedNodes, selectedEdges] = this.handleClickOnElement(e, true);
+        let newSelectedNodes = [];
+        let newSelectedEdges = [];
+        if (selectedNodes.length) {
+          newSelectedNodes = selectedNodes;
+          newSelectedEdges = [
+            ...selectedNodes[0].incomingEdges,
+            ...selectedNodes[0].outgoingEdges
+          ];
+        } else if (selectedEdges.length) {
+          newSelectedEdges = selectedEdges;
+          newSelectedNodes = [selectedEdges[0].sourceNode, selectedEdges[0].targetNode];
+        }
+        _setSelectedNodes(newSelectedNodes);
+        _setSelectedEdges(newSelectedEdges);
+      }
     }
-    _setSelectedNodes(newSelectedNodes);
-    _setSelectedEdges(newSelectedEdges);
     this.setState((prevState) => ({
       ...prevState,
       mouseDown: e.buttons === 1

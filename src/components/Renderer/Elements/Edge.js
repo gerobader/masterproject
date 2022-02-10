@@ -35,6 +35,10 @@ class Edge {
     this.instance.lookAt(targetVector);
     this.instance.rotateX(THREE.Math.degToRad(90));
   }
+
+  setColor(color) {
+    this.instance.material.color.set(color);
+  }
 }
 
 export default Edge;

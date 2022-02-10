@@ -41,6 +41,10 @@ class Label {
     this.label.style.display = 'block';
     this.position = position;
   }
+
+  setColor(color) {
+    this.label.style.color = color;
+  }
 }
 
 export default Label;

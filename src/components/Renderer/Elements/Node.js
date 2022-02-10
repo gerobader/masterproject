@@ -9,6 +9,8 @@ class Node {
     this.instance = null;
     this.incomingEdges = [];
     this.outgoingEdges = [];
+    this.color = color;
+    this.colorIsMapped = false;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
       this.addLabel(camera);
@@ -25,6 +27,14 @@ class Node {
     this.instance.position.z = z;
   }
 
+  setColor(color) {
+    this.instance.material.color.set(color);
+  }
+
+  setLabelColor(color) {
+    this.label.setColor(color);
+  }
+
   updateAssociatedEdgePosition() {
     this.incomingEdges.forEach((edge) => {
       edge.updatePosition();
@@ -34,14 +44,14 @@ class Node {
     });
   }
 
-  updatePositionRelative(x, y, z) {
+  setPositionRelative(x, y, z) {
     this.instance.position.x += x;
     this.instance.position.y += y;
     this.instance.position.z += z;
     this.updateAssociatedEdgePosition();
   }
 
-  updatePositionAbsolute(x, y, z) {
+  setPositionAbsolute(x, y, z) {
     this.instance.position.x = x;
     this.instance.position.y = y;
     this.instance.position.z = z;

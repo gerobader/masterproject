@@ -327,6 +327,7 @@ class Renderer extends Component {
     composer.addPass(selectedElementOutline);
 
     const controls = new TransformControls(camera, renderer.domElement);
+    controls.setSize(0.5);
     scene.add(controls);
 
     _setNodes(nodes);
@@ -393,7 +394,7 @@ class Renderer extends Component {
           if (original) {
             const newPosition = new THREE.Vector3();
             nodeCopy.getWorldPosition(newPosition);
-            original.updatePositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
+            original.setPositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
           }
         });
       } else {

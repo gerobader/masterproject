@@ -1,0 +1,29 @@
+@import '../../../../assets/settings';
+.appearance-controls {
+  padding: 0 10px;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  position: relative;
+  .settings {
+    padding: 0 10px;
+    .option {
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 20px;
+      .label {
+        width: 50%;
+        line-height: $uiElementHeight;
+      }
+    }
+  }
+  .controls {
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    width: calc(100% - 20px);
+    display: flex;
+    flex-direction: row;
+  }
+}

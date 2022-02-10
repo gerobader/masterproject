@@ -1,0 +1,19 @@
+@import '../../../../assets/settings';
+.color-picker {
+  display: flex;
+  width: $uiElementHeight;
+  height: $uiElementHeight;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid $menuWindowBorderColor;
+  box-sizing: border-box;
+  border-radius: $uiElementBorderRadius;
+  input{
+    min-width: 29px;
+    min-height: 33px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+  }
+}

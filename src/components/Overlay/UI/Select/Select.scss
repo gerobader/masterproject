@@ -1,0 +1,52 @@
+@import '../../../../assets/settings';
+.vis-select{
+  width: 100%;
+  max-width: 135px;
+  height: $uiElementHeight;
+  border: 1px solid $menuWindowBorderColor;
+  border-radius: $uiElementBorderRadius;
+  background: $uiElementBackground;
+  color: $menuWindowFontColor;
+  margin-right: 10px;
+  text-align: left;
+  padding: 0 10px;
+  line-height: 23px;
+  position: relative;
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+  font-size: 14px;
+  font-weight: 400;
+  &.open{
+    border-top: 1px solid transparent;
+    border-radius: 0 0 5px 5px;
+  }
+  .arrow{
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    width: 10px;
+    height: 11px;
+    background: url('../../../../assets/arrow-up.svg') center no-repeat;
+    &.down {
+      transform: rotate(180deg);
+    }
+  }
+  .options-wrapper{
+    background: $uiElementBackground;
+    position: absolute;
+    border: 1px solid $menuWindowBorderColor;
+    border-bottom: none;
+    bottom: 21px;
+    left: -1px;
+    width: 100%;
+    border-radius: 5px 5px 0 0;
+    .option{
+      padding: 3px 10px;
+      border-bottom: 1px solid #aaa;
+      &:hover, &.selected{
+        background: $uiElementBackground;
+      }
+    }
+  }
+}

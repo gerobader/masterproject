@@ -1,0 +1,28 @@
+@import '../../../../assets/settings';
+.menu-switch {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+  .switch {
+    border: 1px solid $menuWindowBorderColor;
+    background: $uiElementBackground;
+    flex-grow: 1;
+    text-align: center;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: $uiElementHeight;
+    cursor: pointer;
+    user-select: none;
+    &.left {
+      border-radius: $uiElementBorderRadius 0 0 $uiElementBorderRadius;
+    }
+    &.right {
+      border-radius: 0 $uiElementBorderRadius $uiElementBorderRadius 0;
+    }
+    &.active{
+      -webkit-box-shadow: inset 0 0 20px 0 rgba(0,0,0,0.5);
+      box-shadow: inset 0 0 20px 0 rgba(0,0,0,0.5);
+    }
+  }
+}

@@ -10,6 +10,7 @@
   box-sizing: border-box;
   border-radius: $uiElementBorderRadius;
   position: relative;
+  margin-right: 10px;
   .disabled {
     position: absolute;
     width: 15px;

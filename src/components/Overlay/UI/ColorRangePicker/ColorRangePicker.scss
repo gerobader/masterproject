@@ -1,0 +1,27 @@
+@import '../../../../assets/settings';
+.color-range-picker{
+  position: relative;
+  height: $uiElementHeight * 2;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .color-range{
+    width: 100%;
+    height: $uiElementHeight;
+    background: #fff;
+    border: 1px solid $menuWindowBorderColor;
+    box-sizing: border-box;
+    cursor: pointer;
+  }
+  .indicator-wrapper{
+    margin-top: 8px;
+    width: calc(100% + 4px);
+    position: relative;
+    height: 8px;
+  }
+  .sketch-picker{
+    position: fixed;
+    z-index: 3;
+  }
+}

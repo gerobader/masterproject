@@ -17,14 +17,17 @@
   user-select: none;
   font-size: 14px;
   font-weight: 400;
+  span{
+    white-space: nowrap;
+  }
   &.open{
     border-bottom: 1px solid transparent;
     border-radius: 5px 5px 0 0;
     background: #686868;
     z-index: 2;
-  }
-  &.shape-select{
-    margin: 0;
+    &.fixed-when-open {
+      position: fixed;
+    }
   }
   .arrow{
     position: absolute;

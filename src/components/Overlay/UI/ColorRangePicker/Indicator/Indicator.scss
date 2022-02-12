@@ -1,0 +1,23 @@
+.indicator{
+  position: absolute;
+  left: 0;
+  .body{
+    width: 6px;
+    height: 8px;
+    background: #fff;
+    position: relative;
+    cursor: pointer;
+    &::before {
+      border-bottom-width: 4px;
+      border-bottom-style: solid;
+      border-bottom-color: inherit;
+      position: absolute;
+      top: -4px;
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 3px solid transparent;
+      border-right: 3px solid transparent;
+    }
+  }
+}

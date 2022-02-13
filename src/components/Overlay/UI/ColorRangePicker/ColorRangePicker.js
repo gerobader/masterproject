@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import React, {useState, useRef, useEffect} from 'react';
 import Indicator from './Indicator/Indicator';
 
@@ -5,7 +6,7 @@ import './ColorRangePicker.scss';
 
 const ColorRangePicker = () => {
   const [indicators, setIndicators] = useState([]);
-  const [selectedIndicator, setSelectedIndicator] = useState(undefined);
+  const [selectedIndicatorId, setSelectedIndicatorId] = useState(undefined);
   const [startX, setStartX] = useState(undefined);
   const [lastX, setLastX] = useState(undefined);
   const colorRangePicker = useRef();
@@ -19,30 +20,60 @@ const ColorRangePicker = () => {
 
   const addIndicator = (e) => {
     const position = (e.nativeEvent.layerX / e.target.offsetWidth) * e.target.offsetWidth - 3;
-    const indicator = {position: position, color: '#ffffff'};
+    const indicator = {position: position, color: '#ffffff', isDragged: false};
     const newIndicators = [...indicators, indicator];
     setIndicators(newIndicators);
   };
 
+  const deleteIndicator = () => {
+    if (selectedIndicatorId && selectedIndicatorId > 1) {
+      const newIndicators = indicators.filter((indicator, index) => index !== selectedIndicatorId);
+      setSelectedIndicatorId(undefined);
+      setIndicators(newIndicators);
+    }
+  };
+
+  useEffect(() => {
+    const callDeleteIndicator = (e) => {
+      if (e.key === 'Delete' || e.key === 'Backspace') deleteIndicator();
+    };
+    document.addEventListener('keydown', callDeleteIndicator);
+    return () => {
+      document.removeEventListener('keydown', callDeleteIndicator);
+    };
+  }, [deleteIndicator]);
+
+  const setIndicatorColor = (color, id) => {
+    const newIndicators = [...indicators];
+    newIndicators[id].color = color;
+    setIndicators(newIndicators);
+  };
+
   const handleMouseDown = (e, indicatorId) => {
-    setSelectedIndicator(indicatorId);
+    setSelectedIndicatorId(indicatorId);
     setStartX(e.clientX);
     setLastX(e.clientX);
   };
 
   const handleMouseUp = () => {
-    setStartX(undefined);
-    setLastX(undefined);
+    if (selectedIndicatorId) {
+      setStartX(undefined);
+      setLastX(undefined);
+      setTimeout(() => {
+        indicators[selectedIndicatorId].isDragged = false;
+      }, 30);
+    }
   };
 
   const dragIndicator = (e) => {
-    if (startX && !indicators[selectedIndicator].isFixed) {
-      let newPosition = indicators[selectedIndicator].position + (e.clientX - lastX);
-      if (newPosition < -1) newPosition = -1;
-      else if (newPosition > colorRangePicker.current.offsetWidth - 1) {
-        newPosition = colorRangePicker.current.offsetWidth - 1;
+    if (startX && !indicators[selectedIndicatorId].isFixed) {
+      indicators[selectedIndicatorId].isDragged = true;
+      let newPosition = indicators[selectedIndicatorId].position + (e.clientX - lastX);
+      if (newPosition < 5) newPosition = 5;
+      else if (newPosition > colorRangePicker.current.offsetWidth - 6) {
+        newPosition = colorRangePicker.current.offsetWidth - 6;
       }
-      indicators[selectedIndicator].position = newPosition;
+      indicators[selectedIndicatorId].position = newPosition;
       setLastX(e.clientX);
     }
   };
@@ -71,17 +102,17 @@ const ColorRangePicker = () => {
         style={{background: `linear-gradient(90deg${gradients})`}}
       />
       <div className="indicator-wrapper">
-        {indicators.map((indicator, index) => {
-          return (
-            <Indicator
-              key={index}
-              onMouseDown={handleMouseDown}
-              position={indicator.position}
-              selectedColor={indicator.color}
-              id={index}
-            />
-          );
-        })}
+        {indicators.map((indicator, index) => (
+          <Indicator
+            key={index}
+            onMouseDown={handleMouseDown}
+            position={indicator.position}
+            color={indicator.color}
+            setColor={setIndicatorColor}
+            id={index}
+            shouldOpenPicker={!indicator.isDragged}
+          />
+        ))}
       </div>
     </div>
   );

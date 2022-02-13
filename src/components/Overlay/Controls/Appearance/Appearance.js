@@ -6,9 +6,9 @@ import Button from '../../UI/Button/Button';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import SmallNumberInput from '../../UI/SmallTextInput/SmallNumberInput';
+import ColorRangePicker from '../../UI/ColorRangePicker/ColorRangePicker';
 
 import './Appearance.scss';
-import ColorRangePicker from "../../UI/ColorRangePicker/ColorRangePicker";
 
 const shapes = [
   'Box', 'Cone', 'Cylinder', 'Dodecahedron', 'Icosahedron', 'Octahedron', 'Sphere', 'Tetrahedron', 'Torus', 'Torus Knot'

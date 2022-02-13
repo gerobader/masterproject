@@ -1,28 +1,24 @@
-import React, {useState} from 'react';
-import {SketchPicker} from 'react-color';
+import React from 'react';
 
 import './Indicator.scss';
 
 const Indicator = ({
-  selectedColor, position, id, onMouseDown
+  color, position, id, onMouseDown, setColor, shouldOpenPicker
 }) => {
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  console.log(selectedColor);
+  const onClickOnColorInput = (e) => {
+    if (!shouldOpenPicker) e.preventDefault();
+  };
   return (
     <div
       className="indicator"
       style={{transform: `translateX(${position}px)`}}
       onMouseDown={(e) => onMouseDown(e, id)}
     >
-      <div className="body" style={{background: selectedColor, borderColor: selectedColor}}/>
-      {colorPickerOpen && (
-        // <div/>
-        <SketchPicker
-          color={selectedColor}
-          onChange={(color) => console.log(color)}
-          onChangeComplete={(color) => setSelectedColor(color.hex)}
-        />
-      )}
+      <div className="body" style={{background: color, borderColor: color}}>
+        <div className="color-input-wrapper">
+          <input onClick={onClickOnColorInput} type="color" value={color} onChange={(e) => setColor(e.target.value, id)}/>
+        </div>
+      </div>
     </div>
   );
 };

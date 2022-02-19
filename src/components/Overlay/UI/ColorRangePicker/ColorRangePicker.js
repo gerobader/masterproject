@@ -4,23 +4,31 @@ import Indicator from './Indicator/Indicator';
 
 import './ColorRangePicker.scss';
 
-const ColorRangePicker = () => {
-  const [indicators, setIndicators] = useState([]);
+const ColorRangePicker = ({indicators, setIndicators}) => {
   const [selectedIndicatorId, setSelectedIndicatorId] = useState(undefined);
   const [startX, setStartX] = useState(undefined);
   const [lastX, setLastX] = useState(undefined);
   const colorRangePicker = useRef();
 
   useEffect(() => {
-    setIndicators([
-      {position: -1, color: '#ff0000', isFixed: true},
-      {position: colorRangePicker.current.offsetWidth - 1, color: '#00fff0', isFixed: true}
-    ]);
+    if (colorRangePicker.current) {
+      setIndicators([
+        {
+          position: -1, positionPercent: 0, color: '#ff0000', isFixed: true
+        },
+        {
+          position: colorRangePicker.current.offsetWidth - 1, positionPercent: 100, color: '#00fff0', isFixed: true
+        }
+      ]);
+    }
   }, [colorRangePicker]);
 
   const addIndicator = (e) => {
+    const positionPercent = Math.ceil((e.nativeEvent.layerX / e.target.offsetWidth) * 100);
     const position = (e.nativeEvent.layerX / e.target.offsetWidth) * e.target.offsetWidth - 3;
-    const indicator = {position: position, color: '#ffffff', isDragged: false};
+    const indicator = {
+      positionPercent, position, color: '#ffffff', isDragged: false
+    };
     const newIndicators = [...indicators, indicator];
     setIndicators(newIndicators);
   };
@@ -74,19 +82,22 @@ const ColorRangePicker = () => {
         newPosition = colorRangePicker.current.offsetWidth - 6;
       }
       indicators[selectedIndicatorId].position = newPosition;
+      indicators[selectedIndicatorId].positionPercent = Math.ceil((newPosition / colorRangePicker.current.offsetWidth) * 100);
       setLastX(e.clientX);
     }
   };
 
   let gradients = '';
-  const tempIndicators = [...indicators];
-  tempIndicators.sort((first, second) => {
-    if (first.position === second.position) return 0;
-    return first.position > second.position ? 1 : -1;
-  });
-  tempIndicators.forEach((indicator) => {
-    gradients += `, ${indicator.color} ${Math.ceil((indicator.position / colorRangePicker.current.offsetWidth) * 100)}%`;
-  });
+  if (colorRangePicker.current) {
+    const tempIndicators = [...indicators];
+    tempIndicators.sort((first, second) => {
+      if (first.position === second.position) return 0;
+      return first.position > second.position ? 1 : -1;
+    });
+    tempIndicators.forEach((indicator) => {
+      gradients += `, ${indicator.color} ${indicator.positionPercent}%`;
+    });
+  }
 
   return (
     <div
@@ -99,7 +110,7 @@ const ColorRangePicker = () => {
       <div
         className="color-range"
         onClick={(e) => addIndicator(e)}
-        style={{background: `linear-gradient(90deg${gradients})`}}
+        style={gradients ? {background: `linear-gradient(90deg${gradients})`} : {}}
       />
       <div className="indicator-wrapper">
         {indicators.map((indicator, index) => (

@@ -7,6 +7,7 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import SmallNumberInput from '../../UI/SmallTextInput/SmallNumberInput';
 import ColorRangePicker from '../../UI/ColorRangePicker/ColorRangePicker';
+import {calculateColorForElement, sortElements} from '../../../utility';
 
 import './Appearance.scss';
 
@@ -28,8 +29,33 @@ const Appearance = () => {
   const [nodeShape, setNodeShape] = useState();
   const [fillColorMappingExpanded, setFillColorMappingExpanded] = useState(true);
   const [fillMappingValue, setFillMappingValue] = useState();
+  const [colorMapIndicators, setColorMapIndicators] = useState([]);
+
+  const applyColorMap = () => {
+    if (fillMappingValue === 'Edge Count') {
+      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+      const sortedColorMapIndicators = [...colorMapIndicators];
+      sortedColorMapIndicators.sort((first, second) => {
+        if (first.position === second.position) return 0;
+        return first.position > second.position ? 1 : -1;
+      });
+      sortedElements.forEach((element) => {
+        const upperColorBoundIndicator = sortedColorMapIndicators.filter(
+          (colorIndicator) => colorIndicator.positionPercent > element.percentage
+        )[0];
+        const lowerColorBoundIndicator = sortedColorMapIndicators.filter(
+          (colorIndicator) => colorIndicator.positionPercent <= element.percentage
+        ).pop();
+        const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
+        if (color && typeof element.object.setColor === 'function') {
+          element.object.setColor(color);
+        }
+      });
+    }
+  };
 
   const applyChanges = () => {
+    if (colorMapIndicators.length) applyColorMap();
     let elementsToEdit = [];
     if (elementType === 'Nodes' || elementType === 'Both') {
       if (applyOnlyToSelected) {
@@ -53,6 +79,7 @@ const Appearance = () => {
       if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
     });
   };
+
   return (
     <div className="appearance-controls">
       <MenuSwitch setActiveMenu={setActiveMenu} activeMenu={activeMenu}/>
@@ -127,7 +154,7 @@ const Appearance = () => {
               <div className="setting">
                 <div className="label">Range:</div>
                 <div className="config">
-                  <ColorRangePicker/>
+                  <ColorRangePicker indicators={colorMapIndicators} setIndicators={setColorMapIndicators}/>
                 </div>
               </div>
             </div>

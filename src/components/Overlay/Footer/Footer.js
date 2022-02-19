@@ -9,7 +9,7 @@ const Footer = () => {
   } = useSelector((state) => state.networkElements);
   return (
     <div className="footer">
-      <p>{`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}`}</p>
+      <p>{`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}${selectedNodes.length === 1 ? ` (${selectedNodes[0].labelText})` : ''}`}</p>
       <p>{`Edges: ${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}</p>
     </div>
   );

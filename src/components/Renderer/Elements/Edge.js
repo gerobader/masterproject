@@ -10,12 +10,24 @@ class Edge {
   }
 
   buildGeometry() {
+
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
-    const material = new THREE.MeshBasicMaterial({color: new THREE.Color(Math.random(), Math.random(), Math.random())});
+    const material = new THREE.MeshBasicMaterial({color: 0xffffff});
+    material.transparent = true;
+    material.opacity = 0.5;
     this.instance = new THREE.Mesh(geometry, material);
-    this.instance.name = 'Edge';
     this.updatePosition();
     this.setRotation();
+
+    // for performance reasons lines should be used for edges, which cannot be adjusted in width
+    // const material = new THREE.LineBasicMaterial({color: 0xffffff});
+    // const points = [];
+    // points.push(this.targetNode.instance.position.clone());
+    // points.push(this.sourceNode.instance.position.clone());
+    // const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    // this.instance = new THREE.Line(geometry, material);
+
+    this.instance.name = 'Edge';
   }
 
   updatePosition() {

@@ -17,6 +17,7 @@
     color: $menuWindowFontColor;
     font-size: 14px;
     font-family: Roboto, sans-serif;
+    -moz-appearance: textfield;
     &::-webkit-outer-spin-button, &::-webkit-inner-spin-button {
       -webkit-appearance: none;
     }

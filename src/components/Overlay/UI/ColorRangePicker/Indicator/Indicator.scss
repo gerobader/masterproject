@@ -6,6 +6,8 @@
     height: 8px;
     background: #fff;
     position: relative;
+    display: flex;
+    justify-content: center;
     &::before {
       border-bottom-width: 4px;
       border-bottom-style: solid;

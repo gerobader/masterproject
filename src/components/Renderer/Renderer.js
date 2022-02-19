@@ -11,8 +11,8 @@ import {
   setNodes, setEdges, setSelectedNodes, setSelectedEdges
 } from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
-import * as lesMiserablesNodes from '../../data/LesMiserables/nodes.json';
-import * as lesMiserablesEdges from '../../data/LesMiserables/edges.json';
+import * as lesMiserablesNodes from '../../data/test/nodes.json';
+import * as lesMiserablesEdges from '../../data/test/edges.json';
 
 import './Renderer.scss';
 
@@ -22,7 +22,7 @@ const controlKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'a
 let speed = 1;
 const initialCameraZ = 200;
 const hoverElementOutlineColor = '#aaaaaa';
-const selectedElementOutlineColor = '#ffffff';
+const selectedElementOutlineColor = '#ff0000';
 
 const raycaster = new THREE.Raycaster();
 const mousePosition = new THREE.Vector2(0, 0);
@@ -30,6 +30,11 @@ let hoveredElementOutline;
 let selectedElementOutline;
 
 let group;
+
+const useTestNetwork = false;
+
+let lastTimestamp = false;
+let showConnectedStuff = true;
 
 class Renderer extends Component {
   constructor(props) {
@@ -145,8 +150,8 @@ class Renderer extends Component {
         if (selectedNodes.length) {
           newSelectedNodes = selectedNodes;
           newSelectedEdges = [
-            ...selectedNodes[0].incomingEdges,
-            ...selectedNodes[0].outgoingEdges
+            ...selectedNodes[0].targetForEdges,
+            ...selectedNodes[0].sourceForEdges
           ];
         } else if (selectedEdges.length) {
           newSelectedEdges = selectedEdges;
@@ -270,6 +275,7 @@ class Renderer extends Component {
             group = undefined;
             _setSelectedNodes([]);
             _setSelectedEdges([]);
+            showConnectedStuff = false;
             return prevState;
           default:
             return prevState;
@@ -295,13 +301,24 @@ class Renderer extends Component {
   }
 
   createScene() {
-    const {_setNodes, _setEdges} = this.props;
+    const {
+      _setNodes, _setEdges, remoteNodes, remoteEdges
+    } = this.props;
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     this.canvasWrapper.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    const lightTarget = new THREE.Object3D();
+    lightTarget.position.set(-100, -100, -100);
+    scene.add(lightTarget);
+    directionalLight.castShadow = true;
+    directionalLight.target = lightTarget;
+    scene.add(directionalLight);
     camera.rotation.order = 'YXZ';
     camera.position.z = initialCameraZ;
 
@@ -314,30 +331,59 @@ class Renderer extends Component {
     window.addEventListener('keydown', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
-    const nodes = lesMiserablesNodes.default.map((node) => {
-      const nodeClass = new Node(
-        Math.random() * 100 - 50,
-        Math.random() * 100 - 50,
-        Math.random() * 100 - 50,
-        1,
-        new THREE.Color(Math.random(), Math.random(), Math.random()),
-        node.id,
-        node.label,
-        camera
-      );
-      scene.add(nodeClass.instance);
-      return nodeClass;
-    });
+    let nodes = [];
+    let edges = [];
+    if (useTestNetwork) {
+      nodes = lesMiserablesNodes.default.map((node) => {
+        const nodeClass = new Node(
+          Math.random() * 100 - 50,
+          Math.random() * 100 - 50,
+          Math.random() * 100 - 50,
+          1,
+          new THREE.Color(Math.random(), Math.random(), Math.random()),
+          node.id,
+          node.label,
+          camera
+        );
+        scene.add(nodeClass.instance);
+        return nodeClass;
+      });
 
-    const edges = lesMiserablesEdges.default.map((edge) => {
-      const sourceNode = nodes.filter((node) => node.id === edge.source)[0];
-      const targetNode = nodes.filter((node) => node.id === edge.target)[0];
-      const edgeClass = new Edge(sourceNode, targetNode);
-      sourceNode.addOutgoingEdge(edgeClass);
-      targetNode.addIncomingEdge(edgeClass);
-      scene.add(edgeClass.instance);
-      return edgeClass;
-    });
+      edges = lesMiserablesEdges.default.map((edge) => {
+        const sourceNode = nodes.filter((node) => node.id === edge.source)[0];
+        const targetNode = nodes.filter((node) => node.id === edge.target)[0];
+        const edgeClass = new Edge(sourceNode, targetNode);
+        sourceNode.addSourceEdge(edgeClass);
+        targetNode.addTargetEdge(edgeClass);
+        scene.add(edgeClass.instance);
+        return edgeClass;
+      });
+    } else {
+      nodes = remoteNodes.map((node, index) => {
+        const nodeClass = new Node(
+          Math.random() * 100 - 50,
+          Math.random() * 100 - 50,
+          Math.random() * 100 - 50,
+          1,
+          new THREE.Color(Math.random(), Math.random(), Math.random()),
+          index,
+          node.label,
+          camera
+        );
+        scene.add(nodeClass.instance);
+        return nodeClass;
+      });
+
+      edges = remoteEdges.map((edge) => {
+        const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
+        const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
+        const edgeClass = new Edge(sourceNode, targetNode);
+        sourceNode.addSourceEdge(edgeClass);
+        targetNode.addTargetEdge(edgeClass);
+        scene.add(edgeClass.instance);
+        return edgeClass;
+      });
+    }
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
@@ -394,6 +440,9 @@ class Renderer extends Component {
       speed = 1;
     }
     nodes.forEach((node) => {
+      if (showConnectedStuff && !selectedNodes.includes(node)) {
+        node.calculatePosition(nodes);
+      }
       if (node.label) {
         node.updateLabelPosition(camera);
       }
@@ -424,6 +473,13 @@ class Renderer extends Component {
         selectedNodes[0].updateAssociatedEdgePosition();
       }
     }
+    // const newTimestamp = new Date().valueOf();
+    // let fps = 0;
+    // if (lastTimestamp) {
+    //   fps = 1000 / (newTimestamp - lastTimestamp);
+    // }
+    // lastTimestamp = newTimestamp;
+    // console.log(fps);
     composer.render();
   }
 

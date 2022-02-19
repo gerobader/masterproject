@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import between from '../../utility';
+import {between} from '../../utility';
 
 class Label {
   constructor(text, parent, camera) {

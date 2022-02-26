@@ -30,15 +30,19 @@ const Appearance = () => {
   const [applyOnlyToSelected, setApplyOnlyToSelected] = useState(false);
   const [elementType, setElementType] = useState('Nodes');
   const [nodeShape, setNodeShape] = useState();
-  const [fillMappingValue, setFillMappingValue] = useState();
-  const [colorMapIndicators, setColorMapIndicators] = useState([]);
-  const [sizeMappingValue, setSizeMappingValue] = useState();
+  const [elementColorMappingValue, setElementColorMappingValue] = useState();
+  const [elementColorMapIndicators, setElementColorMapIndicators] = useState([]);
+  const [elementSizeMappingValue, setElementSizeMappingValue] = useState();
   const [elementSizeMapping, setElementSizeMapping] = useState([]);
+  const [labelColorMappingValue, setLabelColorMappingValue] = useState();
+  const [labelColorMapIndicators, setLabelColorMapIndicators] = useState([]);
+  const [labelSizeMappingValue, setLabelSizeMappingValue] = useState();
+  const [labelSizeMapping, setLabelSizeMapping] = useState([]);
 
-  const applyColorMapping = () => {
-    if (fillMappingValue === 'Edge Count') {
+  const applyColorMapping = (colorMapIndicator, mappingValue, targetElement) => {
+    if (mappingValue === 'Edge Count') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
-      const sortedColorMapIndicators = [...colorMapIndicators];
+      const sortedColorMapIndicators = [...colorMapIndicator];
       sortedColorMapIndicators.sort((first, second) => {
         if (first.position === second.position) return 0;
         return first.position > second.position ? 1 : -1;
@@ -51,26 +55,39 @@ const Appearance = () => {
           (colorIndicator) => colorIndicator.positionPercent <= element.percentage
         ).pop();
         const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
-        if (color && typeof element.object.setColor === 'function') {
-          element.object.setColor(color);
+        if (color) {
+          if (targetElement === 'node' && typeof element.object.setColor === 'function') {
+            element.object.setColor(color);
+          } else if (targetElement === 'label' && typeof element.object.setLabelColor === 'function') {
+            element.object.setLabelColor(color);
+          }
         }
       });
     }
   };
 
-  const applyElementSizeMapping = () => {
-    if (sizeMappingValue === 'Edge Count') {
+  const applyElementSizeMapping = (mappingValue, sizeMapping, targetElement) => {
+    if (mappingValue === 'Edge Count') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
       sortedElements.forEach((element) => {
-        const size = elementSizeMapping[0] + ((elementSizeMapping[1] - elementSizeMapping[0]) * (element.percentage / 100));
-        element.object.setSize(size);
+        if (targetElement === 'node' && typeof element.object.setSize === 'function') {
+          element.object.setSize(sizeMapping[0] + ((sizeMapping[1] - sizeMapping[0]) * (element.percentage / 100)));
+        } else if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
+          element.object.setLabelSize(sizeMapping[0] + ((sizeMapping[1] - sizeMapping[0]) * (element.percentage / 100)));
+        }
       });
     }
   };
 
   const applyChanges = () => {
-    if (colorMapIndicators.length) applyColorMapping();
-    if (elementSizeMapping.length === 2 && !elementSizeMapping.includes(NaN)) applyElementSizeMapping();
+    if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
+    if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
+    if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
+      applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
+    }
+    if (labelSizeMapping.length === 2 && labelSizeMappingValue && !labelSizeMapping.includes(NaN)) {
+      applyElementSizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
+    }
     let elementsToEdit = [];
     if (elementType === 'Nodes' || elementType === 'Both') {
       if (applyOnlyToSelected) {
@@ -88,7 +105,7 @@ const Appearance = () => {
     }
     elementsToEdit.forEach((element) => {
       if (fillColor && typeof element.setColor === 'function') element.setColor(fillColor);
-      if (elementSize && typeof element.setSize === 'function') element.setSize(parseFloat(elementSize));
+      if (elementSize && typeof element.setSize === 'function') element.setSize(elementSize);
       if (labelColor && typeof element.setLabelColor === 'function') element.setLabelColor(labelColor);
       if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(labelSize);
       if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
@@ -125,47 +142,33 @@ const Appearance = () => {
         </div>
       ) : (
         <div className="settings">
-          <ExpandableSetting name="Fill Color">
-            {(parentOpenState) => (
-              <>
-                <Setting name="Mapping Value">
-                  <Select
-                    options={['Edge Count']}
-                    value={fillMappingValue}
-                    setSelected={setFillMappingValue}
-                    parentOpenState={parentOpenState}
-                    className="fixed-when-open"
-                  />
-                  {fillMappingValue && (
-                    <Button text="reset" className="reset" onClick={() => setFillMappingValue(undefined)}/>
-                  )}
-                </Setting>
-                <Setting name="Range">
-                  <ColorRangePicker indicators={colorMapIndicators} setIndicators={setColorMapIndicators}/>
-                </Setting>
-              </>
-            )}
+          <ExpandableSetting
+            name="Fill Color"
+            mappingValue={elementColorMappingValue}
+            setMappingValue={setElementColorMappingValue}
+          >
+            <ColorRangePicker indicators={elementColorMapIndicators} setIndicators={setElementColorMapIndicators}/>
           </ExpandableSetting>
-          <ExpandableSetting name="Element Size">
-            {(parentOpenState) => (
-              <>
-                <Setting name="Mapping Value">
-                  <Select
-                    options={['Edge Count']}
-                    value={sizeMappingValue}
-                    setSelected={setSizeMappingValue}
-                    parentOpenState={parentOpenState}
-                    className="fixed-when-open"
-                  />
-                  {sizeMappingValue && (
-                    <Button text="reset" className="reset" onClick={() => setSizeMappingValue(undefined)}/>
-                  )}
-                </Setting>
-                <Setting name="Range">
-                  <RangeInput range={elementSizeMapping} setRange={setElementSizeMapping}/>
-                </Setting>
-              </>
-            )}
+          <ExpandableSetting
+            name="Element Size"
+            mappingValue={elementSizeMappingValue}
+            setMappingValue={setElementSizeMappingValue}
+          >
+            <RangeInput range={elementSizeMapping} setRange={setElementSizeMapping}/>
+          </ExpandableSetting>
+          <ExpandableSetting
+            name="Label Color"
+            mappingValue={labelColorMappingValue}
+            setMappingValue={setLabelColorMappingValue}
+          >
+            <ColorRangePicker indicators={labelColorMapIndicators} setIndicators={setLabelColorMapIndicators}/>
+          </ExpandableSetting>
+          <ExpandableSetting
+            name="Label Size"
+            mappingValue={labelSizeMappingValue}
+            setMappingValue={setLabelSizeMappingValue}
+          >
+            <RangeInput range={labelSizeMapping} setRange={setLabelSizeMapping}/>
           </ExpandableSetting>
         </div>
       )}

@@ -7,8 +7,6 @@ const RangeInput = ({range, setRange}) => {
   const updateRange = (value, type) => {
     const newRange = [...range];
     newRange[type] = value;
-    if (type === 1 && value < range[0]) [newRange[type]] = range;
-    if (type === 0 && value > range[1]) [, newRange[type]] = range;
     setRange(newRange);
   };
   return (

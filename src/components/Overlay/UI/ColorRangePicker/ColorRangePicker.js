@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+/* eslint-disable no-param-reassign */
 import React, {useState, useRef, useEffect} from 'react';
 import Indicator from './Indicator/Indicator';
 

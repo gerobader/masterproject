@@ -14,7 +14,7 @@ class Node {
     this.size = r;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
-      // this.addLabel(camera);
+      this.addLabel(camera);
     }
   }
 

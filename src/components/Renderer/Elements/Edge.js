@@ -10,7 +10,6 @@ class Edge {
   }
 
   buildGeometry() {
-
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
     const material = new THREE.MeshBasicMaterial({color: 0xffffff});
     material.transparent = true;

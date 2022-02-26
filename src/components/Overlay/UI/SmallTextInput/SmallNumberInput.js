@@ -8,7 +8,7 @@ const SmallNumberInput = ({value, setValue}) => (
       type="number"
       className={`small-number-input${value >= 100 ? ' small' : ''}`}
       value={value || ''}
-      onChange={(e) => setValue(e.target.value)}
+      onChange={(e) => setValue(parseFloat(e.target.value))}
     />
     {!value ? <div className="disabled"/> : ''}
   </div>

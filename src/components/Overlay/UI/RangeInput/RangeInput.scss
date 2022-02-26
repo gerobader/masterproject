@@ -1,0 +1,11 @@
+.range-input{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .divider{
+    width: 10px;
+    height: 2px;
+    background: #fff;
+    margin-right: 10px;
+  }
+}

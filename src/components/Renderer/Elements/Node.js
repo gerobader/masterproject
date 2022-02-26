@@ -54,13 +54,13 @@ class Node {
         const isConnected = isTarget || isSource;
         const distance = Math.round(this.instance.position.distanceTo(node.instance.position));
         if (isConnected) {
-          if (distance > 30) {
+          if (distance > 10) {
             direction.x += (node.instance.position.x - this.instance.position.x);
             direction.y += (node.instance.position.y - this.instance.position.y);
             direction.z += (node.instance.position.z - this.instance.position.z);
           }
         }
-        if (distance < 15) {
+        if (distance < 30) {
           direction.x += this.instance.position.x - node.instance.position.x;
           direction.y += this.instance.position.y - node.instance.position.y;
           direction.z += this.instance.position.z - node.instance.position.z;

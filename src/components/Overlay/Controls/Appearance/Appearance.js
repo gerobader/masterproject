@@ -8,6 +8,9 @@ import Select from '../../UI/Select/Select';
 import SmallNumberInput from '../../UI/SmallTextInput/SmallNumberInput';
 import ColorRangePicker from '../../UI/ColorRangePicker/ColorRangePicker';
 import {calculateColorForElement, sortElements} from '../../../utility';
+import RangeInput from '../../UI/RangeInput/RangeInput';
+import Setting from './Setting/Setting';
+import ExpandableSetting from './ExpandableSetting/ExpandableSetting';
 
 import './Appearance.scss';
 
@@ -19,7 +22,7 @@ const Appearance = () => {
   const {
     nodes, selectedNodes, edges, selectedEdges
   } = useSelector((state) => state.networkElements);
-  const [activeMenu, setActiveMenu] = useState('right');
+  const [activeMenu, setActiveMenu] = useState('left');
   const [fillColor, setFillColor] = useState();
   const [elementSize, setElementSize] = useState();
   const [labelColor, setLabelColor] = useState();
@@ -27,11 +30,12 @@ const Appearance = () => {
   const [applyOnlyToSelected, setApplyOnlyToSelected] = useState(false);
   const [elementType, setElementType] = useState('Nodes');
   const [nodeShape, setNodeShape] = useState();
-  const [fillColorMappingExpanded, setFillColorMappingExpanded] = useState(true);
   const [fillMappingValue, setFillMappingValue] = useState();
   const [colorMapIndicators, setColorMapIndicators] = useState([]);
+  const [sizeMappingValue, setSizeMappingValue] = useState();
+  const [elementSizeMapping, setElementSizeMapping] = useState([]);
 
-  const applyColorMap = () => {
+  const applyColorMapping = () => {
     if (fillMappingValue === 'Edge Count') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
       const sortedColorMapIndicators = [...colorMapIndicators];
@@ -54,8 +58,19 @@ const Appearance = () => {
     }
   };
 
+  const applyElementSizeMapping = () => {
+    if (sizeMappingValue === 'Edge Count') {
+      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+      sortedElements.forEach((element) => {
+        const size = elementSizeMapping[0] + ((elementSizeMapping[1] - elementSizeMapping[0]) * (element.percentage / 100));
+        element.object.setSize(size);
+      });
+    }
+  };
+
   const applyChanges = () => {
-    if (colorMapIndicators.length) applyColorMap();
+    if (colorMapIndicators.length) applyColorMapping();
+    if (elementSizeMapping.length === 2 && !elementSizeMapping.includes(NaN)) applyElementSizeMapping();
     let elementsToEdit = [];
     if (elementType === 'Nodes' || elementType === 'Both') {
       if (applyOnlyToSelected) {
@@ -85,80 +100,73 @@ const Appearance = () => {
       <MenuSwitch setActiveMenu={setActiveMenu} activeMenu={activeMenu}/>
       {activeMenu === 'left' ? (
         <div className="settings">
-          <div className="setting">
-            <div className="label">Fill Color:</div>
-            <div className="config">
-              <ColorPicker color={fillColor} setColor={setFillColor}/>
-              {fillColor && (<Button text="reset" className="reset" onClick={() => setFillColor(undefined)}/>)}
-            </div>
-          </div>
-          <div className="setting">
-            <div className="label">Element Size:</div>
-            <div className="config">
-              <SmallNumberInput value={elementSize} setValue={setElementSize}/>
-              {elementSize && (
-                <Button text="reset" className="reset" onClick={() => setElementSize(undefined)}/>
-              )}
-            </div>
-          </div>
-          <div className="setting">
-            <div className="label">Node Shape:</div>
-            <div className="config">
-              <Select
-                options={shapes}
-                value={nodeShape}
-                setSelected={setNodeShape}
-                className="no-margin"
-              />
-              {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
-            </div>
-          </div>
-          <div className="setting">
-            <div className="label">Label Color:</div>
-            <div className="config">
-              <ColorPicker color={labelColor} setColor={setLabelColor}/>
-              {labelColor && (<Button text="reset" className="reset" onClick={() => setLabelColor(undefined)}/>)}
-            </div>
-          </div>
-          <div className="setting">
-            <div className="label">Label Size:</div>
-            <div className="config">
-              <SmallNumberInput value={labelSize} setValue={setLabelSize}/>
-              {labelSize && (<Button text="reset" className="reset" onClick={() => setLabelSize(undefined)}/>)}
-            </div>
-          </div>
+          <Setting name="Fill Color">
+            <ColorPicker color={fillColor} setColor={setFillColor}/>
+            {fillColor && (<Button text="reset" className="reset" onClick={() => setFillColor(undefined)}/>)}
+          </Setting>
+          <Setting name="Element Size">
+            <SmallNumberInput value={elementSize} setValue={setElementSize}/>
+            {elementSize && (
+              <Button text="reset" className="reset" onClick={() => setElementSize(undefined)}/>
+            )}
+          </Setting>
+          <Setting name="Node Shape">
+            <Select options={shapes} value={nodeShape} setSelected={setNodeShape} className="no-margin"/>
+            {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
+          </Setting>
+          <Setting name="Label Color">
+            <ColorPicker color={labelColor} setColor={setLabelColor}/>
+            {labelColor && (<Button text="reset" className="reset" onClick={() => setLabelColor(undefined)}/>)}
+          </Setting>
+          <Setting name="Label Size">
+            <SmallNumberInput value={labelSize} setValue={setLabelSize}/>
+            {labelSize && (<Button text="reset" className="reset" onClick={() => setLabelSize(undefined)}/>)}
+          </Setting>
         </div>
       ) : (
         <div className="settings">
-          <div className={`expandable-setting${fillColorMappingExpanded ? ' open' : ''}`}>
-            <div className="expandable-label" onClick={() => setFillColorMappingExpanded(!fillColorMappingExpanded)}>
-              Fill Color
-              <div className="arrow"/>
-            </div>
-            <div className="setting-wrapper">
-              <div className="setting">
-                <div className="label">Mapping Value:</div>
-                <div className="config">
+          <ExpandableSetting name="Fill Color">
+            {(parentOpenState) => (
+              <>
+                <Setting name="Mapping Value">
                   <Select
                     options={['Edge Count']}
                     value={fillMappingValue}
                     setSelected={setFillMappingValue}
-                    parentOpenState={fillColorMappingExpanded}
+                    parentOpenState={parentOpenState}
                     className="fixed-when-open"
                   />
                   {fillMappingValue && (
                     <Button text="reset" className="reset" onClick={() => setFillMappingValue(undefined)}/>
                   )}
-                </div>
-              </div>
-              <div className="setting">
-                <div className="label">Range:</div>
-                <div className="config">
+                </Setting>
+                <Setting name="Range">
                   <ColorRangePicker indicators={colorMapIndicators} setIndicators={setColorMapIndicators}/>
-                </div>
-              </div>
-            </div>
-          </div>
+                </Setting>
+              </>
+            )}
+          </ExpandableSetting>
+          <ExpandableSetting name="Element Size">
+            {(parentOpenState) => (
+              <>
+                <Setting name="Mapping Value">
+                  <Select
+                    options={['Edge Count']}
+                    value={sizeMappingValue}
+                    setSelected={setSizeMappingValue}
+                    parentOpenState={parentOpenState}
+                    className="fixed-when-open"
+                  />
+                  {sizeMappingValue && (
+                    <Button text="reset" className="reset" onClick={() => setSizeMappingValue(undefined)}/>
+                  )}
+                </Setting>
+                <Setting name="Range">
+                  <RangeInput range={elementSizeMapping} setRange={setElementSizeMapping}/>
+                </Setting>
+              </>
+            )}
+          </ExpandableSetting>
         </div>
       )}
       <div className="controls">

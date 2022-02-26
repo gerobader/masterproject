@@ -34,7 +34,7 @@ let group;
 const useTestNetwork = false;
 
 let lastTimestamp = false;
-let showConnectedStuff = true;
+let calculatePositions = false;
 
 class Renderer extends Component {
   constructor(props) {
@@ -275,7 +275,7 @@ class Renderer extends Component {
             group = undefined;
             _setSelectedNodes([]);
             _setSelectedEdges([]);
-            showConnectedStuff = false;
+            calculatePositions = false;
             return prevState;
           default:
             return prevState;
@@ -440,7 +440,7 @@ class Renderer extends Component {
       speed = 1;
     }
     nodes.forEach((node) => {
-      if (showConnectedStuff && !selectedNodes.includes(node)) {
+      if (calculatePositions && !selectedNodes.includes(node)) {
         node.calculatePosition(nodes);
       }
       if (node.label) {

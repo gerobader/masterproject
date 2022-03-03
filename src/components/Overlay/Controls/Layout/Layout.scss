@@ -1,0 +1,11 @@
+.layout-controls{
+  padding: 0 10px;
+  .algorithm-wrapper{
+    display: flex;
+    flex-direction: row;
+    .algo-select{
+      max-width: unset;
+      width: 248px;
+    }
+  }
+}

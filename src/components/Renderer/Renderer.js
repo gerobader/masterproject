@@ -11,8 +11,8 @@ import {
   setNodes, setEdges, setSelectedNodes, setSelectedEdges
 } from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
-import * as lesMiserablesNodes from '../../data/test/nodes.json';
-import * as lesMiserablesEdges from '../../data/test/edges.json';
+import * as testNodes from '../../data/LesMiserables/nodes.json';
+import * as testEdges from '../../data/LesMiserables/edges.json';
 
 import './Renderer.scss';
 
@@ -31,7 +31,7 @@ let selectedElementOutline;
 
 let group;
 
-const useTestNetwork = false;
+const useTestNetwork = true;
 
 let lastTimestamp = false;
 let calculatePositions = false;
@@ -334,7 +334,7 @@ class Renderer extends Component {
     let nodes = [];
     let edges = [];
     if (useTestNetwork) {
-      nodes = lesMiserablesNodes.default.map((node) => {
+      nodes = testNodes.default.map((node) => {
         const nodeClass = new Node(
           Math.random() * 100 - 50,
           Math.random() * 100 - 50,
@@ -349,7 +349,7 @@ class Renderer extends Component {
         return nodeClass;
       });
 
-      edges = lesMiserablesEdges.default.map((edge) => {
+      edges = testEdges.default.map((edge) => {
         const sourceNode = nodes.filter((node) => node.id === edge.source)[0];
         const targetNode = nodes.filter((node) => node.id === edge.target)[0];
         const edgeClass = new Edge(sourceNode, targetNode);

@@ -12,9 +12,10 @@ class Node {
     this.color = color;
     this.colorIsMapped = false;
     this.size = r;
+    this.disp = new THREE.Vector3();
     this.buildGeometry(x, y, z, r, color);
     if (label) {
-      this.addLabel(camera);
+      // this.addLabel(camera);
     }
   }
 
@@ -141,10 +142,13 @@ class Node {
     });
   }
 
-  setPositionRelative(x, y, z) {
+  setPositionRelative(x, y, z, checkBoundaries = false, boundarySize) {
     this.instance.position.x += x;
     this.instance.position.y += y;
     this.instance.position.z += z;
+    if (checkBoundaries) {
+      this.instance.position.clampScalar(-boundarySize / 2, boundarySize / 2);
+    }
     this.updateAssociatedEdgePosition();
   }
 

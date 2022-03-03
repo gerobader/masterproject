@@ -105,9 +105,9 @@ const Appearance = () => {
     }
     elementsToEdit.forEach((element) => {
       if (fillColor && typeof element.setColor === 'function') element.setColor(fillColor);
-      if (elementSize && typeof element.setSize === 'function') element.setSize(elementSize);
+      if (elementSize && typeof element.setSize === 'function') element.setSize(parseFloat(elementSize));
       if (labelColor && typeof element.setLabelColor === 'function') element.setLabelColor(labelColor);
-      if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(labelSize);
+      if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(parseFloat(labelSize));
       if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
     });
   };
@@ -123,7 +123,7 @@ const Appearance = () => {
           </Setting>
           <Setting name="Element Size">
             <SmallNumberInput value={elementSize} setValue={setElementSize}/>
-            {elementSize && (
+            {elementSize !== undefined && (
               <Button text="reset" className="reset" onClick={() => setElementSize(undefined)}/>
             )}
           </Setting>

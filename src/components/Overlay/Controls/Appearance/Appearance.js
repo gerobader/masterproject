@@ -5,12 +5,12 @@ import ColorPicker from '../../UI/ColorPicker/ColorPicker';
 import Button from '../../UI/Button/Button';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
-import SmallNumberInput from '../../UI/SmallTextInput/SmallNumberInput';
+import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
 import ColorRangePicker from '../../UI/ColorRangePicker/ColorRangePicker';
 import {calculateColorForElement, sortElements} from '../../../utility';
 import RangeInput from '../../UI/RangeInput/RangeInput';
-import Setting from './Setting/Setting';
-import ExpandableSetting from './ExpandableSetting/ExpandableSetting';
+import Setting from '../../UI/Setting/Setting';
+import ExpandableSetting from '../../UI/ExpandableSetting/ExpandableSetting';
 
 import './Appearance.scss';
 
@@ -69,11 +69,13 @@ const Appearance = () => {
   const applyElementSizeMapping = (mappingValue, sizeMapping, targetElement) => {
     if (mappingValue === 'Edge Count') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+      const min = parseFloat(sizeMapping[0]);
+      const max = parseFloat(sizeMapping[1]);
       sortedElements.forEach((element) => {
         if (targetElement === 'node' && typeof element.object.setSize === 'function') {
-          element.object.setSize(sizeMapping[0] + ((sizeMapping[1] - sizeMapping[0]) * (element.percentage / 100)));
+          element.object.setSize(min + ((max - min) * (element.percentage / 100)));
         } else if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
-          element.object.setLabelSize(sizeMapping[0] + ((sizeMapping[1] - sizeMapping[0]) * (element.percentage / 100)));
+          element.object.setLabelSize(min + ((max - min) * (element.percentage / 100)));
         }
       });
     }
@@ -128,7 +130,13 @@ const Appearance = () => {
             )}
           </Setting>
           <Setting name="Node Shape">
-            <Select options={shapes} value={nodeShape} setSelected={setNodeShape} className="no-margin"/>
+            <Select
+              options={shapes}
+              value={nodeShape}
+              setSelected={setNodeShape}
+              className="no-margin"
+              defaultOption="- Shape -"
+            />
             {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
           </Setting>
           <Setting name="Label Color">

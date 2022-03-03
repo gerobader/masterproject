@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
-import Select from '../../../UI/Select/Select';
-import Button from '../../../UI/Button/Button';
+import Select from '../Select/Select';
+import Button from '../Button/Button';
 import Setting from '../Setting/Setting';
 
 import './ExpandableSetting.scss';

@@ -11,8 +11,8 @@ import {
   setNodes, setEdges, setSelectedNodes, setSelectedEdges
 } from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
-import * as testNodes from '../../data/LesMiserables/nodes.json';
-import * as testEdges from '../../data/LesMiserables/edges.json';
+import * as testNodes from '../../data/test/nodes.json';
+import * as testEdges from '../../data/test/edges.json';
 
 import './Renderer.scss';
 
@@ -34,7 +34,6 @@ let group;
 const useTestNetwork = true;
 
 let lastTimestamp = false;
-let calculatePositions = false;
 
 class Renderer extends Component {
   constructor(props) {
@@ -275,7 +274,6 @@ class Renderer extends Component {
             group = undefined;
             _setSelectedNodes([]);
             _setSelectedEdges([]);
-            calculatePositions = false;
             return prevState;
           default:
             return prevState;
@@ -361,9 +359,9 @@ class Renderer extends Component {
     } else {
       nodes = remoteNodes.map((node, index) => {
         const nodeClass = new Node(
-          Math.random() * 100 - 50,
-          Math.random() * 100 - 50,
-          Math.random() * 100 - 50,
+          Math.random() * 50 - 25,
+          Math.random() * 50 - 25,
+          Math.random() * 50 - 25,
           1,
           new THREE.Color(Math.random(), Math.random(), Math.random()),
           index,
@@ -440,9 +438,6 @@ class Renderer extends Component {
       speed = 1;
     }
     nodes.forEach((node) => {
-      if (calculatePositions && !selectedNodes.includes(node)) {
-        node.calculatePosition(nodes);
-      }
       if (node.label) {
         node.updateLabelPosition(camera);
       }

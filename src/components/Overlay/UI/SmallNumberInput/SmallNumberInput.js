@@ -6,7 +6,7 @@ const SmallNumberInput = ({value, setValue}) => (
   <div className="small-number-input-wrapper">
     <input
       type="number"
-      className={`small-number-input${value >= 100 ? ' small' : ''}`}
+      className={`small-number-input${value >= 99999 ? ' small' : ''}`}
       value={value || ''}
       onChange={(e) => setValue(e.target.value)}
     />

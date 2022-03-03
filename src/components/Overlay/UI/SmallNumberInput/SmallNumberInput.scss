@@ -6,7 +6,7 @@
   align-items: center;
   margin-right: 10px;
   .small-number-input{
-    width: $uiElementHeight;
+    width: $uiElementHeight + $uiElementHeight;
     height: $uiElementHeight;
     background: $uiElementBackground;
     border: 1px solid $menuWindowBorderColor;
@@ -26,6 +26,9 @@
     }
     &:focus + .disabled{
       display: none;
+    }
+    &:focus-visible{
+      outline: none;
     }
   }
   .disabled {

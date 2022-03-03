@@ -1,5 +1,5 @@
 import React from 'react';
-import SmallNumberInput from '../SmallTextInput/SmallNumberInput';
+import SmallNumberInput from '../SmallNumberInput/SmallNumberInput';
 
 import './RangeInput.scss';
 

@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import './Select.scss';
 
 const Select = ({
-  options, value, setSelected, className, opensUp, parentOpenState
+  options, value, setSelected, className, opensUp, parentOpenState, defaultOption
 }) => {
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -16,7 +16,7 @@ const Select = ({
       className={`vis-select${open ? ' open' : ''} ${className || ''}${opensUp ? ' opens-up' : ''}`}
       onClick={() => setOpen(!open)}
     >
-      <span>{value}</span>
+      <span>{value || defaultOption}</span>
       <div className={`arrow${open ? ' open' : ''}`}/>
       {open && (
         <div className="options-wrapper">

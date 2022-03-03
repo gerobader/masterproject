@@ -12,4 +12,7 @@
   &.reset{
     min-width: 60px;
   }
+  &:focus-visible{
+    outline: none;
+  }
 }

@@ -1,4 +1,4 @@
-@import '../../../../../assets/settings';
+@import '../../../../assets/settings';
 .expandable-setting{
   flex-direction: column;
   max-height: 24px;
@@ -22,7 +22,7 @@
       height: 8px;
       right: 0;
       top: 8px;
-      background: url('../../../../../assets/small-arrow.svg') center no-repeat;
+      background: url('../../../../assets/small-arrow.svg') center no-repeat;
       transition: transform 0.2s linear;
     }
   }

@@ -42,39 +42,6 @@ class Node {
     return completeWeight;
   }
 
-  calculatePosition(nodes) {
-    const direction = new THREE.Vector3(0, 0, 0);
-    // if (this.id === 0) {
-    //   const weight = this.stressMajorization(nodes);
-    //   console.log(weight);
-    // }
-    nodes.forEach((node) => {
-      if (node.id !== this.id) {
-        const isTarget = this.sourceForEdges.find((edge) => edge.targetNode.id === node.id);
-        const isSource = this.targetForEdges.find((edge) => edge.sourceNode.id === node.id);
-        const isConnected = isTarget || isSource;
-        const distance = Math.round(this.instance.position.distanceTo(node.instance.position));
-        if (isConnected) {
-          if (distance > 10) {
-            direction.x += (node.instance.position.x - this.instance.position.x);
-            direction.y += (node.instance.position.y - this.instance.position.y);
-            direction.z += (node.instance.position.z - this.instance.position.z);
-          }
-        }
-        if (distance < 30) {
-          direction.x += this.instance.position.x - node.instance.position.x;
-          direction.y += this.instance.position.y - node.instance.position.y;
-          direction.z += this.instance.position.z - node.instance.position.z;
-        }
-      }
-    });
-    // direction.normalize();
-    // direction.multiplyScalar(0.2);
-    // direction.clampLength(-1, 1);
-    direction.divideScalar(50);
-    this.setPositionRelative(direction.x, direction.y, direction.z);
-  }
-
   setColor(color) {
     this.instance.material.color.set(color);
   }

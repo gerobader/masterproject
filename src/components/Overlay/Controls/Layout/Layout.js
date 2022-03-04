@@ -5,6 +5,9 @@ import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
+import {
+  fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
+} from './forceFunctions';
 
 import './Layout.scss';
 import loader from '../../../../assets/loader.png';
@@ -17,6 +20,9 @@ const Layout = () => {
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);
   const [maxIterations, setMaxIterations] = useState('200');
+  const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(0.1);
+  const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(0.5);
+  const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(100);
 
   const stopCalculation = () => {
     clearInterval(interval);
@@ -24,15 +30,15 @@ const Layout = () => {
     setRunning(false);
   };
 
-  const forceDirectedPlacement = () => {
+  const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
     const maxIterationsFloat = parseFloat(maxIterations);
-    if (!maxIterationsFloat) return;
+    if (type === 1 && !maxIterationsFloat) return;
+    nodes.forEach((node) => {
+      node.instance.position.clampScalar(-size / 2, size / 2);
+    });
     setRunning(true);
-    // source: https://dcc.fceia.unr.edu.ar/sites/default/files/uploads/materias/fruchterman.pdf
     const area = size * size;
     const k = Math.sqrt(area / nodes.length);
-    const attractiveForce = (d) => (d ** 2) / k;
-    const repulsiveForce = (d) => (k ** 2) / d;
     const temp = new THREE.Vector3(1, 1, 1);
     let iterationCount = 0;
     const iteration = () => {
@@ -43,9 +49,9 @@ const Layout = () => {
         nodes.forEach((u) => {
           if (v !== u) {
             const distance = v.instance.position.clone().sub(u.instance.position);
-            const length = distance.length();
+            const length = distance.length() || 0.1;
             const normalizedDistance = distance.clone().normalize();
-            v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce(length)));
+            v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
           }
         });
       });
@@ -54,15 +60,21 @@ const Layout = () => {
         const distance = edge.sourceNode.instance.position.clone().sub(edge.targetNode.instance.position);
         const length = distance.length();
         const normalizedDistance = distance.clone().normalize();
-        edge.sourceNode.disp.sub(normalizedDistance.multiplyScalar(attractiveForce(length)));
-        edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForce(length)));
+        const attractiveForceStrength = attractiveForce({
+          d: length, k, k1: eadesAttractionMultiplier, k2: eadesAttractionDistanceImpact
+        });
+        edge.sourceNode.disp.sub(normalizedDistance.multiplyScalar(attractiveForceStrength));
+        edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForceStrength));
       });
       nodes.forEach((node) => {
-        const displacement = node.disp.clone().normalize().min(temp);
+        const displacement = node.disp.clone().normalize();
+        if (type === 1) displacement.min(temp);
         node.setPositionRelative(displacement.x, displacement.y, displacement.z, true, size);
       });
-      if (temp.x > 1 / maxIterationsFloat) temp.subScalar(1 / maxIterationsFloat);
-      if (iterationCount === maxIterationsFloat) stopCalculation();
+      if (type === 1) {
+        if (temp.x > 1 / maxIterationsFloat) temp.subScalar(1 / maxIterationsFloat);
+        if (iterationCount === maxIterationsFloat) stopCalculation();
+      }
     };
     if (!interval) {
       interval = setInterval(() => iteration(), 30);
@@ -70,14 +82,18 @@ const Layout = () => {
   };
 
   const startCalculation = () => {
-    if (layoutAlgorithm === 'Force-directed Placement') forceDirectedPlacement();
+    if (layoutAlgorithm === 'Fruchterman and Reingold') {
+      forceDirectedPlacement(1, fruchtAndReinAttraction, fruchtAndReinRepulsion);
+    } else if (layoutAlgorithm === 'Eades') {
+      forceDirectedPlacement(2, eadesAttraction, eadesRepulsion);
+    }
   };
 
   return (
     <div className="layout-controls">
       <div className="algorithm-wrapper">
         <Select
-          options={['Force-directed Placement']}
+          options={['Fruchterman and Reingold', 'Eades']}
           defaultOption="- Layout Algorithm -"
           value={layoutAlgorithm}
           setSelected={setLayoutAlgorithm}
@@ -91,13 +107,29 @@ const Layout = () => {
         {running && <img alt="loader" className="loader" src={loader}/>}
       </div>
       <div className="settings">
-        {layoutAlgorithm === 'Force-directed Placement' && (
+        {layoutAlgorithm === 'Fruchterman and Reingold' && (
           <>
             <Setting name="Size">
               <SmallNumberInput value={size} setValue={setSize}/>
             </Setting>
             <Setting name="Iterations">
               <SmallNumberInput value={maxIterations} setValue={setMaxIterations}/>
+            </Setting>
+          </>
+        )}
+        {layoutAlgorithm === 'Eades' && (
+          <>
+            <Setting name="Size">
+              <SmallNumberInput value={size} setValue={setSize}/>
+            </Setting>
+            <Setting name="Attraction Multiplier">
+              <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
+            </Setting>
+            <Setting name="Attraction Distance Impact">
+              <SmallNumberInput value={eadesAttractionDistanceImpact} setValue={setEadesAttractionDistanceImpact}/>
+            </Setting>
+            <Setting name="Repulsion Strength">
+              <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
             </Setting>
           </>
         )}

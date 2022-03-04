@@ -18,7 +18,7 @@ import './Renderer.scss';
 
 let animationRunning = false;
 const sensitivity = 0.002;
-const controlKeys = ['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'c', ' ', 'escape'];
+const controlKeys = ['w', 'a', 's', 'd', 'f', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'c', ' ', 'escape'];
 let speed = 1;
 const initialCameraZ = 200;
 const hoverElementOutlineColor = '#aaaaaa';
@@ -29,11 +29,12 @@ const mousePosition = new THREE.Vector2(0, 0);
 let hoveredElementOutline;
 let selectedElementOutline;
 
+const clock = new THREE.Clock();
+let targetQuaternion;
+let interpolation = 0;
 let group;
 
-const useTestNetwork = true;
-
-let lastTimestamp = false;
+const useTestNetwork = false;
 
 class Renderer extends Component {
   constructor(props) {
@@ -61,6 +62,10 @@ class Renderer extends Component {
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
+    this.lookAt = this.lookAt.bind(this);
+    this.cameraControls = this.cameraControls.bind(this);
+    this.handleOutline = this.handleOutline.bind(this);
+    this.handleNodeDragging = this.handleNodeDragging.bind(this);
   }
 
   componentDidMount() {
@@ -117,6 +122,8 @@ class Renderer extends Component {
     if (orbitPreview) {
       _setOrbitPreview(false);
     }
+    targetQuaternion = undefined;
+    interpolation = 0;
     if (hoveredElement) {
       if (e.button === 0) {
         const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
@@ -229,7 +236,9 @@ class Renderer extends Component {
 
   handleKeyUp(e) {
     const {scene, controls} = this.state;
-    const {_setSelectedNodes, _setSelectedEdges} = this.props;
+    const {
+      _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges
+    } = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key)) {
       this.setState((prevState) => {
@@ -268,6 +277,9 @@ class Renderer extends Component {
               ...prevState,
               cameraDown: false
             };
+          case 'f':
+            this.lookAt([...selectedNodes, ...selectedEdges]);
+            return prevState;
           case 'escape':
             controls.detach();
             scene.remove(group);
@@ -279,6 +291,84 @@ class Renderer extends Component {
             return prevState;
         }
       });
+    }
+  }
+
+  handleOutline() {
+    const {hoveredElement} = this.state;
+    const {selectedNodes, selectedEdges} = this.props;
+    if (hoveredElement) {
+      hoveredElementOutline.selectedObjects = [hoveredElement.object];
+    } else {
+      hoveredElementOutline.selectedObjects = [];
+    }
+    if (selectedNodes.length || selectedEdges.length) {
+      const selectedElements = [...selectedNodes, ...selectedEdges];
+      selectedElementOutline.selectedObjects = selectedElements.map((selectedElement) => selectedElement.instance);
+    } else {
+      selectedElementOutline.selectedObjects = [];
+    }
+  }
+
+  handleNodeDragging() {
+    const {controls} = this.state;
+    const {selectedNodes} = this.props;
+    if (controls.dragging) {
+      if (selectedNodes.length > 1) {
+        group.children.forEach((nodeCopy) => {
+          const original = selectedNodes.find((selectedNode) => selectedNode.instance.uuid === nodeCopy.userData.originalUuid);
+          if (original) {
+            const newPosition = new THREE.Vector3();
+            nodeCopy.getWorldPosition(newPosition);
+            original.setPositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
+          }
+        });
+      } else {
+        selectedNodes[0].updateAssociatedEdgePosition();
+      }
+    }
+  }
+
+  lookAt(elements) {
+    const {camera} = this.state;
+    const position = new THREE.Vector3();
+    elements.forEach((element) => {
+      position.add(element.instance.position);
+    });
+    position.divideScalar(elements.length);
+    const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
+    targetQuaternion = new THREE.Quaternion();
+    targetQuaternion.setFromRotationMatrix(rotationMatrix);
+  }
+
+  cameraControls() {
+    const {
+      camera, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
+    } = this.state;
+    const delta = clock.getDelta();
+    if (targetQuaternion) {
+      camera.quaternion.slerp(targetQuaternion, delta * 5);
+      if (interpolation >= 1) {
+        interpolation = 0;
+        targetQuaternion = undefined;
+      } else {
+        interpolation += delta;
+      }
+    }
+    if (cameraForward || cameraBack || cameraLeft || cameraRight || cameraUp || cameraDown) {
+      speed += 0.1;
+      const dir = new THREE.Vector3(0, 0, 0);
+      if (cameraForward) dir.z -= 1;
+      if (cameraBack) dir.z += 1;
+      if (cameraLeft) dir.x -= 1;
+      if (cameraRight) dir.x += 1;
+      if (cameraUp) dir.y += 1;
+      if (cameraDown) dir.y -= 1;
+      dir.applyQuaternion(camera.quaternion).normalize();
+      const divideVector = new THREE.Vector3(10 / speed, 10 / speed, 10 / speed);
+      camera.position.add(dir.divide(divideVector));
+    } else {
+      speed = 1;
     }
   }
 
@@ -410,71 +500,22 @@ class Renderer extends Component {
   }
 
   animate() {
-    const {
-      composer, hoveredElement, scene, camera, controls, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
-    } = this.state;
-    const {
-      orbitPreview, nodes, selectedNodes, selectedEdges
-    } = this.props;
+    const {composer, scene, camera} = this.state;
+    const {orbitPreview, nodes} = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) {
       camera.position.x = camera.position.x * Math.cos(0.002) - camera.position.z * Math.sin(0.002);
       camera.position.z = camera.position.z * Math.cos(0.002) + camera.position.x * Math.sin(0.002);
       camera.lookAt(scene.position);
     }
-    if (cameraForward || cameraBack || cameraLeft || cameraRight || cameraUp || cameraDown) {
-      speed += 0.1;
-      const dir = new THREE.Vector3(0, 0, 0);
-      if (cameraForward) dir.z -= 1;
-      if (cameraBack) dir.z += 1;
-      if (cameraLeft) dir.x -= 1;
-      if (cameraRight) dir.x += 1;
-      if (cameraUp) dir.y += 1;
-      if (cameraDown) dir.y -= 1;
-      dir.applyQuaternion(camera.quaternion).normalize();
-      const divideVector = new THREE.Vector3(10 / speed, 10 / speed, 10 / speed);
-      camera.position.add(dir.divide(divideVector));
-    } else {
-      speed = 1;
-    }
+    this.cameraControls();
+    this.handleOutline();
+    this.handleNodeDragging();
     nodes.forEach((node) => {
       if (node.label) {
         node.updateLabelPosition(camera);
       }
     });
-    if (hoveredElement) {
-      hoveredElementOutline.selectedObjects = [hoveredElement.object];
-    } else {
-      hoveredElementOutline.selectedObjects = [];
-    }
-    if (selectedNodes.length || selectedEdges.length) {
-      const selectedElements = [...selectedNodes, ...selectedEdges];
-      selectedElementOutline.selectedObjects = selectedElements.map((selectedElement) => selectedElement.instance);
-    } else {
-      selectedElementOutline.selectedObjects = [];
-    }
-
-    if (controls.dragging) {
-      if (selectedNodes.length > 1) {
-        group.children.forEach((nodeCopy) => {
-          const original = selectedNodes.find((selectedNode) => selectedNode.instance.uuid === nodeCopy.userData.originalUuid);
-          if (original) {
-            const newPosition = new THREE.Vector3();
-            nodeCopy.getWorldPosition(newPosition);
-            original.setPositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
-          }
-        });
-      } else {
-        selectedNodes[0].updateAssociatedEdgePosition();
-      }
-    }
-    // const newTimestamp = new Date().valueOf();
-    // let fps = 0;
-    // if (lastTimestamp) {
-    //   fps = 1000 / (newTimestamp - lastTimestamp);
-    // }
-    // lastTimestamp = newTimestamp;
-    // console.log(fps);
     composer.render();
   }
 

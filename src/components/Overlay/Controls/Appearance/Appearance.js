@@ -82,36 +82,39 @@ const Appearance = () => {
   };
 
   const applyChanges = () => {
-    if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
-    if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
-    if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
-      applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
-    }
-    if (labelSizeMapping.length === 2 && labelSizeMappingValue && !labelSizeMapping.includes(NaN)) {
-      applyElementSizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
-    }
-    let elementsToEdit = [];
-    if (elementType === 'Nodes' || elementType === 'Both') {
-      if (applyOnlyToSelected) {
-        elementsToEdit = [...selectedNodes];
-      } else {
-        elementsToEdit = [...nodes];
+    if (activeMenu === 'right') {
+      if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
+      if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
+      if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
+        applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
       }
-    }
-    if (elementType === 'Edges' || elementType === 'Both') {
-      if (applyOnlyToSelected) {
-        elementsToEdit = [...elementsToEdit, ...selectedEdges];
-      } else {
-        elementsToEdit = [...elementsToEdit, ...edges];
+      if (labelSizeMapping.length === 2 && labelSizeMappingValue && !labelSizeMapping.includes(NaN)) {
+        applyElementSizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
       }
+    } else {
+      let elementsToEdit = [];
+      if (elementType === 'Nodes' || elementType === 'Both') {
+        if (applyOnlyToSelected) {
+          elementsToEdit = [...selectedNodes];
+        } else {
+          elementsToEdit = [...nodes];
+        }
+      }
+      if (elementType === 'Edges' || elementType === 'Both') {
+        if (applyOnlyToSelected) {
+          elementsToEdit = [...elementsToEdit, ...selectedEdges];
+        } else {
+          elementsToEdit = [...elementsToEdit, ...edges];
+        }
+      }
+      elementsToEdit.forEach((element) => {
+        if (fillColor && typeof element.setColor === 'function') element.setColor(fillColor);
+        if (elementSize && typeof element.setSize === 'function') element.setSize(parseFloat(elementSize));
+        if (labelColor && typeof element.setLabelColor === 'function') element.setLabelColor(labelColor);
+        if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(parseFloat(labelSize));
+        if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
+      });
     }
-    elementsToEdit.forEach((element) => {
-      if (fillColor && typeof element.setColor === 'function') element.setColor(fillColor);
-      if (elementSize && typeof element.setSize === 'function') element.setSize(parseFloat(elementSize));
-      if (labelColor && typeof element.setLabelColor === 'function') element.setLabelColor(labelColor);
-      if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(parseFloat(labelSize));
-      if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
-    });
   };
 
   return (

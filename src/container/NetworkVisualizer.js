@@ -5,19 +5,18 @@ import Overlay from '../components/Overlay/Overlay';
 
 import './NetworkVisualizer.scss';
 
-const neoDriver = neo4j.driver(
-  'bolt://demo.neo4jlabs.com',
-  neo4j.auth.basic('gameofthrones', 'gameofthrones'),
-  {encrypted: true}
-);
-
 const NetworkVisualizer = () => {
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
   useEffect(async () => {
+    const neoDriver = neo4j.driver(
+      'bolt://demo.neo4jlabs.com',
+      neo4j.auth.basic('gameofthrones', 'gameofthrones'),
+      {encrypted: true}
+    );
     const session = await neoDriver.session({database: 'gameofthrones'});
     const res = await session.run('MATCH (n)-[:INTERACTS1]->(m) RETURN n.name as source, m.name as target');
-    session.close();
+    await session.close();
     const uniqueNodes = new Set();
     const e = res.records.map((r) => {
       const source = r.get('source');

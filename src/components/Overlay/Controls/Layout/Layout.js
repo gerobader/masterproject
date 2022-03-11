@@ -5,12 +5,12 @@ import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
+import Loader from '../../UI/Loader/Loader';
 import {
   fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
 } from './forceFunctions';
 
 import './Layout.scss';
-import loader from '../../../../assets/loader.png';
 
 let interval;
 
@@ -97,14 +97,14 @@ const Layout = () => {
           defaultOption="- Layout Algorithm -"
           value={layoutAlgorithm}
           setSelected={setLayoutAlgorithm}
-          className="algo-select"
+          className="extra-wide"
         />
         <Button
           onClick={running ? stopCalculation : startCalculation}
           text={running ? 'Stop' : 'Run'}
           className="run"
         />
-        {running && <img alt="loader" className="loader" src={loader}/>}
+        {running && <Loader/>}
       </div>
       <div className="settings">
         {layoutAlgorithm === 'Fruchterman and Reingold' && (

@@ -332,6 +332,7 @@ class Renderer extends Component {
   lookAt(elements) {
     const {camera} = this.state;
     const position = new THREE.Vector3();
+    interpolation = 0;
     elements.forEach((element) => {
       position.add(element.instance.position);
     });
@@ -390,7 +391,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setNodes, _setEdges, remoteNodes, remoteEdges
+      _setNodes, _setEdges, remoteNodes, remoteEdges, use2Dimensions
     } = this.props;
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -451,7 +452,7 @@ class Renderer extends Component {
         const nodeClass = new Node(
           Math.random() * 50 - 25,
           Math.random() * 50 - 25,
-          Math.random() * 50 - 25,
+          use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
           new THREE.Color(Math.random(), Math.random(), Math.random()),
           index,
@@ -461,7 +462,6 @@ class Renderer extends Component {
         scene.add(nodeClass.instance);
         return nodeClass;
       });
-
       edges = remoteEdges.map((edge) => {
         const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
         const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];

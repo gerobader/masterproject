@@ -1,0 +1,35 @@
+.start-screen{
+  height: 100vh;
+  width: 100vw;
+  background: #000;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  .menu-element{
+    height: 236px;
+    .header{
+      margin-bottom: 38px;
+    }
+    .controls-wrapper{
+      align-items: center;
+      .vis-select{
+        margin-bottom: 13px;
+        text-align: center;
+      }
+    }
+    .checkbox-wrapper{
+      flex-direction: row-reverse;
+      label{
+        margin: 0 0 0 8px;
+
+      }
+    }
+    .button-wrapper{
+      position: relative;
+      margin-top: 30px;
+      .loader{
+        position: absolute;
+      }
+    }
+  }
+}

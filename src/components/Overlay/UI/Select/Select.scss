@@ -29,6 +29,10 @@
       position: fixed;
     }
   }
+  &.extra-wide{
+    max-width: unset;
+    width: 248px;
+  }
   .arrow{
     position: absolute;
     right: 10px;

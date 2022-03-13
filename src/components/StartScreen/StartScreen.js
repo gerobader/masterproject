@@ -24,39 +24,52 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
       );
       const session = await neoDriver.session({database: selectedNetwork});
       let res;
-      const uniqueNodes = new Set();
+      const nodes = [];
+      let edges = [];
       if (selectedNetwork === 'gameofthrones') {
         res = await session.run('MATCH (n)-[:INTERACTS1]->(m) RETURN n.name as source, m.name as target');
         await session.close();
-        const e = res.records.map((r) => {
+        edges = res.records.map((r) => {
           const source = r.get('source');
           const target = r.get('target');
-          uniqueNodes.add(source);
-          uniqueNodes.add(target);
+          if (!nodes.some((node) => node.label === source)) {
+            nodes.push({label: source, data: {}});
+          }
+          if (!nodes.some((node) => node.label === target)) {
+            nodes.push({label: target, data: {}});
+          }
           return {source, target};
-        });
-        const n = Array.from(uniqueNodes).map((node) => ({label: node}));
-        setElements({
-          nodes: n,
-          edges: e
         });
       } else if (selectedNetwork === 'movies') {
         res = await session.run('MATCH p=()-[r:ACTED_IN]->() RETURN p');
         await session.close();
-        const e = res.records.map((r) => {
+        edges = res.records.map((r) => {
           const path = r.get('p');
           const source = path.start.properties.name;
           const target = path.end.properties.title;
-          uniqueNodes.add(source);
-          uniqueNodes.add(target);
+          if (!nodes.some((node) => node.label === source)) {
+            nodes.push({
+              label: source,
+              data: {
+                type: 'actor'
+              }
+            });
+          }
+          if (!nodes.some((node) => node.label === target)) {
+            nodes.push({
+              label: target,
+              data: {
+                type: 'movie'
+              }
+            });
+          }
           return {source, target};
         });
-        const n = Array.from(uniqueNodes).map((node) => ({label: node}));
-        setElements({
-          nodes: n,
-          edges: e
-        });
       }
+      setElements({
+        nodes,
+        edges
+      });
     }
   };
 

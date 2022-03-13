@@ -6,7 +6,7 @@ import Setting from '../Setting/Setting';
 import './ExpandableSetting.scss';
 
 const ExpandableSetting = ({
-  name, mappingValue, setMappingValue, children
+  name, mappingValue, setMappingValue, children, mappingOptions
 }) => {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -18,16 +18,15 @@ const ExpandableSetting = ({
       <div className="setting-wrapper">
         <Setting name="Mapping Value">
           <Select
-            options={['Edge Count']}
+            options={mappingOptions}
             value={mappingValue}
             setSelected={setMappingValue}
             parentOpenState={expanded}
+            className="overflow-fix"
           />
           {mappingValue && (<Button text="reset" className="reset" onClick={() => setMappingValue(undefined)}/>)}
         </Setting>
-        <Setting name="Range">
-          {children}
-        </Setting>
+        {typeof children === 'function' ? children(expanded) : children}
       </div>
     </div>
   );

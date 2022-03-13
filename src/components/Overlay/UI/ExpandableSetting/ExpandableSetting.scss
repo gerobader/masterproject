@@ -3,10 +3,10 @@
   flex-direction: column;
   max-height: 24px;
   overflow: hidden;
-  transition: max-height 0.2s ease-in-out;
+  //transition: max-height 0.2s ease-in-out;
   margin-bottom: 20px;
   &.open{
-    max-height: 100%;
+    max-height: unset;
     .arrow{
       transform: rotate(180deg);
     }

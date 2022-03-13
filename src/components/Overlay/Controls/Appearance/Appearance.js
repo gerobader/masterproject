@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useMemo} from 'react';
 import {useSelector} from 'react-redux';
 import MenuSwitch from '../../UI/MenuSwitch/MenuSwitch';
 import ColorPicker from '../../UI/ColorPicker/ColorPicker';
@@ -34,15 +34,38 @@ const Appearance = () => {
   const [elementColorMapIndicators, setElementColorMapIndicators] = useState([]);
   const [elementSizeMappingValue, setElementSizeMappingValue] = useState();
   const [elementSizeMapping, setElementSizeMapping] = useState([]);
+  const [nodeShapeMappingValue, setNodeShapeMappingValue] = useState();
+  const [nodeShapeMapping, setNodeShapeMapping] = useState([]);
   const [labelColorMappingValue, setLabelColorMappingValue] = useState();
   const [labelColorMapIndicators, setLabelColorMapIndicators] = useState([]);
   const [labelSizeMappingValue, setLabelSizeMappingValue] = useState();
   const [labelSizeMapping, setLabelSizeMapping] = useState([]);
+  const nodeDataPoints = useMemo(() => {
+    const data = {};
+    nodes.forEach((node) => {
+      Object.keys(node.data).forEach((dataPoint) => {
+        if (dataPoint in data) {
+          if (!data[dataPoint].includes(node.data[dataPoint])) {
+            data[dataPoint].push(node.data[dataPoint]);
+          }
+        } else {
+          data[dataPoint] = [node.data[dataPoint]];
+        }
+      });
+    });
+    if ('edgeCount' in data) {
+      data.edgeCount.sort((a, b) => {
+        if (a === b) return 0;
+        return a < b ? -1 : 1;
+      });
+    }
+    return data;
+  }, [nodes]);
 
-  const applyColorMapping = (colorMapIndicator, mappingValue, targetElement) => {
-    if (mappingValue === 'Edge Count') {
+  const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
+    if (mappingValue === 'edgeCount') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
-      const sortedColorMapIndicators = [...colorMapIndicator];
+      const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
         if (first.position === second.position) return 0;
         return first.position > second.position ? 1 : -1;
@@ -63,33 +86,52 @@ const Appearance = () => {
           }
         }
       });
+    } else if (mappingValue) {
+      nodes.forEach((node) => {
+        node.setColor(colorMapIndicators[node.data.type]);
+      });
     }
   };
 
   const applyElementSizeMapping = (mappingValue, sizeMapping, targetElement) => {
-    if (mappingValue === 'Edge Count') {
-      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
-      const min = parseFloat(sizeMapping[0]);
-      const max = parseFloat(sizeMapping[1]);
-      sortedElements.forEach((element) => {
-        if (targetElement === 'node' && typeof element.object.setSize === 'function') {
-          element.object.setSize(min + ((max - min) * (element.percentage / 100)));
-        } else if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
-          element.object.setLabelSize(min + ((max - min) * (element.percentage / 100)));
-        }
+    if (mappingValue === 'edgeCount') {
+      if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
+        const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+        const min = parseFloat(sizeMapping[0]);
+        const max = parseFloat(sizeMapping[1]);
+        sortedElements.forEach((element) => {
+          if (targetElement === 'node' && typeof element.object.setSize === 'function') {
+            element.object.setSize(min + ((max - min) * (element.percentage / 100)));
+          } else if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
+            element.object.setLabelSize(min + ((max - min) * (element.percentage / 100)));
+          }
+        });
+      }
+    } else if (mappingValue) {
+      nodes.forEach((node) => {
+        node.setSize(sizeMapping[node.data.type]);
       });
     }
+  };
+
+  const applyNodeShapeMapping = (dataToMapOn, dataMapping) => {
+    nodes.forEach((node) => {
+      const nodeData = node.data[dataToMapOn];
+      const shape = dataMapping[nodeData];
+      node.setShape(shape);
+    });
   };
 
   const applyChanges = () => {
     if (activeMenu === 'right') {
       if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
       if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
-      if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
-        applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
-      }
+      applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
       if (labelSizeMapping.length === 2 && labelSizeMappingValue && !labelSizeMapping.includes(NaN)) {
         applyElementSizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
+      }
+      if (nodeShapeMappingValue && Object.keys(nodeShapeMapping).length > 0) {
+        applyNodeShapeMapping(nodeShapeMappingValue, nodeShapeMapping);
       }
     } else {
       let elementsToEdit = [];
@@ -115,6 +157,51 @@ const Appearance = () => {
         if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
       });
     }
+  };
+
+  const createMappingInputs = (mappingType, mappingValue, rangeMapping, rangeMappingSetter) => {
+    if (mappingValue === 'edgeCount' && mappingType !== 'shape') {
+      return (
+        <Setting name="Range">
+          {mappingType === 'color' ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)
+            : (<RangeInput range={rangeMapping} setRange={rangeMappingSetter}/>)}
+        </Setting>
+      );
+    }
+    if (mappingValue) {
+      if (mappingType === 'size') {
+        return nodeDataPoints[mappingValue].map((dataPoint) => (
+          <Setting key={dataPoint} name={dataPoint}>
+            <SmallNumberInput
+              value={rangeMapping[dataPoint]}
+              setValue={(value) => rangeMappingSetter({...rangeMapping, [dataPoint]: value})}
+            />
+          </Setting>
+        ));
+      }
+      if (mappingType === 'color') {
+        return nodeDataPoints[mappingValue].map((dataPoint) => (
+          <Setting key={dataPoint} name={dataPoint}>
+            <ColorPicker
+              color={rangeMapping[dataPoint]}
+              setColor={(value) => rangeMappingSetter({...rangeMapping, [dataPoint]: value})}
+            />
+          </Setting>
+        ));
+      }
+      return (expanded) => nodeDataPoints[mappingValue].map((dataPoint) => (
+        <Setting key={dataPoint} name={dataPoint}>
+          <Select
+            options={shapes}
+            value={rangeMapping[dataPoint]}
+            setSelected={(option) => rangeMappingSetter({...rangeMapping, [dataPoint]: option})}
+            parentOpenState={expanded}
+            className="overflow-fix"
+          />
+        </Setting>
+      ));
+    }
+    return null;
   };
 
   return (
@@ -156,21 +243,38 @@ const Appearance = () => {
           <ExpandableSetting
             name="Fill Color"
             mappingValue={elementColorMappingValue}
-            setMappingValue={setElementColorMappingValue}
+            setMappingValue={(mappingValue) => {
+              setElementColorMappingValue(mappingValue);
+              setElementColorMapIndicators([]);
+            }}
+            mappingOptions={Object.keys(nodeDataPoints)}
           >
-            <ColorRangePicker indicators={elementColorMapIndicators} setIndicators={setElementColorMapIndicators}/>
+            {createMappingInputs('color', elementColorMappingValue, elementColorMapIndicators, setElementColorMapIndicators)}
           </ExpandableSetting>
           <ExpandableSetting
             name="Element Size"
             mappingValue={elementSizeMappingValue}
-            setMappingValue={setElementSizeMappingValue}
+            setMappingValue={(mappingValue) => {
+              setElementSizeMappingValue(mappingValue);
+              setElementSizeMapping([]);
+            }}
+            mappingOptions={Object.keys(nodeDataPoints)}
           >
-            <RangeInput range={elementSizeMapping} setRange={setElementSizeMapping}/>
+            {createMappingInputs('size', elementSizeMappingValue, elementSizeMapping, setElementSizeMapping)}
+          </ExpandableSetting>
+          <ExpandableSetting
+            name="Node Shape"
+            mappingValue={nodeShapeMappingValue}
+            setMappingValue={setNodeShapeMappingValue}
+            mappingOptions={Object.keys(nodeDataPoints)}
+          >
+            {createMappingInputs('shape', nodeShapeMappingValue, nodeShapeMapping, setNodeShapeMapping)}
           </ExpandableSetting>
           <ExpandableSetting
             name="Label Color"
             mappingValue={labelColorMappingValue}
             setMappingValue={setLabelColorMappingValue}
+            mappingOptions={Object.keys(nodeDataPoints)}
           >
             <ColorRangePicker indicators={labelColorMapIndicators} setIndicators={setLabelColorMapIndicators}/>
           </ExpandableSetting>
@@ -178,6 +282,7 @@ const Appearance = () => {
             name="Label Size"
             mappingValue={labelSizeMappingValue}
             setMappingValue={setLabelSizeMappingValue}
+            mappingOptions={Object.keys(nodeDataPoints)}
           >
             <RangeInput range={labelSizeMapping} setRange={setLabelSizeMapping}/>
           </ExpandableSetting>

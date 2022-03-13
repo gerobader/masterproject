@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, r, color, id, label, camera) {
+  constructor(x, y, z, r, color, id, label, data, camera) {
     this.label = null;
     this.id = id;
     this.labelText = label;
+    this.data = data;
     this.instance = null;
     this.targetForEdges = [];
     this.sourceForEdges = [];
@@ -29,25 +30,18 @@ class Node {
     this.instance.position.z = z;
   }
 
-  stressMajorization(nodes) {
-    let completeWeight = 0;
-    nodes.forEach((node) => {
-      if (node.id !== this.id) {
-        const distance = Math.round(this.instance.position.distanceTo(node.instance.position));
-        const idealDistance = 15;
-        const weight = (distance - idealDistance) ** 2;
-        completeWeight += weight;
-      }
-    });
-    return completeWeight;
+  computeDatapoints() {
+    this.data.edgeCount = this.targetForEdges.length + this.sourceForEdges.length;
   }
 
   setColor(color) {
-    this.instance.material.color.set(color);
+    if (color) {
+      this.instance.material.color.set(color);
+    }
   }
 
   setSize(size) {
-    if (size !== this.size) {
+    if (size && size !== this.size) {
       const newSize = size / this.size;
       this.instance.geometry.scale(newSize, newSize, newSize);
       this.size = size;

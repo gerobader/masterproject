@@ -20,9 +20,9 @@ const Layout = () => {
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);
   const [maxIterations, setMaxIterations] = useState('200');
-  const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(0.1);
-  const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(0.5);
-  const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(100);
+  const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
+  const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
+  const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(70);
 
   const stopCalculation = () => {
     clearInterval(interval);

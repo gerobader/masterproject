@@ -21,19 +21,28 @@
     white-space: nowrap;
   }
   &.open{
-    border-bottom: 1px solid transparent;
+    //border-bottom: 1px solid transparent;
     border-radius: 5px 5px 0 0;
     background: #686868;
     z-index: 2;
     &.fixed-when-open {
       position: fixed;
     }
+    &.overflow-fix {
+      position: absolute;
+    }
+    .select-arrow{
+      transform: rotate(0deg);
+    }
   }
   &.extra-wide{
     max-width: unset;
     width: 248px;
   }
-  .arrow{
+  &.has-value .select-arrow{
+    display: none;
+  }
+  .select-arrow{
     position: absolute;
     right: 10px;
     top: 5px;
@@ -41,9 +50,6 @@
     height: 11px;
     background: url('../../../../assets/arrow-up.svg') center no-repeat;
     transform: rotate(180deg);
-    &.open {
-      transform: rotate(0deg);
-    }
   }
   .options-wrapper{
     background: #686868;
@@ -53,7 +59,7 @@
     left: -1px;
     width: 100%;
     border-radius: 0 0 5px 5px;
-    top: 21px;
+    top: 23px;
     max-height: 100px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -64,7 +70,9 @@
     }
     .option{
       padding: 3px 10px;
-      border-top: 1px solid #aaa;
+      &:not(:first-child) {
+        border-top: 1px solid #aaa;
+      }
       &:hover, &.selected{
         background: $uiElementBackground;
       }
@@ -72,7 +80,7 @@
   }
   &.opens-up{
     &.open{
-      border-top: 1px solid transparent;
+      //border-top: 1px solid transparent;
       border-radius: 0 0 5px 5px;
       border-bottom: 1px solid $menuWindowBorderColor;
     }
@@ -84,13 +92,15 @@
     }
     .options-wrapper{
       top: unset;
-      bottom: 21px;
+      bottom: 23px;
       border-radius: 5px 5px 0 0;
       border-top: 1px solid $menuWindowBorderColor;
       border-bottom: none;
       .option{
         border-top: none;
-        border-bottom: 1px solid #aaa;
+        &:not(:last-child) {
+          border-bottom: 1px solid #aaa;
+        }
       }
     }
   }

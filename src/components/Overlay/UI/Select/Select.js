@@ -13,11 +13,11 @@ const Select = ({
   }, [parentOpenState]);
   return (
     <div
-      className={`vis-select${open ? ' open' : ''} ${className || ''}${opensUp ? ' opens-up' : ''}`}
+      className={`vis-select${open ? ' open' : ''} ${className || ''}${opensUp ? ' opens-up' : ''}${value ? ' has-value' : ''}`}
       onClick={() => setOpen(!open)}
     >
       <span>{value || defaultOption}</span>
-      <div className={`arrow${open ? ' open' : ''}`}/>
+      <div className="select-arrow"/>
       {open && (
         <div className="options-wrapper">
           {options.map((option) => (

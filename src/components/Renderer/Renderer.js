@@ -432,6 +432,7 @@ class Renderer extends Component {
           new THREE.Color(Math.random(), Math.random(), Math.random()),
           node.id,
           node.label,
+          {},
           camera
         );
         scene.add(nodeClass.instance);
@@ -457,6 +458,7 @@ class Renderer extends Component {
           new THREE.Color(Math.random(), Math.random(), Math.random()),
           index,
           node.label,
+          node.data,
           camera
         );
         scene.add(nodeClass.instance);
@@ -472,6 +474,8 @@ class Renderer extends Component {
         return edgeClass;
       });
     }
+
+    nodes.forEach((node) => node.computeDatapoints());
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);

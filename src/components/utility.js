@@ -44,15 +44,10 @@ export const calculateColorForElement = (lowerColorBoundIndicator, upperColorBou
 };
 
 export const sortElements = (elements) => {
-  const sortedElements = [];
-  elements.forEach((element) => {
-    const edgeCount = element.targetForEdges.length + element.sourceForEdges.length;
-    sortedElements.push({object: element, sortBy: edgeCount});
+  elements.sort((a, b) => {
+    if (a.data.edgeCount === b.data.edgeCount) return 0;
+    return a.data.edgeCount < b.data.edgeCount ? -1 : 1;
   });
-  sortedElements.sort((a, b) => {
-    if (a.sortBy === b.sortBy) return 0;
-    return a.sortBy < b.sortBy ? -1 : 1;
-  });
-  const max = sortedElements[sortedElements.length - 1].sortBy;
-  return sortedElements.map((element) => ({object: element.object, percentage: Math.ceil((element.sortBy / max) * 100)}));
+  const max = elements[elements.length - 1].data.edgeCount;
+  return elements.map((element) => ({object: element, percentage: Math.ceil((element.data.edgeCount / max) * 100)}));
 };

@@ -12,7 +12,7 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
   const colorRangePicker = useRef();
 
   useEffect(() => {
-    if (colorRangePicker.current) {
+    if (colorRangePicker.current && indicators.length === 0) {
       setIndicators([
         {
           position: -1, positionPercent: 0, color: '#ff0000', isFixed: true
@@ -22,7 +22,7 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
         }
       ]);
     }
-  }, [colorRangePicker]);
+  }, [colorRangePicker, indicators]);
 
   const addIndicator = (e) => {
     const positionPercent = Math.ceil((e.nativeEvent.layerX / e.target.offsetWidth) * 100);
@@ -69,7 +69,9 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
       setStartX(undefined);
       setLastX(undefined);
       setTimeout(() => {
-        indicators[selectedIndicatorId].isDragged = false;
+        if (indicators[selectedIndicatorId]) {
+          indicators[selectedIndicatorId].isDragged = false;
+        }
       }, 30);
     }
   };
@@ -114,7 +116,7 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
         style={gradients ? {background: `linear-gradient(90deg${gradients})`} : {}}
       />
       <div className="indicator-wrapper">
-        {indicators.map((indicator, index) => (
+        {indicators.length && indicators.map((indicator, index) => (
           <Indicator
             key={index}
             onMouseDown={handleMouseDown}

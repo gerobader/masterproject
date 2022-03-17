@@ -43,11 +43,48 @@ export const calculateColorForElement = (lowerColorBoundIndicator, upperColorBou
   return color;
 };
 
-export const sortElements = (elements) => {
+export const sortElements = (elements, sortValue) => {
   elements.sort((a, b) => {
-    if (a.data.edgeCount === b.data.edgeCount) return 0;
-    return a.data.edgeCount < b.data.edgeCount ? -1 : 1;
+    if (a.data[sortValue] === b.data[sortValue]) return 0;
+    return a.data[sortValue] < b.data[sortValue] ? -1 : 1;
   });
-  const max = elements[elements.length - 1].data.edgeCount;
-  return elements.map((element) => ({object: element, percentage: Math.ceil((element.data.edgeCount / max) * 100)}));
+  const min = elements[0].data[sortValue];
+  const max = elements[elements.length - 1].data[sortValue] - min;
+  return elements.map((element) => ({object: element, percentage: Math.ceil(((element.data[sortValue] - min) / max) * 100)}));
+};
+
+export const calculatePathBetweenNodes = (startNode, targetNode, allNodes) => {
+  const result = {target: targetNode, paths: []};
+  const maxPathLength = 4; // allNodes.length < 100 ? 10 : allNodes.length / 10;
+  const calculate = (currentNode, usedNodes, distance) => {
+    if (distance > maxPathLength || result.distance < distance) return;
+    usedNodes.add(currentNode);
+    const connectedNodes = [];
+    currentNode.targetForEdges.forEach((incomingEdge) => {
+      connectedNodes.push(incomingEdge.sourceNode);
+    });
+    currentNode.sourceForEdges.forEach((outgoingEdge) => {
+      connectedNodes.push(outgoingEdge.targetNode);
+    });
+    const found = connectedNodes.filter((connectedNode) => connectedNode.id === targetNode.id);
+    if (found.length) {
+      usedNodes.add(targetNode);
+      const shortestPaths = result.paths.filter((path) => path.size <= usedNodes.size) || [];
+      result.distance = distance;
+      result.paths = [...shortestPaths, usedNodes];
+    } else {
+      connectedNodes.forEach((connectedNode) => {
+        if (!usedNodes.has(connectedNode)) {
+          calculate(connectedNode, new Set(usedNodes), distance + 1);
+        }
+      });
+    }
+  };
+  calculate(startNode, new Set(), 1);
+  return result;
+};
+
+export const sortArray = (a, b) => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
 };

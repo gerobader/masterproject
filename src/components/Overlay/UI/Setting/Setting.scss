@@ -9,6 +9,10 @@
   .label {
     width: 50%;
     line-height: $uiElementHeight;
+    box-sizing: border-box;
+    padding-right: 10px;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
   .config{
     display: flex;

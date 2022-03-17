@@ -7,7 +7,7 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
 import ColorRangePicker from '../../UI/ColorRangePicker/ColorRangePicker';
-import {calculateColorForElement, sortElements} from '../../../utility';
+import {calculateColorForElement, sortArray, sortElements} from '../../../utility';
 import RangeInput from '../../UI/RangeInput/RangeInput';
 import Setting from '../../UI/Setting/Setting';
 import ExpandableSetting from '../../UI/ExpandableSetting/ExpandableSetting';
@@ -53,18 +53,18 @@ const Appearance = () => {
         }
       });
     });
-    if ('edgeCount' in data) {
-      data.edgeCount.sort((a, b) => {
-        if (a === b) return 0;
-        return a < b ? -1 : 1;
-      });
+    if ('degree' in data) {
+      data.degree.sort((a, b) => sortArray(a, b));
+    }
+    if ('closeness' in data) {
+      data.closeness.sort((a, b) => sortArray(a, b));
     }
     return data;
   }, [nodes]);
 
   const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
-    if (mappingValue === 'edgeCount') {
-      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+    if (mappingValue === 'degree' || mappingValue === 'closeness') {
+      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
       const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
         if (first.position === second.position) return 0;
@@ -88,15 +88,20 @@ const Appearance = () => {
       });
     } else if (mappingValue) {
       nodes.forEach((node) => {
-        node.setColor(colorMapIndicators[node.data.type]);
+        if (targetElement === 'node') {
+          node.setColor(colorMapIndicators[node.data.type]);
+        } else {
+          node.setLabelColor(colorMapIndicators[node.data.type]);
+        }
       });
     }
   };
 
-  const applyElementSizeMapping = (mappingValue, sizeMapping, targetElement) => {
-    if (mappingValue === 'edgeCount') {
-      if (elementSizeMapping.length === 2 && elementSizeMappingValue && !elementSizeMapping.includes(NaN)) {
-        const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes);
+  const applySizeMapping = (mappingValue, sizeMapping, targetElement) => {
+    const elementsToUse = applyOnlyToSelected ? selectedNodes : nodes;
+    if (mappingValue === 'degree' || mappingValue === 'closeness') {
+      if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
+        const sortedElements = sortElements(elementsToUse, mappingValue);
         const min = parseFloat(sizeMapping[0]);
         const max = parseFloat(sizeMapping[1]);
         sortedElements.forEach((element) => {
@@ -108,8 +113,12 @@ const Appearance = () => {
         });
       }
     } else if (mappingValue) {
-      nodes.forEach((node) => {
-        node.setSize(sizeMapping[node.data.type]);
+      elementsToUse.forEach((node) => {
+        if (targetElement === 'node') {
+          node.setSize(sizeMapping[node.data.type]);
+        } else {
+          node.setLabelSize(sizeMapping[node.data.type]);
+        }
       });
     }
   };
@@ -126,10 +135,8 @@ const Appearance = () => {
     if (activeMenu === 'right') {
       if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
       if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
-      applyElementSizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
-      if (labelSizeMapping.length === 2 && labelSizeMappingValue && !labelSizeMapping.includes(NaN)) {
-        applyElementSizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
-      }
+      applySizeMapping(elementSizeMappingValue, elementSizeMapping, 'node');
+      applySizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
       if (nodeShapeMappingValue && Object.keys(nodeShapeMapping).length > 0) {
         applyNodeShapeMapping(nodeShapeMappingValue, nodeShapeMapping);
       }
@@ -160,7 +167,7 @@ const Appearance = () => {
   };
 
   const createMappingInputs = (mappingType, mappingValue, rangeMapping, rangeMappingSetter) => {
-    if (mappingValue === 'edgeCount' && mappingType !== 'shape') {
+    if ((mappingValue === 'degree' || mappingValue === 'closeness') && mappingType !== 'shape') {
       return (
         <Setting name="Range">
           {mappingType === 'color' ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)
@@ -209,7 +216,7 @@ const Appearance = () => {
       <MenuSwitch setActiveMenu={setActiveMenu} activeMenu={activeMenu}/>
       {activeMenu === 'left' ? (
         <div className="settings">
-          <Setting name="Fill Color">
+          <Setting name="Element Color">
             <ColorPicker color={fillColor} setColor={setFillColor}/>
             {fillColor && (<Button text="reset" className="reset" onClick={() => setFillColor(undefined)}/>)}
           </Setting>
@@ -241,7 +248,7 @@ const Appearance = () => {
       ) : (
         <div className="settings">
           <ExpandableSetting
-            name="Fill Color"
+            name="Element Color"
             mappingValue={elementColorMappingValue}
             setMappingValue={(mappingValue) => {
               setElementColorMappingValue(mappingValue);
@@ -276,7 +283,7 @@ const Appearance = () => {
             setMappingValue={setLabelColorMappingValue}
             mappingOptions={Object.keys(nodeDataPoints)}
           >
-            <ColorRangePicker indicators={labelColorMapIndicators} setIndicators={setLabelColorMapIndicators}/>
+            {createMappingInputs('color', labelColorMappingValue, labelColorMapIndicators, setLabelColorMapIndicators)}
           </ExpandableSetting>
           <ExpandableSetting
             name="Label Size"
@@ -284,7 +291,7 @@ const Appearance = () => {
             setMappingValue={setLabelSizeMappingValue}
             mappingOptions={Object.keys(nodeDataPoints)}
           >
-            <RangeInput range={labelSizeMapping} setRange={setLabelSizeMapping}/>
+            {createMappingInputs('size', labelSizeMappingValue, labelSizeMapping, setLabelSizeMapping)}
           </ExpandableSetting>
         </div>
       )}

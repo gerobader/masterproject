@@ -21,7 +21,6 @@
     white-space: nowrap;
   }
   &.open{
-    //border-bottom: 1px solid transparent;
     border-radius: 5px 5px 0 0;
     background: #686868;
     z-index: 2;
@@ -80,7 +79,6 @@
   }
   &.opens-up{
     &.open{
-      //border-top: 1px solid transparent;
       border-radius: 0 0 5px 5px;
       border-bottom: 1px solid $menuWindowBorderColor;
     }

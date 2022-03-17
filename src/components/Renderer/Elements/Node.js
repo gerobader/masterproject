@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Label from './Label';
+import {calculatePathBetweenNodes} from '../../utility';
 
 class Node {
   constructor(x, y, z, r, color, id, label, data, camera) {
@@ -14,6 +15,7 @@ class Node {
     this.colorIsMapped = false;
     this.size = r;
     this.disp = new THREE.Vector3();
+    this.distanceMap = {};
     this.buildGeometry(x, y, z, r, color);
     if (label) {
       // this.addLabel(camera);
@@ -30,8 +32,27 @@ class Node {
     this.instance.position.z = z;
   }
 
-  computeDatapoints() {
-    this.data.edgeCount = this.targetForEdges.length + this.sourceForEdges.length;
+  computeDatapoints(nodes) {
+    this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
+    this.data.closeness = Math.random() * 10;
+    if (this.id !== 0) return;
+    if (nodes.length > 1) {
+      nodes.forEach((node) => {
+        if (node.id !== this.id) {
+          this.distanceMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
+        }
+      });
+      // for (let i = 0; i < nodes.length; i++) {
+      //   const node = nodes[i];
+      //   if (node.id !== this.id) {
+      //     this.distanceMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
+      //   }
+      // }
+      const sum = Object.keys(this.distanceMap).reduce((prevVal, currVal) => prevVal + this.distanceMap[currVal].distance, 0);
+      this.data.closeness = sum / (nodes.length - 1);
+    }
+    console.log(this.distanceMap);
+    console.log('---------------------------- all done for:', this.labelText, '------------------------------------------');
   }
 
   setColor(color) {
@@ -87,11 +108,15 @@ class Node {
   }
 
   setLabelColor(color) {
-    this.label.setColor(color);
+    if (color) {
+      this.label.setColor(color);
+    }
   }
 
   setLabelSize(size) {
-    this.label.setSize(size);
+    if (size) {
+      this.label.setSize(size);
+    }
   }
 
   updateAssociatedEdgePosition() {
@@ -121,11 +146,15 @@ class Node {
   }
 
   addTargetEdge(edge) {
-    this.targetForEdges.push(edge);
+    if (edge) {
+      this.targetForEdges.push(edge);
+    }
   }
 
   addSourceEdge(edge) {
-    this.sourceForEdges.push(edge);
+    if (edge) {
+      this.sourceForEdges.push(edge);
+    }
   }
 
   addLabel(camera) {

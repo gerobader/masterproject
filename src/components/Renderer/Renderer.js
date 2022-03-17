@@ -425,9 +425,9 @@ class Renderer extends Component {
     if (useTestNetwork) {
       nodes = testNodes.default.map((node) => {
         const nodeClass = new Node(
-          Math.random() * 100 - 50,
-          Math.random() * 100 - 50,
-          Math.random() * 100 - 50,
+          Math.random() * 50 - 25,
+          Math.random() * 50 - 25,
+          use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
           new THREE.Color(Math.random(), Math.random(), Math.random()),
           node.id,
@@ -475,7 +475,7 @@ class Renderer extends Component {
       });
     }
 
-    nodes.forEach((node) => node.computeDatapoints());
+    nodes.forEach((node) => node.computeDatapoints(nodes));
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);

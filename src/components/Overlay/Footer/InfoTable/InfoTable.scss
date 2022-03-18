@@ -1,0 +1,65 @@
+@import '../../../../assets/settings';
+
+.info-table{
+  padding: 0 20px;
+  display: flex;
+  flex-direction: row;
+  color: $menuWindowFontColor;
+  background: $menuWindowBackgroundColor;
+  border-top: 1px solid $menuWindowBorderColor;
+  backdrop-filter: blur($menuWindowBackgroundBlur);
+  height: 150px;
+  .controls{
+    padding: 10px 10px 10px 0;
+    border-right: 1px solid $menuWindowBorderColor;
+    width: 214px;
+    min-width: 214px;
+    box-sizing: border-box;
+    .vis-select{
+      margin-bottom: 20px;
+    }
+  }
+  .table-wrapper{
+    overflow: auto;
+    max-width: calc(100vw - 234px);
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar{
+      display: none;
+    }
+    table{
+      border-spacing: 0;
+      position: relative;
+      thead{
+        position: sticky;
+        top: 0;
+        th{
+          padding: 0 8px;
+          line-height: $uiElementHeight;
+          background: $uiElementBackgroundNotTransparent;
+          border-right: 1px solid $menuWindowBorderColor;
+          font-weight: 400;
+          resize: horizontal;
+          overflow: auto;
+          cursor: default;
+          &:not(:first-child){
+            min-width: 70px;
+          }
+        }
+      }
+      tbody{
+        tr{
+          cursor: pointer;
+          &.selected{
+            background: $menuWindowBackgroundColor;
+          }
+          td{
+            padding: 0 8px;
+            line-height: $uiElementHeight;
+            border-right: 1px solid $menuWindowBorderColor;
+          }
+        }
+      }
+    }
+  }
+}

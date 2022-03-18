@@ -1,5 +1,6 @@
 import React from 'react';
 import {useSelector} from 'react-redux';
+import InfoTable from './InfoTable/InfoTable';
 
 import './Footer.scss';
 
@@ -8,10 +9,13 @@ const Footer = () => {
     nodes, edges, selectedNodes, selectedEdges
   } = useSelector((state) => state.networkElements);
   return (
-    <div className="footer">
-      {/* eslint-disable-next-line max-len */}
-      <p>{`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}${selectedNodes.length === 1 ? ` (${selectedNodes[0].labelText})` : ''}`}</p>
-      <p>{`Edges: ${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}</p>
+    <div className="footer-wrapper">
+      {nodes.length && <InfoTable/>}
+      <div className="footer">
+        {/* eslint-disable-next-line max-len */}
+        <p>{`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}${selectedNodes.length === 1 ? ` (${selectedNodes[0].labelText})` : ''}`}</p>
+        <p>{`Edges: ${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}</p>
+      </div>
     </div>
   );
 };

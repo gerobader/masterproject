@@ -11,8 +11,8 @@ import {
   setNodes, setEdges, setSelectedNodes, setSelectedEdges
 } from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
-import * as testNodes from '../../data/test/nodes.json';
-import * as testEdges from '../../data/test/edges.json';
+import * as testNodes from '../../data/movies/nodes.json';
+import * as testEdges from '../../data/movies/edges.json';
 
 import './Renderer.scss';
 
@@ -34,7 +34,7 @@ let targetQuaternion;
 let interpolation = 0;
 let group;
 
-const useTestNetwork = false;
+const useTestNetwork = true;
 
 class Renderer extends Component {
   constructor(props) {
@@ -66,10 +66,17 @@ class Renderer extends Component {
     this.cameraControls = this.cameraControls.bind(this);
     this.handleOutline = this.handleOutline.bind(this);
     this.handleNodeDragging = this.handleNodeDragging.bind(this);
+    this.handleControls = this.handleControls.bind(this);
   }
 
   componentDidMount() {
     this.createScene();
+  }
+
+  // eslint-disable-next-line no-unused-vars
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    const {selectedNodes, selectedEdges} = this.props;
+    this.handleControls(selectedNodes, selectedEdges);
   }
 
   handleClickOnElement(e, connectedSelect = false) {
@@ -100,11 +107,8 @@ class Renderer extends Component {
           } else {
             newSelectedNodes = [...selectedNodes, newSelectedNode];
           }
-          if (newSelectedNodes.length === 1) controls.attach(newSelectedNode.instance);
         } else {
           scene.remove(group);
-          if (!connectedSelect) controls.attach(newSelectedNode.instance);
-          else controls.detach();
           newSelectedNodes = [newSelectedNode];
           newSelectedEdges = [];
         }
@@ -118,7 +122,7 @@ class Renderer extends Component {
     const {
       _setOrbitPreview, orbitPreview, _setSelectedNodes, _setSelectedEdges
     } = this.props;
-    const {scene, controls, hoveredElement} = this.state;
+    const {hoveredElement} = this.state;
     if (orbitPreview) {
       _setOrbitPreview(false);
     }
@@ -127,26 +131,6 @@ class Renderer extends Component {
     if (hoveredElement) {
       if (e.button === 0) {
         const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
-        if (newSelectedEdges.length) {
-          controls.detach();
-        } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
-          scene.remove(group);
-          group = new THREE.Group();
-          const groupPosition = new THREE.Vector3(0, 0, 0);
-          newSelectedNodes.forEach((node) => {
-            groupPosition.add(node.instance.position);
-          });
-          groupPosition.divideScalar(newSelectedNodes.length);
-          group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
-          newSelectedNodes.forEach((node) => {
-            const clone = node.instance.clone();
-            clone.userData = {originalUuid: node.instance.uuid};
-            clone.position.sub(groupPosition);
-            group.add(clone);
-          });
-          scene.add(group);
-          controls.attach(group);
-        }
         _setSelectedNodes(newSelectedNodes);
         _setSelectedEdges(newSelectedEdges);
       } else if (e.button === 1) {
@@ -310,6 +294,32 @@ class Renderer extends Component {
     }
   }
 
+  handleControls(newSelectedNodes, newSelectedEdges) {
+    const {controls, scene} = this.state;
+    if (newSelectedEdges.length) {
+      controls.detach();
+    } else if (newSelectedNodes.length === 1) {
+      controls.attach(newSelectedNodes[0].instance);
+    } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
+      scene.remove(group);
+      group = new THREE.Group();
+      const groupPosition = new THREE.Vector3(0, 0, 0);
+      newSelectedNodes.forEach((node) => {
+        groupPosition.add(node.instance.position);
+      });
+      groupPosition.divideScalar(newSelectedNodes.length);
+      group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
+      newSelectedNodes.forEach((node) => {
+        const clone = node.instance.clone();
+        clone.userData = {originalUuid: node.instance.uuid};
+        clone.position.sub(groupPosition);
+        group.add(clone);
+      });
+      scene.add(group);
+      controls.attach(group);
+    }
+  }
+
   handleNodeDragging() {
     const {controls} = this.state;
     const {selectedNodes} = this.props;
@@ -393,6 +403,7 @@ class Renderer extends Component {
     const {
       _setNodes, _setEdges, remoteNodes, remoteEdges, use2Dimensions
     } = this.props;
+
     const renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     this.canvasWrapper.appendChild(renderer.domElement);
@@ -423,14 +434,14 @@ class Renderer extends Component {
     let nodes = [];
     let edges = [];
     if (useTestNetwork) {
-      nodes = testNodes.default.map((node) => {
+      nodes = testNodes.default.map((node, index) => {
         const nodeClass = new Node(
           Math.random() * 50 - 25,
           Math.random() * 50 - 25,
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
           new THREE.Color(Math.random(), Math.random(), Math.random()),
-          node.id,
+          index,
           node.label,
           {},
           camera
@@ -440,8 +451,8 @@ class Renderer extends Component {
       });
 
       edges = testEdges.default.map((edge) => {
-        const sourceNode = nodes.filter((node) => node.id === edge.source)[0];
-        const targetNode = nodes.filter((node) => node.id === edge.target)[0];
+        const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
+        const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
         const edgeClass = new Edge(sourceNode, targetNode);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);

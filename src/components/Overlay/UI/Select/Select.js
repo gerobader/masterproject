@@ -3,7 +3,7 @@ import React, {useState, useEffect} from 'react';
 import './Select.scss';
 
 const Select = ({
-  options, value, setSelected, className, opensUp, parentOpenState, defaultOption
+  options, value, setSelected, className, opensUp, parentOpenState, defaultOption, alwaysShowArrow
 }) => {
   const [open, setOpen] = useState(false);
   useEffect(() => {
@@ -17,7 +17,7 @@ const Select = ({
       onClick={() => setOpen(!open)}
     >
       <span>{value || defaultOption}</span>
-      <div className="select-arrow"/>
+      <div className={`select-arrow${alwaysShowArrow ? ' always-visible' : ''}`}/>
       {open && (
         <div className="options-wrapper">
           {options.map((option) => (

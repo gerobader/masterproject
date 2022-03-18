@@ -301,6 +301,7 @@ const Appearance = () => {
           value={elementType}
           setSelected={setElementType}
           opensUp
+          alwaysShowArrow
         />
         {(selectedNodes.length || selectedEdges.length) ? (
           <Checkbox

@@ -1,21 +1,23 @@
 @import '../../../assets/settings';
 
-.footer{
-  height: 35px;
-  width: 100vw;
+.footer-wrapper{
   position: absolute;
   bottom: 0;
   left: 0;
-  color: $menuWindowFontColor;
-  background: $menuWindowBackgroundColor;
-  border-top: 1px solid $menuWindowBorderColor;
-  backdrop-filter: blur($menuWindowBackgroundBlur);
-  display: flex;
-  align-items: center;
-  flex-direction: row;
-  padding: 0 20px;
-  font-weight: 300;
-  p{
-    margin: 0 10px 0 0;
+  .footer{
+    height: 35px;
+    width: 100vw;
+    color: $menuWindowFontColor;
+    background: $menuWindowBackgroundColor;
+    border-top: 1px solid $menuWindowBorderColor;
+    backdrop-filter: blur($menuWindowBackgroundBlur);
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    padding: 0 20px;
+    font-weight: 300;
+    p{
+      margin: 0 10px 0 0;
+    }
   }
 }

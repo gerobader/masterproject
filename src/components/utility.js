@@ -55,7 +55,7 @@ export const sortElements = (elements, sortValue) => {
 
 export const calculatePathBetweenNodes = (startNode, targetNode, allNodes) => {
   const result = {target: targetNode, paths: []};
-  const maxPathLength = 4; // allNodes.length < 100 ? 10 : allNodes.length / 10;
+  const maxPathLength = 12; // allNodes.length < 100 ? 10 : allNodes.length / 10;
   const calculate = (currentNode, usedNodes, distance) => {
     if (distance > maxPathLength || result.distance < distance) return;
     usedNodes.add(currentNode);

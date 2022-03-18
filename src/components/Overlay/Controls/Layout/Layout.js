@@ -98,6 +98,7 @@ const Layout = () => {
           value={layoutAlgorithm}
           setSelected={setLayoutAlgorithm}
           className="extra-wide"
+          alwaysShowArrow
         />
         <Button
           onClick={running ? stopCalculation : startCalculation}

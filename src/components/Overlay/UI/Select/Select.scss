@@ -15,7 +15,7 @@
   cursor: pointer;
   box-sizing: border-box;
   user-select: none;
-  font-size: 14px;
+  font-size: $uiElementFontSize;
   font-weight: 400;
   span{
     white-space: nowrap;
@@ -38,7 +38,7 @@
     max-width: unset;
     width: 248px;
   }
-  &.has-value .select-arrow{
+  &.has-value .select-arrow:not(.always-visible){
     display: none;
   }
   .select-arrow{
@@ -82,7 +82,7 @@
       border-radius: 0 0 5px 5px;
       border-bottom: 1px solid $menuWindowBorderColor;
     }
-    .arrow {
+    .select-arrow {
       transform: rotate(0deg);
       &.open {
         transform: rotate(180deg);

@@ -33,15 +33,35 @@
       thead{
         position: sticky;
         top: 0;
+        z-index: 2;
         th{
-          padding: 0 8px;
+          padding: 0 20px;
           line-height: $uiElementHeight;
           background: $uiElementBackgroundNotTransparent;
           border-right: 1px solid $menuWindowBorderColor;
           font-weight: 400;
           resize: horizontal;
           overflow: auto;
-          cursor: default;
+          cursor: pointer;
+          user-select: none;
+          position: relative;
+          &.show-arrow{
+            &::before{
+              content: '';
+              position: absolute;
+              width: 10px;
+              height: 10px;
+              left: 4px;
+              top: 7px;
+              background: url('../../../../assets/small-arrow.svg') center/10px no-repeat;
+              image-rendering: auto;
+            }
+            &.reverse{
+              &::before{
+                transform: rotate(180deg);
+              }
+            }
+          }
           &:not(:first-child){
             min-width: 70px;
           }
@@ -57,6 +77,24 @@
             padding: 0 8px;
             line-height: $uiElementHeight;
             border-right: 1px solid $menuWindowBorderColor;
+            position: relative;
+            .lock{
+              position: absolute;
+              right: 6px;
+              top: 7px;
+              width: 6px;
+              height: 9px;
+              background: url('../../../../assets/lock.svg') center no-repeat;
+              opacity: 0;
+              &.show{
+                opacity: 1;
+              }
+            }
+            &:hover{
+              .lock:not(.show){
+                opacity: 0.6;
+              }
+            }
           }
         }
       }

@@ -15,6 +15,7 @@ import * as testNodes from '../../data/movies/nodes.json';
 import * as testEdges from '../../data/movies/edges.json';
 
 import './Renderer.scss';
+import {RGBtoHex} from "../utility";
 
 let animationRunning = false;
 const sensitivity = 0.002;
@@ -440,10 +441,10 @@ class Renderer extends Component {
           Math.random() * 50 - 25,
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
-          new THREE.Color(Math.random(), Math.random(), Math.random()),
+          RGBtoHex([Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)]),
           index,
           node.label,
-          {},
+          node.data,
           camera
         );
         scene.add(nodeClass.instance);

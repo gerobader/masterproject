@@ -1,5 +1,5 @@
-import React, {useState, useMemo} from 'react';
-import {useSelector} from 'react-redux';
+import React, {useState, useMemo, useEffect} from 'react';
+import {useSelector, useDispatch} from 'react-redux';
 import MenuSwitch from '../../UI/MenuSwitch/MenuSwitch';
 import ColorPicker from '../../UI/ColorPicker/ColorPicker';
 import Button from '../../UI/Button/Button';
@@ -11,6 +11,7 @@ import {calculateColorForElement, sortArray, sortElements} from '../../../utilit
 import RangeInput from '../../UI/RangeInput/RangeInput';
 import Setting from '../../UI/Setting/Setting';
 import ExpandableSetting from '../../UI/ExpandableSetting/ExpandableSetting';
+import {setNodes} from '../../../../redux/networkElements/networkElements.actions';
 
 import './Appearance.scss';
 
@@ -22,6 +23,7 @@ const Appearance = () => {
   const {
     nodes, selectedNodes, edges, selectedEdges
   } = useSelector((state) => state.networkElements);
+  const dispatch = useDispatch();
   const [activeMenu, setActiveMenu] = useState('left');
   const [fillColor, setFillColor] = useState();
   const [elementSize, setElementSize] = useState();
@@ -62,6 +64,12 @@ const Appearance = () => {
     return data;
   }, [nodes]);
 
+  useEffect(() => {
+    if (selectedNodes.length === 1) {
+      setFillColor(selectedNodes[0].color);
+    }
+  }, [selectedNodes]);
+
   const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
     if (mappingValue === 'degree' || mappingValue === 'closeness') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
@@ -85,7 +93,9 @@ const Appearance = () => {
             element.object.setLabelColor(color);
           }
         }
+        dispatch(setNodes(nodes));
       });
+      dispatch(setNodes(nodes));
     } else if (mappingValue) {
       nodes.forEach((node) => {
         if (targetElement === 'node') {
@@ -94,6 +104,7 @@ const Appearance = () => {
           node.setLabelColor(colorMapIndicators[node.data.type]);
         }
       });
+      dispatch(setNodes(nodes));
     }
   };
 
@@ -112,6 +123,7 @@ const Appearance = () => {
           }
         });
       }
+      dispatch(setNodes(nodes));
     } else if (mappingValue) {
       elementsToUse.forEach((node) => {
         if (targetElement === 'node') {
@@ -120,6 +132,7 @@ const Appearance = () => {
           node.setLabelSize(sizeMapping[node.data.type]);
         }
       });
+      dispatch(setNodes(nodes));
     }
   };
 
@@ -163,6 +176,7 @@ const Appearance = () => {
         if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(parseFloat(labelSize));
         if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
       });
+      dispatch(setNodes(nodes));
     }
   };
 
@@ -217,7 +231,20 @@ const Appearance = () => {
       {activeMenu === 'left' ? (
         <div className="settings">
           <Setting name="Element Color">
-            <ColorPicker color={fillColor} setColor={setFillColor}/>
+            <ColorPicker
+              color={fillColor}
+              setColor={setFillColor}
+              disabled={selectedNodes.length === 1 && selectedNodes[0].colorLocked}
+            />
+            {(selectedNodes.length === 1) && (
+              <div
+                className={`lock${selectedNodes[0].colorLocked ? ' is-locked' : ''}`}
+                onClick={() => {
+                  selectedNodes[0].colorLocked = !selectedNodes[0].colorLocked;
+                  dispatch(setNodes(nodes));
+                }}
+              />
+            )}
             {fillColor && (<Button text="reset" className="reset" onClick={() => setFillColor(undefined)}/>)}
           </Setting>
           <Setting name="Element Size">

@@ -15,7 +15,8 @@ class Node {
     this.colorIsMapped = false;
     this.size = r;
     this.disp = new THREE.Vector3();
-    this.distanceMap = {};
+    this.pathMap = {};
+    this.colorLocked = false;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
       // this.addLabel(camera);
@@ -39,7 +40,7 @@ class Node {
     if (nodes.length > 1) {
       nodes.forEach((node) => {
         if (node.id !== this.id) {
-          this.distanceMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
+          this.pathMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
         }
       });
       // for (let i = 0; i < nodes.length; i++) {
@@ -48,17 +49,22 @@ class Node {
       //     this.distanceMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
       //   }
       // }
-      const sum = Object.keys(this.distanceMap).reduce((prevVal, currVal) => prevVal + this.distanceMap[currVal].distance, 0);
+      const sum = Object.keys(this.pathMap).reduce((prevVal, currVal) => prevVal + this.pathMap[currVal].distance, 0);
       this.data.closeness = sum / (nodes.length - 1);
     }
-    console.log(this.distanceMap);
+    console.log(this.pathMap);
     console.log('---------------------------- all done for:', this.labelText, '------------------------------------------');
   }
 
   setColor(color) {
-    if (color) {
+    if (color && !this.colorLocked) {
+      this.color = color;
       this.instance.material.color.set(color);
     }
+  }
+
+  setColorLock(lock) {
+    if (lock === true || lock === false) this.colorLocked = lock;
   }
 
   setSize(size) {

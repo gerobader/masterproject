@@ -11,11 +11,11 @@ import {
   setNodes, setEdges, setSelectedNodes, setSelectedEdges
 } from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
+import {RGBtoHex} from '../utility';
 import * as testNodes from '../../data/movies/nodes.json';
 import * as testEdges from '../../data/movies/edges.json';
 
 import './Renderer.scss';
-import {RGBtoHex} from "../utility";
 
 let animationRunning = false;
 const sensitivity = 0.002;
@@ -220,7 +220,7 @@ class Renderer extends Component {
   }
 
   handleKeyUp(e) {
-    const {scene, controls} = this.state;
+    const {scene} = this.state;
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges
     } = this.props;
@@ -266,7 +266,6 @@ class Renderer extends Component {
             this.lookAt([...selectedNodes, ...selectedEdges]);
             return prevState;
           case 'escape':
-            controls.detach();
             scene.remove(group);
             group = undefined;
             _setSelectedNodes([]);
@@ -297,7 +296,7 @@ class Renderer extends Component {
 
   handleControls(newSelectedNodes, newSelectedEdges) {
     const {controls, scene} = this.state;
-    if (newSelectedEdges.length) {
+    if (newSelectedEdges.length || newSelectedNodes.length === 0) {
       controls.detach();
     } else if (newSelectedNodes.length === 1) {
       controls.attach(newSelectedNodes[0].instance);
@@ -324,7 +323,7 @@ class Renderer extends Component {
   handleNodeDragging() {
     const {controls} = this.state;
     const {selectedNodes} = this.props;
-    if (controls.dragging) {
+    if (controls.dragging && selectedNodes.length) {
       if (selectedNodes.length > 1) {
         group.children.forEach((nodeCopy) => {
           const original = selectedNodes.find((selectedNode) => selectedNode.instance.uuid === nodeCopy.userData.originalUuid);
@@ -451,10 +450,10 @@ class Renderer extends Component {
         return nodeClass;
       });
 
-      edges = testEdges.default.map((edge) => {
+      edges = testEdges.default.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
         const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
-        const edgeClass = new Edge(sourceNode, targetNode);
+        const edgeClass = new Edge(index, sourceNode, targetNode);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
         scene.add(edgeClass.instance);
@@ -476,18 +475,16 @@ class Renderer extends Component {
         scene.add(nodeClass.instance);
         return nodeClass;
       });
-      edges = remoteEdges.map((edge) => {
+      edges = remoteEdges.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
         const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
-        const edgeClass = new Edge(sourceNode, targetNode);
+        const edgeClass = new Edge(index, sourceNode, targetNode);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
         scene.add(edgeClass.instance);
         return edgeClass;
       });
     }
-
-    nodes.forEach((node) => node.computeDatapoints(nodes));
 
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);

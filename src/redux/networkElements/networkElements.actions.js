@@ -1,5 +1,5 @@
 import {
-  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_BY
+  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_NODES_BY, SET_SORT_EDGES_BY
 } from '../actionTypes';
 
 export const setNodes = (nodes) => ({
@@ -22,7 +22,12 @@ export const setSelectedEdges = (edges) => ({
   payload: edges
 });
 
-export const setSortBy = (sortValue) => ({
-  type: SET_SORT_BY,
+export const setSortNodesBy = (sortValue) => ({
+  type: SET_SORT_NODES_BY,
+  payload: sortValue
+});
+
+export const setSortEdgesBy = (sortValue) => ({
+  type: SET_SORT_EDGES_BY,
   payload: sortValue
 });

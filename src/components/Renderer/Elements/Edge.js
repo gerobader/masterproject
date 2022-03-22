@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 
 class Edge {
-  constructor(sourceNode, targetNode) {
+  constructor(id, sourceNode, targetNode) {
+    this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
     this.instance = null;

@@ -15,7 +15,7 @@
     width: 214px;
     min-width: 214px;
     box-sizing: border-box;
-    .vis-select{
+    .vis-select, .vis-text-input{
       margin-bottom: 20px;
     }
   }
@@ -78,6 +78,9 @@
             line-height: $uiElementHeight;
             border-right: 1px solid $menuWindowBorderColor;
             position: relative;
+            &.selected{
+              background: $menuWindowBackgroundColor;
+            }
             .lock{
               position: absolute;
               right: 6px;

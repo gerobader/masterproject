@@ -4,4 +4,5 @@ export const SET_NODES = 'SET_NODES';
 export const SET_EDGES = 'SET_EDGES';
 export const SET_SELECTED_NODES = 'SET_SELECTED_NODES';
 export const SET_SELECTED_EDGES = 'SET_SELECTED_EDGES';
-export const SET_SORT_BY = 'SET_SORT_BY';
+export const SET_SORT_NODES_BY = 'SET_SORT_NODES_BY';
+export const SET_SORT_EDGES_BY = 'SET_SORT_EDGES_BY';

@@ -1,5 +1,5 @@
 import {
-  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_BY
+  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_NODES_BY, SET_SORT_EDGES_BY
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -8,15 +8,21 @@ const initialState = {
   edges: [],
   selectedNodes: [],
   selectedEdges: [],
-  sortBy: 'id',
-  reversed: false
+  sortNodesBy: 'id',
+  sortEdgesBy: 'id',
+  nodesReversed: false,
+  edgesReversed: false
 };
 
-const sortElements = (elements, value) => {
-  if (value === 'name') return elements.sort((a, b) => sortArray(a.labelText, b.labelText));
-  if (value === 'color') return elements.sort((a, b) => sortArray(a.color, b.color));
-  if (value === 'size') return elements.sort((a, b) => a.size - b.size);
-  if (elements[0].data[value]) return elements.sort((a, b) => sortArray(a.data[value], b.data[value]));
+const sortElements = (elements, sortValue) => {
+  if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.labelText, b.sourceNode.labelText));
+  if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.labelText, b.targetNode.labelText));
+  if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.labelText, b.labelText));
+  if (sortValue === 'color') return elements.sort((a, b) => sortArray(a.color, b.color));
+  if (sortValue === 'size') return elements.sort((a, b) => a.size - b.size);
+  if (elements[0].data && elements[0].data[sortValue]) {
+    return elements.sort((a, b) => sortArray(a.data[sortValue], b.data[sortValue]));
+  }
   return elements.sort((a, b) => a.id - b.id);
 };
 
@@ -42,12 +48,19 @@ const networkElementsReducer = (state = initialState, action) => {
         ...state,
         selectedEdges: action.payload
       };
-    case SET_SORT_BY:
+    case SET_SORT_NODES_BY:
       return {
         ...state,
-        nodes: action.payload === state.sortBy ? state.nodes.reverse() : sortElements(state.nodes, action.payload),
-        sortBy: action.payload,
-        reversed: action.payload === state.sortBy && !state.reversed
+        nodes: action.payload === state.sortNodesBy ? state.nodes.reverse() : sortElements(state.nodes, action.payload),
+        sortNodesBy: action.payload,
+        nodesReversed: action.payload === state.sortNodesBy && !state.nodesReversed
+      };
+    case SET_SORT_EDGES_BY:
+      return {
+        ...state,
+        edges: action.payload === state.sortEdgesBy ? state.edges.reverse() : sortElements(state.edges, action.payload),
+        sortEdgesBy: action.payload,
+        edgesReversed: action.payload === state.sortEdgesBy && !state.edgesReversed
       };
     default:
       return state;

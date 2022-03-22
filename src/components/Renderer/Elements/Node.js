@@ -15,7 +15,7 @@ class Node {
     this.colorIsMapped = false;
     this.size = r;
     this.disp = new THREE.Vector3();
-    this.pathMap = {};
+    this.pathMap = undefined;
     this.colorLocked = false;
     this.buildGeometry(x, y, z, r, color);
     if (label) {
@@ -33,27 +33,18 @@ class Node {
     this.instance.position.z = z;
   }
 
-  computeDatapoints(nodes) {
+  computeStatisticalMeasures(nodes) {
     this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
-    this.data.closeness = Math.random() * 10;
-    if (this.id !== 0) return;
     if (nodes.length > 1) {
+      this.pathMap = {};
       nodes.forEach((node) => {
         if (node.id !== this.id) {
           this.pathMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
         }
       });
-      // for (let i = 0; i < nodes.length; i++) {
-      //   const node = nodes[i];
-      //   if (node.id !== this.id) {
-      //     this.distanceMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
-      //   }
-      // }
       const sum = Object.keys(this.pathMap).reduce((prevVal, currVal) => prevVal + this.pathMap[currVal].distance, 0);
       this.data.closeness = sum / (nodes.length - 1);
     }
-    console.log(this.pathMap);
-    console.log('---------------------------- all done for:', this.labelText, '------------------------------------------');
   }
 
   setColor(color) {

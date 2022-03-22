@@ -1,0 +1,18 @@
+@import '../../../../assets/settings';
+.vis-text-input{
+  width: 100%;
+  max-width: 135px;
+  height: $uiElementHeight;
+  border: 1px solid $menuWindowBorderColor;
+  border-radius: $uiElementBorderRadius;
+  background: $uiElementBackground;
+  color: $menuWindowFontColor;
+  font-size: $uiElementFontSize;
+  margin-right: 10px;
+  padding: 0 10px;
+  box-sizing: border-box;
+  outline: none;
+  &::placeholder{
+    color: #aaa;
+  }
+}

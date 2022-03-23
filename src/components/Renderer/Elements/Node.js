@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import Label from './Label';
-import {calculatePathBetweenNodes} from '../../utility';
 
 class Node {
   constructor(x, y, z, r, color, id, label, data, camera) {
@@ -36,12 +35,6 @@ class Node {
   computeStatisticalMeasures(nodes) {
     this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
     if (nodes.length > 1) {
-      this.pathMap = {};
-      nodes.forEach((node) => {
-        if (node.id !== this.id) {
-          this.pathMap[node.id] = calculatePathBetweenNodes(this, node, nodes);
-        }
-      });
       const sum = Object.keys(this.pathMap).reduce((prevVal, currVal) => prevVal + this.pathMap[currVal].distance, 0);
       this.data.closeness = sum / (nodes.length - 1);
     }

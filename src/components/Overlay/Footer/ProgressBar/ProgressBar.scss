@@ -1,0 +1,26 @@
+@import '../../../../assets/settings';
+
+.progress-wrapper{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  .progress-info{
+    margin: 0 0 0 10px;
+  }
+  .progress-bar{
+    width: 100px;
+    height: 10px;
+    border: 1px solid $menuWindowBorderColor;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    .progress{
+      background: $menuWindowBorderColor;
+      position: absolute;
+      width: 0;
+      height: 10px;
+      top: 0;
+      left: 0;
+    }
+  }
+}

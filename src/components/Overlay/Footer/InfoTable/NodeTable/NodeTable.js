@@ -8,7 +8,7 @@ let mouseDownX = 0;
 
 const NodeTable = ({changeSortValue, nodes}) => {
   const {
-    selectedNodes, sortNodesBy, reversed
+    selectedNodes, sortNodesBy, nodesReversed
   } = useSelector((state) => state.networkElements);
   const dispatch = useDispatch();
   return (
@@ -18,28 +18,28 @@ const NodeTable = ({changeSortValue, nodes}) => {
           <th
             onMouseUp={(e) => changeSortValue('id', e, mouseDownX, 'node')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'id' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortNodesBy === 'id' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
           >
             ID
           </th>
           <th
             onMouseUp={(e) => changeSortValue('name', e, mouseDownX, 'node')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'name' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortNodesBy === 'name' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
           >
             Name
           </th>
           <th
             onMouseUp={(e) => changeSortValue('size', e, mouseDownX, 'node')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'size' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortNodesBy === 'size' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
           >
             Size
           </th>
           <th
             onMouseUp={(e) => changeSortValue('color', e, mouseDownX, 'node')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'color' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortNodesBy === 'color' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
           >
             Color
           </th>
@@ -48,7 +48,7 @@ const NodeTable = ({changeSortValue, nodes}) => {
               key={dataPoint}
               onMouseUp={(e) => changeSortValue(dataPoint, e, mouseDownX, 'node')}
               onMouseDown={(e) => { mouseDownX = e.clientX; }}
-              className={sortNodesBy === dataPoint ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+              className={sortNodesBy === dataPoint ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
             >
               {dataPoint}
             </th>

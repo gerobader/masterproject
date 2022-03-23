@@ -8,7 +8,7 @@ let mouseDownX = 0;
 
 const EdgeTable = ({changeSortValue, edges}) => {
   const {
-    selectedNodes, selectedEdges, sortEdgesBy, reversed
+    selectedNodes, selectedEdges, sortEdgesBy, edgesReversed
   } = useSelector((state) => state.networkElements);
   const dispatch = useDispatch();
 
@@ -31,21 +31,21 @@ const EdgeTable = ({changeSortValue, edges}) => {
           <th
             onMouseUp={(e) => changeSortValue('id', e, mouseDownX, 'edge')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'id' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortEdgesBy === 'id' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
           >
             ID
           </th>
           <th
             onMouseUp={(e) => changeSortValue('sourceName', e, mouseDownX, 'edge')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'sourceName' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortEdgesBy === 'sourceName' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
           >
             Source Name
           </th>
           <th
             onMouseUp={(e) => changeSortValue('targetName', e, mouseDownX, 'edge')}
             onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'targetName' ? `show-arrow${reversed ? ' reverse' : ''}` : null}
+            className={sortEdgesBy === 'targetName' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
           >
             Target Name
           </th>

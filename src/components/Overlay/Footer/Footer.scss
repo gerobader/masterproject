@@ -7,17 +7,24 @@
   .footer{
     height: 35px;
     width: 100vw;
+    box-sizing: border-box;
     color: $menuWindowFontColor;
     background: $menuWindowBackgroundColor;
     border-top: 1px solid $menuWindowBorderColor;
     backdrop-filter: blur($menuWindowBackgroundBlur);
+    font-size: $uiElementFontSize;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     flex-direction: row;
     padding: 0 20px;
     font-weight: 300;
-    p{
-      margin: 0 10px 0 0;
+    .left-info{
+      display: flex;
+      flex-direction: row;
+      .margin-right{
+        margin: 0 10px 0 0;
+      }
     }
   }
 }

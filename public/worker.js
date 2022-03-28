@@ -1,6 +1,7 @@
 onmessage = (e) => {
   const nodePathMaps = {};
   const nodes = e.data;
+  const maxPathLength = 12;
   const calculatePathBetweenNodes = (startNode, targetNode) => {
     if (nodePathMaps[targetNode.id]) {
       const pathInfo = nodePathMaps[targetNode.id][startNode.id];
@@ -8,7 +9,6 @@ onmessage = (e) => {
       return {target: targetNode, paths, distance: pathInfo.paths[0].size - 1};
     }
     const result = {target: targetNode, paths: []};
-    const maxPathLength = 12;
     const calculate = (currentNode, usedNodes, distance) => {
       if (distance > maxPathLength || result.distance < distance) return;
       usedNodes.add(currentNode);

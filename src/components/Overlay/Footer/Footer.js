@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import {useSelector} from 'react-redux';
 import InfoTable from './InfoTable/InfoTable';
 import ProgressBar from './ProgressBar/ProgressBar';
+import SettingsMenu from './SettingsMenu/SettingsMenu';
 
 import './Footer.scss';
 
@@ -10,9 +11,12 @@ const Footer = () => {
     nodes, edges, selectedNodes, selectedEdges
   } = useSelector((state) => state.networkElements);
   const [progressInfo, setProgressInfo] = useState();
+  const [showInfoTable, setShowInfoTable] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   return (
     <div className="footer-wrapper">
-      {nodes.length && <InfoTable setProgressInfo={setProgressInfo}/>}
+      {showInfoTable && <InfoTable setProgressInfo={setProgressInfo}/>}
+      {showSettings && <SettingsMenu hideSettings={() => setShowSettings(false)}/>}
       <div className="footer">
         {/* eslint-disable-next-line max-len */}
         <div className="left-info">
@@ -24,6 +28,16 @@ const Footer = () => {
             {`Edges: ${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}
           </p>
           <ProgressBar progressInfo={progressInfo}/>
+        </div>
+        <div className="right-button-wrapper">
+          <div
+            className={`footer-button table${showInfoTable ? ' active' : ''}`}
+            onClick={() => setShowInfoTable(!showInfoTable)}
+          />
+          <div
+            className={`footer-button settings${showSettings ? ' active' : ''}`}
+            onClick={() => setShowSettings(!showSettings)}
+          />
         </div>
       </div>
     </div>

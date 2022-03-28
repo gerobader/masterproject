@@ -1,0 +1,23 @@
+@import '../../../../../assets/settings';
+
+.menu-setting{
+  font-size: $uiElementFontSize;
+  color: $menuWindowFontColor;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: row;
+  cursor: pointer;
+  user-select: none;
+  &:hover{
+    background: $menuWindowBackgroundColor;
+  }
+  .icon-wrapper{
+    width: 16px;
+    margin-right: 7px;
+    display: flex;
+    align-content: center;
+    img{
+      width: 100%;
+    }
+  }
+}

@@ -17,13 +17,34 @@
     align-items: center;
     justify-content: space-between;
     flex-direction: row;
-    padding: 0 20px;
+    padding: 0 0 0 20px;
     font-weight: 300;
     .left-info{
       display: flex;
       flex-direction: row;
       .margin-right{
         margin: 0 10px 0 0;
+      }
+    }
+    .right-button-wrapper{
+      display: flex;
+      flex-direction: row;
+      .footer-button{
+        cursor: pointer;
+        border-left: 1px solid $menuWindowBorderColor;
+        height: 35px;
+        width: 35px;
+        background-repeat: no-repeat;
+        background-position: center;
+        &.active{
+          background-color: $menuWindowBackgroundColor;
+        }
+        &.table{
+          background-image: url('../../../assets/table-icon.svg');
+        }
+        &.settings{
+          background-image: url('../../../assets/setting-icon.svg');
+        }
       }
     }
   }

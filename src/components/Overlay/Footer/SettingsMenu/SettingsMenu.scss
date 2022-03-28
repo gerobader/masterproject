@@ -1,0 +1,19 @@
+@import '../../../../assets/settings';
+
+.settings-menu{
+  position: absolute;
+  bottom: 35px;
+  right: 0;
+  width: 228px;
+  height: 400px;
+  padding: 5px 0;
+  box-sizing: border-box;
+  backdrop-filter: blur($menuWindowBackgroundBlur);
+  background: $menuWindowBackgroundColor;
+  border-left: 1px solid $menuWindowBorderColor;
+  border-top: 1px solid $menuWindowBorderColor;
+  border-radius: $menuWindowBorderRadius 0 0 0;
+  hr{
+    margin: 5px 0;
+  }
+}

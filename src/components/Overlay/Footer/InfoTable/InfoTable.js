@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import NodeTable from './NodeTable/NodeTable';
 import EdgeTable from './EdgeTable/EdgeTable';
@@ -16,17 +16,13 @@ const InfoTable = ({setProgressInfo}) => {
   const [calculationRunning, setCalculationRunning] = useState(false);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-
-  }, []);
-
   const changeSortValue = (value, e, prevX, elementType) => {
     if (e.clientX === prevX) {
       dispatch(elementType === 'node' ? setSortNodesBy(value) : setSortEdgesBy(value));
     }
   };
 
-  const calculateStatisticalMeasures = async () => {
+  const calculateStatisticalMeasures = () => {
     if (!calculationRunning) {
       setCalculationRunning(true);
       const edgeClones = {};
@@ -46,7 +42,6 @@ const InfoTable = ({setProgressInfo}) => {
         };
       });
       const worker = new Worker('worker.js');
-      const start = new Date();
       worker.postMessage(nodeClones);
       worker.addEventListener('message', (event) => {
         if (event.data.type === 'success') {
@@ -74,9 +69,7 @@ const InfoTable = ({setProgressInfo}) => {
             node.pathMap = pathMap;
             node.computeStatisticalMeasures(nodes);
           });
-          const time = new Date() - start;
-          console.log('took', time, 'ms');
-          dispatch(setNodes(nodes));
+          dispatch(setNodes([...nodes]));
         } else if (event.data.type === 'progress') {
           setProgressInfo(event.data.progress);
         }

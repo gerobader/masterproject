@@ -22,6 +22,7 @@ class Edge {
     const arrowHeadGeometry = new THREE.ConeGeometry(0.325, 1.5, 16);
     const arrowHead = new THREE.Mesh(arrowHeadGeometry, material);
     arrowHead.name = 'Arrow';
+    arrowHead.userData.scale = 1;
     group.add(arrowHead);
     this.instance = group;
     this.updatePosition();
@@ -40,9 +41,12 @@ class Edge {
     const targetVector = this.targetNode.instance.position.clone();
     const sourceVector = this.sourceNode.instance.position.clone();
     const lineVector = targetVector.clone().sub(sourceVector);
-    this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - this.instance.children[1].geometry.parameters.height;
-    this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + this.instance.children[1].geometry.parameters.height) / 2;
-    this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (this.instance.children[1].geometry.parameters.height / 2);
+    const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
+    this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
+    // edge position
+    this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
+    // arrow position
+    this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
     this.instance.position.set(
       (sourceVector.x + targetVector.x) / 2,
       (sourceVector.y + targetVector.y) / 2,
@@ -66,9 +70,10 @@ class Edge {
 
   setSize(size) {
     if (size !== this.size) {
-      const newSize = size / this.size;
-      this.instance.children[0].geometry.scale(newSize, 1, newSize);
+      this.instance.children[0].scale.set(size, 1, size);
+      this.instance.children[1].scale.set(size, size, size);
       this.size = size;
+      this.updatePosition();
     }
   }
 }

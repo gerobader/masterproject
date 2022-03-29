@@ -88,8 +88,8 @@ class Renderer extends Component {
     let newSelectedEdges = [...selectedEdges];
     let newSelectedNodes = [...selectedNodes];
     if (!controls.dragging) {
-      if (hoveredElement.object.name === 'Edge') {
-        const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.object.uuid);
+      if (hoveredElement.type === 'Group') {
+        const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
         if (e.ctrlKey && !connectedSelect) {
           if (selectedEdges.includes(newSelectedEdge)) {
             newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
@@ -282,7 +282,7 @@ class Renderer extends Component {
     const {hoveredElement} = this.state;
     const {selectedNodes, selectedEdges} = this.props;
     if (hoveredElement) {
-      hoveredElementOutline.selectedObjects = [hoveredElement.object];
+      hoveredElementOutline.selectedObjects = hoveredElement.type === 'Group' ? hoveredElement.children : [hoveredElement.object];
     } else {
       hoveredElementOutline.selectedObjects = [];
     }
@@ -389,8 +389,20 @@ class Renderer extends Component {
     mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
     raycaster.setFromCamera(mousePosition, camera);
-    let newHoveredElement = raycaster.intersectObjects(scene.children);
-    newHoveredElement = newHoveredElement.length ? newHoveredElement[0] : undefined;
+    let newHoveredElement;
+    const intersects = raycaster.intersectObjects(scene.children, true);
+    if (intersects.length) {
+      newHoveredElement = intersects.find(
+        (intersectedElement) => (
+          intersectedElement?.object.name === 'Node'
+          || intersectedElement?.object.name === 'Edge'
+          || intersectedElement?.object.name === 'Arrow'
+        )
+      );
+      if (newHoveredElement && (newHoveredElement?.object.name === 'Edge' || newHoveredElement?.object.name === 'Arrow')) {
+        newHoveredElement = newHoveredElement.object.parent;
+      }
+    }
     if (newHoveredElement !== hoveredElement) {
       this.setState((state) => ({
         ...state,

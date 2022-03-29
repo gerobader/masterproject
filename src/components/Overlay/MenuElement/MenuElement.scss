@@ -5,11 +5,14 @@
   width: 415px;
   border: 1px solid $menuWindowBorderColor;
   border-radius: $menuWindowBorderRadius;
-  background: $menuWindowBackgroundColor;
   padding: 15px;
   color: #fff;
   transition: height 0.2s ease-in-out, width 0.2s ease-in-out;
   box-sizing: border-box;
+  background: $menuWindowBackgroundNonBlur;
+  @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+    background: $menuWindowBackgroundColor;
+  }
   backdrop-filter: blur($menuWindowBackgroundBlur);
   display: flex;
   flex-direction: column;

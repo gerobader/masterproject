@@ -56,6 +56,8 @@ class Node {
       const newSize = size / this.size;
       this.instance.geometry.scale(newSize, newSize, newSize);
       this.size = size;
+      this.targetForEdges.forEach((edge) => edge.updatePosition());
+      this.sourceForEdges.forEach((edge) => edge.updatePosition());
     }
   }
 

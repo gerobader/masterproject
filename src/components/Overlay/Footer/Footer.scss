@@ -9,7 +9,10 @@
     width: 100vw;
     box-sizing: border-box;
     color: $menuWindowFontColor;
-    background: $menuWindowBackgroundColor;
+    background: $menuWindowBackgroundNonBlur;
+    @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+      background: $menuWindowBackgroundColor;
+    }
     border-top: 1px solid $menuWindowBorderColor;
     backdrop-filter: blur($menuWindowBackgroundBlur);
     font-size: $uiElementFontSize;

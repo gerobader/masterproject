@@ -8,8 +8,11 @@
   height: 400px;
   padding: 5px 0;
   box-sizing: border-box;
+  background: $menuWindowBackgroundNonBlur;
+  @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+    background: $menuWindowBackgroundColor;
+  }
   backdrop-filter: blur($menuWindowBackgroundBlur);
-  background: $menuWindowBackgroundColor;
   border-left: 1px solid $menuWindowBorderColor;
   border-top: 1px solid $menuWindowBorderColor;
   border-radius: $menuWindowBorderRadius 0 0 0;

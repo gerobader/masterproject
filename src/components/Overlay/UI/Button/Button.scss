@@ -10,10 +10,16 @@
   font-weight: 400;
   min-width: 105px;
   cursor: pointer;
+  user-select: none;
   &.reset{
     min-width: 60px;
   }
   &:focus-visible{
     outline: none;
+  }
+  &.disabled{
+    pointer-events: none;
+    cursor: default;
+    opacity: 0.3;
   }
 }

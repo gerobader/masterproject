@@ -1,5 +1,11 @@
 import {
-  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_NODES_BY, SET_SORT_EDGES_BY
+  SET_NODES,
+  SET_EDGES,
+  SET_SELECTED_NODES,
+  SET_SELECTED_EDGES,
+  SET_SORT_NODES_BY,
+  SET_SORT_EDGES_BY,
+  SET_NODES_AND_EDGES
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -10,6 +16,7 @@ const initialState = {
   selectedEdges: [],
   sortNodesBy: 'id',
   sortEdgesBy: 'id',
+  updateScene: false,
   nodesReversed: false,
   edgesReversed: false
 };
@@ -37,6 +44,13 @@ const networkElementsReducer = (state = initialState, action) => {
       return {
         ...state,
         edges: action.payload
+      };
+    case SET_NODES_AND_EDGES:
+      return {
+        ...state,
+        nodes: action.nodes,
+        edges: action.edges,
+        updateScene: action.shouldUpdateScene
       };
     case SET_SELECTED_NODES:
       return {

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, r, color, id, label, data, camera) {
+  constructor(x, y, z, r, color, id, label, data, colorLocked, shape, pathMap, camera) {
     this.label = null;
     this.id = id;
     this.labelText = label;
@@ -14,22 +14,23 @@ class Node {
     this.colorIsMapped = false;
     this.size = r;
     this.disp = new THREE.Vector3();
-    this.pathMap = undefined;
-    this.colorLocked = false;
-    this.buildGeometry(x, y, z, r, color);
+    this.pathMap = pathMap;
+    this.colorLocked = colorLocked;
+    this.buildGeometry(x, y, z, shape);
     if (label) {
       // this.addLabel(camera);
     }
   }
 
-  buildGeometry(x, y, z, r, color) {
-    const geometry = new THREE.SphereGeometry(r, 16, 16);
-    const material = new THREE.MeshLambertMaterial({color});
+  buildGeometry(x, y, z, shape) {
+    const geometry = new THREE.SphereGeometry(this.size, 16, 16);
+    const material = new THREE.MeshLambertMaterial({color: this.color});
     this.instance = new THREE.Mesh(geometry, material);
     this.instance.name = 'Node';
     this.instance.position.x = x;
     this.instance.position.y = y;
     this.instance.position.z = z;
+    if (shape && shape !== 'Sphere') this.setShape(shape);
   }
 
   computeStatisticalMeasures(nodes) {
@@ -159,6 +160,47 @@ class Node {
 
   updateLabelPosition(camera) {
     this.label.updatePosition(camera);
+  }
+
+  unserializePathMap(nodes) {
+    if (this.pathMap) {
+      const unserializedPathMap = {};
+      Object.keys(this.pathMap).forEach((index) => {
+        const pathInfo = this.pathMap[index];
+        unserializedPathMap[index] = {
+          distance: pathInfo.distance,
+          paths: pathInfo.paths.map((path) => path.map((nodeId) => nodes.find((node) => node.id === nodeId))),
+          target: nodes.find((node) => node.id === pathInfo.target)
+        };
+      });
+      this.pathMap = unserializedPathMap;
+    }
+  }
+
+  serialize(savePathMap) {
+    let serializedPathMap;
+    if (savePathMap && this.pathMap) {
+      serializedPathMap = {};
+      Object.keys(this.pathMap).forEach((index) => {
+        const pathInfo = this.pathMap[index];
+        serializedPathMap[index] = {
+          distance: pathInfo.distance,
+          paths: pathInfo.paths.map((path) => [...path].map((node) => node.id)),
+          target: pathInfo.target.id
+        };
+      });
+    }
+    return {
+      id: this.id,
+      labelText: this.labelText,
+      data: this.data,
+      position: this.instance.position,
+      color: this.color,
+      size: this.size,
+      pathMap: serializedPathMap,
+      colorLocked: this.colorLocked,
+      shape: this.instance.geometry.type.replace('Geometry', '')
+    };
   }
 }
 

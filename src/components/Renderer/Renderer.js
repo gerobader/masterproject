@@ -7,9 +7,7 @@ import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import Node from './Elements/Node';
 import Edge from './Elements/Edge';
-import {
-  setNodes, setEdges, setSelectedNodes, setSelectedEdges
-} from '../../redux/networkElements/networkElements.actions';
+import {setSelectedNodes, setSelectedEdges, setNodesAndEdges} from '../../redux/networkElements/networkElements.actions';
 import {setOrbitPreview} from '../../redux/settings/settings.actions';
 import {RGBtoHex} from '../utility';
 import * as testNodes from '../../data/movies/nodes.json';
@@ -68,6 +66,7 @@ class Renderer extends Component {
     this.handleOutline = this.handleOutline.bind(this);
     this.handleNodeDragging = this.handleNodeDragging.bind(this);
     this.handleControls = this.handleControls.bind(this);
+    this.updateSceneElements = this.updateSceneElements.bind(this);
   }
 
   componentDidMount() {
@@ -76,8 +75,16 @@ class Renderer extends Component {
 
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {selectedNodes, selectedEdges} = this.props;
+    const {
+      updateScene, selectedNodes, selectedEdges
+    } = this.props;
+    const {scene} = this.state;
     this.handleControls(selectedNodes, selectedEdges);
+    if (updateScene) {
+      const network = scene.children.find((child) => child.name === 'Network');
+      scene.remove(network);
+      this.updateSceneElements();
+    }
   }
 
   handleClickOnElement(e, connectedSelect = false) {
@@ -339,17 +346,55 @@ class Renderer extends Component {
     }
   }
 
+  updateSceneElements() {
+    const {scene, camera} = this.state;
+    const {
+      nodes: serializedNodes, edges: serializedEdges, _setNodesAndEdges
+    } = this.props;
+    const nodes = serializedNodes.map((node) => {
+      const nodeClass = new Node(
+        node.position.x,
+        node.position.y,
+        node.position.z,
+        node.size,
+        node.color,
+        node.id,
+        node.labelText,
+        node.data,
+        node.colorLocked,
+        node.shape,
+        node.pathMap,
+        camera
+      );
+      scene.add(nodeClass.instance);
+      return nodeClass;
+    });
+    const edges = serializedEdges.map((edge) => {
+      const sourceNode = nodes.filter((node) => node.id === edge.sourceNode)[0];
+      const targetNode = nodes.filter((node) => node.id === edge.targetNode)[0];
+      const edgeClass = new Edge(edge.id, sourceNode, targetNode, edge.size, edge.color);
+      sourceNode.addSourceEdge(edgeClass);
+      targetNode.addTargetEdge(edgeClass);
+      scene.add(edgeClass.instance);
+      return edgeClass;
+    });
+    nodes.forEach((node) => node.unserializePathMap(nodes));
+    _setNodesAndEdges(nodes, edges, false);
+  }
+
   lookAt(elements) {
     const {camera} = this.state;
-    const position = new THREE.Vector3();
-    interpolation = 0;
-    elements.forEach((element) => {
-      position.add(element.instance.position);
-    });
-    position.divideScalar(elements.length);
-    const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
-    targetQuaternion = new THREE.Quaternion();
-    targetQuaternion.setFromRotationMatrix(rotationMatrix);
+    if (elements.length) {
+      const position = new THREE.Vector3();
+      interpolation = 0;
+      elements.forEach((element) => {
+        position.add(element.instance.position);
+      });
+      position.divideScalar(elements.length);
+      const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
+      targetQuaternion = new THREE.Quaternion();
+      targetQuaternion.setFromRotationMatrix(rotationMatrix);
+    }
   }
 
   cameraControls() {
@@ -413,7 +458,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setNodes, _setEdges, remoteNodes, remoteEdges, use2Dimensions
+      _setNodesAndEdges, remoteNodes, remoteEdges, use2Dimensions
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -443,6 +488,8 @@ class Renderer extends Component {
     window.addEventListener('keydown', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
+    const networkElements = new THREE.Group();
+    networkElements.name = 'Network';
     let nodes = [];
     let edges = [];
     if (useTestNetwork) {
@@ -456,19 +503,21 @@ class Renderer extends Component {
           index,
           node.label,
           node.data,
+          false,
+          'Sphere',
+          undefined,
           camera
         );
-        scene.add(nodeClass.instance);
+        networkElements.add(nodeClass.instance);
         return nodeClass;
       });
-
       edges = testEdges.default.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
         const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
-        const edgeClass = new Edge(index, sourceNode, targetNode);
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
-        scene.add(edgeClass.instance);
+        networkElements.add(edgeClass.instance);
         return edgeClass;
       });
     } else {
@@ -482,22 +531,25 @@ class Renderer extends Component {
           index,
           node.label,
           node.data,
+          false,
+          'Sphere',
+          undefined,
           camera
         );
-        scene.add(nodeClass.instance);
+        networkElements.add(nodeClass.instance);
         return nodeClass;
       });
       edges = remoteEdges.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
         const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
-        const edgeClass = new Edge(index, sourceNode, targetNode);
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
-        scene.add(edgeClass.instance);
+        networkElements.add(edgeClass.instance);
         return edgeClass;
       });
     }
-
+    scene.add(networkElements);
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);
     composer.addPass(renderPass);
@@ -512,8 +564,7 @@ class Renderer extends Component {
     controls.setSize(0.5);
     scene.add(controls);
 
-    _setNodes(nodes);
-    _setEdges(edges);
+    _setNodesAndEdges(nodes, edges, false);
     this.setState((state) => ({
       ...state,
       renderer,
@@ -567,14 +618,14 @@ const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   nodes: state.networkElements.nodes,
   edges: state.networkElements.edges,
+  updateScene: state.networkElements.updateScene,
   selectedNodes: state.networkElements.selectedNodes,
   selectedEdges: state.networkElements.selectedEdges
 });
 
 const mapDispatchToProps = (dispatch) => ({
   _setOrbitPreview: (state) => dispatch(setOrbitPreview(state)),
-  _setNodes: (nodes) => dispatch(setNodes(nodes)),
-  _setEdges: (edges) => dispatch(setEdges(edges)),
+  _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges))
 });

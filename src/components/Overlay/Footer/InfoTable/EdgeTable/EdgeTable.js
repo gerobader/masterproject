@@ -28,27 +28,20 @@ const EdgeTable = ({changeSortValue, edges}) => {
     <table>
       <thead>
         <tr>
-          <th
-            onMouseUp={(e) => changeSortValue('id', e, mouseDownX, 'edge')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'id' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
-          >
-            ID
-          </th>
-          <th
-            onMouseUp={(e) => changeSortValue('sourceName', e, mouseDownX, 'edge')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'sourceName' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
-          >
-            Source Name
-          </th>
-          <th
-            onMouseUp={(e) => changeSortValue('targetName', e, mouseDownX, 'edge')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortEdgesBy === 'targetName' ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
-          >
-            Target Name
-          </th>
+          {['id', 'sourceName', 'targetName', 'color', 'size'].map((value) => {
+            const result = value.replace(/([A-Z])/g, ' $1');
+            const titleCaseValue = result.charAt(0).toUpperCase() + result.slice(1);
+            return (
+              <th
+                key={value}
+                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'edge')}
+                onMouseDown={(e) => { mouseDownX = e.clientX; }}
+                className={sortEdgesBy === value ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
+              >
+                {titleCaseValue === 'Id' ? 'ID' : titleCaseValue}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>
@@ -81,6 +74,8 @@ const EdgeTable = ({changeSortValue, edges}) => {
             >
               {edge.targetNode.labelText}
             </td>
+            <td>{edge.color}</td>
+            <td>{edge.size}</td>
           </tr>
         ))}
       </tbody>

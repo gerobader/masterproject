@@ -15,44 +15,20 @@ const NodeTable = ({changeSortValue, nodes}) => {
     <table>
       <thead>
         <tr>
-          <th
-            onMouseUp={(e) => changeSortValue('id', e, mouseDownX, 'node')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'id' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-          >
-            ID
-          </th>
-          <th
-            onMouseUp={(e) => changeSortValue('name', e, mouseDownX, 'node')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'name' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-          >
-            Name
-          </th>
-          <th
-            onMouseUp={(e) => changeSortValue('size', e, mouseDownX, 'node')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'size' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-          >
-            Size
-          </th>
-          <th
-            onMouseUp={(e) => changeSortValue('color', e, mouseDownX, 'node')}
-            onMouseDown={(e) => { mouseDownX = e.clientX; }}
-            className={sortNodesBy === 'color' ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-          >
-            Color
-          </th>
-          {Object.keys(nodes[0].data).map((dataPoint) => (
-            <th
-              key={dataPoint}
-              onMouseUp={(e) => changeSortValue(dataPoint, e, mouseDownX, 'node')}
-              onMouseDown={(e) => { mouseDownX = e.clientX; }}
-              className={sortNodesBy === dataPoint ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-            >
-              {dataPoint}
-            </th>
-          ))}
+          {['id', 'name', 'size', 'color', ...Object.keys(nodes[0].data)].map((value) => {
+            const result = value.replace(/([A-Z])/g, ' $1');
+            const titleCaseValue = result.charAt(0).toUpperCase() + result.slice(1);
+            return (
+              <th
+                key={value}
+                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'edge')}
+                onMouseDown={(e) => { mouseDownX = e.clientX; }}
+                className={sortNodesBy === value ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
+              >
+                {titleCaseValue === 'Id' ? 'ID' : titleCaseValue}
+              </th>
+            );
+          })}
         </tr>
       </thead>
       <tbody>

@@ -1,7 +1,11 @@
-import {SET_ORBIT_PREVIEW} from '../actionTypes';
+import {SET_ORBIT_PREVIEW, SET_SHOW_SAVE_NETWORK_MODAL} from '../actionTypes';
 
-// eslint-disable-next-line import/prefer-default-export
 export const setOrbitPreview = (state) => ({
   type: SET_ORBIT_PREVIEW,
   payload: state
+});
+
+export const setShowSaveNetworkModal = (show) => ({
+  type: SET_SHOW_SAVE_NETWORK_MODAL,
+  payload: show
 });

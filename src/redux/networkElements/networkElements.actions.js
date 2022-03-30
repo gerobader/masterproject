@@ -1,5 +1,11 @@
 import {
-  SET_NODES, SET_EDGES, SET_SELECTED_NODES, SET_SELECTED_EDGES, SET_SORT_NODES_BY, SET_SORT_EDGES_BY
+  SET_NODES,
+  SET_EDGES,
+  SET_SELECTED_NODES,
+  SET_SELECTED_EDGES,
+  SET_SORT_NODES_BY,
+  SET_SORT_EDGES_BY,
+  SET_NODES_AND_EDGES
 } from '../actionTypes';
 
 export const setNodes = (nodes) => ({
@@ -10,6 +16,13 @@ export const setNodes = (nodes) => ({
 export const setEdges = (edges) => ({
   type: SET_EDGES,
   payload: edges
+});
+
+export const setNodesAndEdges = (nodes, edges, shouldUpdateScene) => ({
+  type: SET_NODES_AND_EDGES,
+  nodes,
+  edges,
+  shouldUpdateScene
 });
 
 export const setSelectedNodes = (nodes) => ({

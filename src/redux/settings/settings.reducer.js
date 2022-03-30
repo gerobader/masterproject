@@ -1,7 +1,8 @@
-import {SET_ORBIT_PREVIEW} from '../actionTypes';
+import {SET_ORBIT_PREVIEW, SET_SHOW_SAVE_NETWORK_MODAL} from '../actionTypes';
 
 const initialState = {
-  orbitPreview: true
+  orbitPreview: true,
+  showSaveNetworkModal: false
 };
 
 const settingsReducer = (state = initialState, action) => {
@@ -10,6 +11,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         orbitPreview: action.payload
+      };
+    case SET_SHOW_SAVE_NETWORK_MODAL:
+      return {
+        ...state,
+        showSaveNetworkModal: action.payload
       };
     default:
       return state;

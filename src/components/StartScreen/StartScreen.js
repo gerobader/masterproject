@@ -75,7 +75,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
 
   return (
     <div className="start-screen">
-      <MenuElement headline="SettingsMenu" isOnStartScreen>
+      <MenuElement headline="SettingsMenu" simpleHeader>
         <Select
           options={networks}
           value={selectedNetwork}

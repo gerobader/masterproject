@@ -7,9 +7,11 @@ import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import Node from './Elements/Node';
 import Edge from './Elements/Edge';
-import {setSelectedNodes, setSelectedEdges, setNodesAndEdges} from '../../redux/networkElements/networkElements.actions';
-import {setOrbitPreview} from '../../redux/settings/settings.actions';
-import {RGBtoHex} from '../utility';
+import {
+  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder
+} from '../../redux/networkElements/networkElements.actions';
+import {setOrbitPreview, addToActionHistory} from '../../redux/settings/settings.actions';
+import {calculateAveragePosition, RGBtoHex} from '../utility';
 import * as testNodes from '../../data/movies/nodes.json';
 import * as testEdges from '../../data/movies/edges.json';
 
@@ -31,7 +33,7 @@ let selectedElementOutline;
 const clock = new THREE.Clock();
 let targetQuaternion;
 let interpolation = 0;
-let group;
+let nodePositionChanges = [];
 
 const useTestNetwork = true;
 
@@ -75,9 +77,7 @@ class Renderer extends Component {
 
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {
-      updateScene, selectedNodes, selectedEdges
-    } = this.props;
+    const {updateScene, selectedNodes, selectedEdges} = this.props;
     const {scene} = this.state;
     this.handleControls(selectedNodes, selectedEdges);
     if (updateScene) {
@@ -89,7 +89,7 @@ class Renderer extends Component {
 
   handleClickOnElement(e, connectedSelect = false) {
     const {
-      nodes, edges, selectedNodes, selectedEdges
+      nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder, _setAveragePositionPlaceholder
     } = this.props;
     const {hoveredElement, controls, scene} = this.state;
     let newSelectedEdges = [...selectedEdges];
@@ -116,7 +116,8 @@ class Renderer extends Component {
             newSelectedNodes = [...selectedNodes, newSelectedNode];
           }
         } else {
-          scene.remove(group);
+          scene.remove(averagePositionPlaceholder);
+          _setAveragePositionPlaceholder(undefined);
           newSelectedNodes = [newSelectedNode];
           newSelectedEdges = [];
         }
@@ -166,6 +167,14 @@ class Renderer extends Component {
   }
 
   handleMouseUp() {
+    const {selectedNodes, _addToActionHistory} = this.props;
+    if (nodePositionChanges.length > 0) {
+      selectedNodes.forEach((node, index) => {
+        nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
+      });
+      _addToActionHistory(nodePositionChanges);
+      nodePositionChanges = [];
+    }
     this.setState((prevState) => ({
       ...prevState,
       mouseDown: false
@@ -229,7 +238,8 @@ class Renderer extends Component {
   handleKeyUp(e) {
     const {scene} = this.state;
     const {
-      _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges
+      _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
+      _setAveragePositionPlaceholder
     } = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key)) {
@@ -273,8 +283,8 @@ class Renderer extends Component {
             this.lookAt([...selectedNodes, ...selectedEdges]);
             return prevState;
           case 'escape':
-            scene.remove(group);
-            group = undefined;
+            scene.remove(averagePositionPlaceholder);
+            _setAveragePositionPlaceholder(undefined);
             _setSelectedNodes([]);
             _setSelectedEdges([]);
             return prevState;
@@ -302,43 +312,44 @@ class Renderer extends Component {
   }
 
   handleControls(newSelectedNodes, newSelectedEdges) {
+    const {averagePositionPlaceholder, _setAveragePositionPlaceholder} = this.props;
     const {controls, scene} = this.state;
     if (newSelectedEdges.length || newSelectedNodes.length === 0) {
       controls.detach();
     } else if (newSelectedNodes.length === 1) {
       controls.attach(newSelectedNodes[0].instance);
-    } else if (newSelectedNodes.length > 1 && (!group || group.children.length !== newSelectedNodes.length)) {
-      scene.remove(group);
-      group = new THREE.Group();
-      const groupPosition = new THREE.Vector3(0, 0, 0);
+    } else if (
+      newSelectedNodes.length > 1
+      && (!averagePositionPlaceholder || Object.keys(averagePositionPlaceholder.userData).length !== newSelectedNodes.length)
+    ) {
+      scene.remove(averagePositionPlaceholder);
+      const newPlaceholder = new THREE.Object3D();
+      const averagePosition = calculateAveragePosition(newSelectedNodes);
+      newPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
       newSelectedNodes.forEach((node) => {
-        groupPosition.add(node.instance.position);
+        newPlaceholder.userData[node.id] = averagePosition.clone().sub(node.instance.position);
       });
-      groupPosition.divideScalar(newSelectedNodes.length);
-      group.position.set(groupPosition.x, groupPosition.y, groupPosition.z);
-      newSelectedNodes.forEach((node) => {
-        const clone = node.instance.clone();
-        clone.userData = {originalUuid: node.instance.uuid};
-        clone.position.sub(groupPosition);
-        group.add(clone);
-      });
-      scene.add(group);
-      controls.attach(group);
+      scene.add(newPlaceholder);
+      controls.attach(newPlaceholder);
+      _setAveragePositionPlaceholder(newPlaceholder);
     }
   }
 
   handleNodeDragging() {
     const {controls} = this.state;
-    const {selectedNodes} = this.props;
+    const {selectedNodes, averagePositionPlaceholder} = this.props;
     if (controls.dragging && selectedNodes.length) {
+      if (nodePositionChanges.length === 0) {
+        selectedNodes.forEach((node) => {
+          const elementChanges = {element: node};
+          elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
+          nodePositionChanges.push(elementChanges);
+        });
+      }
       if (selectedNodes.length > 1) {
-        group.children.forEach((nodeCopy) => {
-          const original = selectedNodes.find((selectedNode) => selectedNode.instance.uuid === nodeCopy.userData.originalUuid);
-          if (original) {
-            const newPosition = new THREE.Vector3();
-            nodeCopy.getWorldPosition(newPosition);
-            original.setPositionAbsolute(newPosition.x, newPosition.y, newPosition.z);
-          }
+        selectedNodes.forEach((node) => {
+          const newPosition = averagePositionPlaceholder.position.clone().sub(averagePositionPlaceholder.userData[node.id]);
+          node.setPositionAbsolute(newPosition);
         });
       } else {
         selectedNodes[0].updateAssociatedEdgePosition();
@@ -620,14 +631,17 @@ const mapStateToPros = (state) => ({
   edges: state.networkElements.edges,
   updateScene: state.networkElements.updateScene,
   selectedNodes: state.networkElements.selectedNodes,
-  selectedEdges: state.networkElements.selectedEdges
+  selectedEdges: state.networkElements.selectedEdges,
+  averagePositionPlaceholder: state.networkElements.averagePositionPlaceholder
 });
 
 const mapDispatchToProps = (dispatch) => ({
   _setOrbitPreview: (state) => dispatch(setOrbitPreview(state)),
+  _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
-  _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges))
+  _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),
+  _setAveragePositionPlaceholder: (placeholder) => dispatch(setAveragePositionPlaceholder(placeholder))
 });
 
 export default connect(mapStateToPros, mapDispatchToProps)(memo(Renderer));

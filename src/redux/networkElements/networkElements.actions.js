@@ -5,7 +5,8 @@ import {
   SET_SELECTED_EDGES,
   SET_SORT_NODES_BY,
   SET_SORT_EDGES_BY,
-  SET_NODES_AND_EDGES
+  SET_NODES_AND_EDGES,
+  SET_AVERAGE_POSITION_PLACEHOLDER
 } from '../actionTypes';
 
 export const setNodes = (nodes) => ({
@@ -33,6 +34,11 @@ export const setSelectedNodes = (nodes) => ({
 export const setSelectedEdges = (edges) => ({
   type: SET_SELECTED_EDGES,
   payload: edges
+});
+
+export const setAveragePositionPlaceholder = (placeholder) => ({
+  type: SET_AVERAGE_POSITION_PLACEHOLDER,
+  payload: placeholder
 });
 
 export const setSortNodesBy = (sortValue) => ({

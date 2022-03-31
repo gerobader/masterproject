@@ -1,8 +1,15 @@
-import {SET_ORBIT_PREVIEW, SET_SHOW_SAVE_NETWORK_MODAL} from '../actionTypes';
+import {
+  ADD_TO_ACTION_HISTORY,
+  SET_CURRENT_HISTORY_POSITION,
+  SET_ORBIT_PREVIEW,
+  SET_SHOW_SAVE_NETWORK_MODAL
+} from '../actionTypes';
 
 const initialState = {
   orbitPreview: true,
-  showSaveNetworkModal: false
+  showSaveNetworkModal: false,
+  actionHistory: [],
+  currentHistoryPosition: 0
 };
 
 const settingsReducer = (state = initialState, action) => {
@@ -16,6 +23,17 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         showSaveNetworkModal: action.payload
+      };
+    case ADD_TO_ACTION_HISTORY:
+      return {
+        ...state,
+        actionHistory: [...state.actionHistory.slice(0, state.currentHistoryPosition), action.payload],
+        currentHistoryPosition: state.currentHistoryPosition + 1
+      };
+    case SET_CURRENT_HISTORY_POSITION:
+      return {
+        ...state,
+        currentHistoryPosition: action.payload
       };
     default:
       return state;

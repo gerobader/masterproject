@@ -12,6 +12,7 @@ import RangeInput from '../../UI/RangeInput/RangeInput';
 import Setting from '../../UI/Setting/Setting';
 import ExpandableSetting from '../../UI/ExpandableSetting/ExpandableSetting';
 import {setNodes} from '../../../../redux/networkElements/networkElements.actions';
+import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 
 import './Appearance.scss';
 
@@ -71,6 +72,7 @@ const Appearance = () => {
   }, [selectedNodes]);
 
   const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
+    const changes = [];
     if (mappingValue === 'degree' || mappingValue === 'closeness') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
       const sortedColorMapIndicators = [...colorMapIndicators];
@@ -87,28 +89,40 @@ const Appearance = () => {
         ).pop();
         const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
         if (color) {
+          const elementChanges = {element};
           if (targetElement === 'node' && typeof element.object.setColor === 'function') {
+            elementChanges.setColor = {before: element.object.color, after: color};
+            changes.push(elementChanges);
             element.object.setColor(color);
           } else if (targetElement === 'label' && typeof element.object.setLabelColor === 'function') {
+            elementChanges.setLabelColor = {before: element.object.label.color, after: color};
+            changes.push(elementChanges);
             element.object.setLabelColor(color);
           }
         }
-        dispatch(setNodes(nodes));
       });
+      dispatch(addToActionHistory(changes));
       dispatch(setNodes(nodes));
     } else if (mappingValue) {
       nodes.forEach((node) => {
+        const elementChanges = {element: node};
         if (targetElement === 'node') {
-          node.setColor(colorMapIndicators[node.data.type]);
+          elementChanges.setColor = {before: node.color, after: colorMapIndicators[node.data[mappingValue]]};
+          changes.push(elementChanges);
+          node.setColor(colorMapIndicators[node.data[mappingValue]]);
         } else {
-          node.setLabelColor(colorMapIndicators[node.data.type]);
+          elementChanges.setLabelColor = {before: node.label.color, after: colorMapIndicators[node.data[mappingValue]]};
+          changes.push(elementChanges);
+          node.setLabelColor(colorMapIndicators[node.data[mappingValue]]);
         }
       });
+      dispatch(addToActionHistory(changes));
       dispatch(setNodes(nodes));
     }
   };
 
   const applySizeMapping = (mappingValue, sizeMapping, targetElement) => {
+    const changes = [];
     const elementsToUse = applyOnlyToSelected ? selectedNodes : nodes;
     if (mappingValue === 'degree' || mappingValue === 'closeness') {
       if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
@@ -116,32 +130,51 @@ const Appearance = () => {
         const min = parseFloat(sizeMapping[0]);
         const max = parseFloat(sizeMapping[1]);
         sortedElements.forEach((element) => {
+          const elementChanges = {element};
+          const newSize = min + ((max - min) * (element.percentage / 100));
           if (targetElement === 'node' && typeof element.object.setSize === 'function') {
-            element.object.setSize(min + ((max - min) * (element.percentage / 100)));
+            elementChanges.setSize = {before: element.object.size, after: newSize};
+            changes.push(elementChanges);
+            element.object.setSize(newSize);
           } else if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
-            element.object.setLabelSize(min + ((max - min) * (element.percentage / 100)));
+            elementChanges.setLabelSize = {before: element.object.label.size, after: newSize};
+            changes.push(elementChanges);
+            element.object.setLabelSize(newSize);
           }
         });
+        dispatch(addToActionHistory(changes));
+        dispatch(setNodes(nodes));
       }
-      dispatch(setNodes(nodes));
     } else if (mappingValue) {
       elementsToUse.forEach((node) => {
+        const elementChanges = {element: node};
         if (targetElement === 'node') {
-          node.setSize(sizeMapping[node.data.type]);
+          elementChanges.setSize = {before: node.size, after: sizeMapping[node.data[mappingValue]]};
+          changes.push(elementChanges);
+          node.setSize(sizeMapping[node.data[mappingValue]]);
         } else {
-          node.setLabelSize(sizeMapping[node.data.type]);
+          elementChanges.setLabelSize = {before: node.label.size, after: sizeMapping[node.data[mappingValue]]};
+          changes.push(elementChanges);
+          node.setLabelSize(sizeMapping[node.data[mappingValue]]);
         }
       });
+      dispatch(addToActionHistory(changes));
       dispatch(setNodes(nodes));
     }
   };
 
   const applyNodeShapeMapping = (dataToMapOn, dataMapping) => {
+    const changes = [];
     nodes.forEach((node) => {
       const nodeData = node.data[dataToMapOn];
       const shape = dataMapping[nodeData];
       node.setShape(shape);
+      const elementChanges = {element: node};
+      elementChanges.setShape = {before: node.shape, after: shape};
+      changes.push(elementChanges);
     });
+    dispatch(addToActionHistory(changes));
+    dispatch(setNodes(nodes));
   };
 
   const applyChanges = () => {
@@ -169,13 +202,32 @@ const Appearance = () => {
           elementsToEdit = [...elementsToEdit, ...edges];
         }
       }
+      const changes = [];
       elementsToEdit.forEach((element) => {
-        if (fillColor && typeof element.setColor === 'function') element.setColor(fillColor);
-        if (elementSize && typeof element.setSize === 'function') element.setSize(parseFloat(elementSize));
-        if (labelColor && typeof element.setLabelColor === 'function') element.setLabelColor(labelColor);
-        if (labelSize && typeof element.setLabelSize === 'function') element.setLabelSize(parseFloat(labelSize));
-        if (nodeShape && typeof element.setShape === 'function') element.setShape(nodeShape);
+        const elementChanges = {element};
+        if (fillColor && typeof element.setColor === 'function' && element.color !== fillColor) {
+          elementChanges.setColor = {before: element.color, after: fillColor};
+          element.setColor(fillColor);
+        }
+        if (elementSize && typeof element.setSize === 'function' && element.size !== elementSize) {
+          elementChanges.setSize = {before: element.size, after: elementSize};
+          element.setSize(parseFloat(elementSize));
+        }
+        if (labelColor && typeof element.setLabelColor === 'function' && element.label && element.label.color !== labelColor) {
+          elementChanges.setLabelColor = {before: element.label?.color, after: labelColor};
+          element.setLabelColor(labelColor);
+        }
+        if (labelSize && typeof element.setLabelSize === 'function' && element.label && element.label.size !== labelSize) {
+          elementChanges.setLabelSize = {before: element.label?.size, after: labelSize};
+          element.setLabelSize(parseFloat(labelSize));
+        }
+        if (nodeShape && typeof element.setShape === 'function' && element.shape !== nodeShape) {
+          elementChanges.setShape = {before: element.shape, after: nodeShape};
+          element.setShape(nodeShape);
+        }
+        changes.push(elementChanges);
       });
+      dispatch(addToActionHistory(changes));
       dispatch(setNodes(nodes));
     }
   };

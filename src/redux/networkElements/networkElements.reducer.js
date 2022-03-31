@@ -5,7 +5,8 @@ import {
   SET_SELECTED_EDGES,
   SET_SORT_NODES_BY,
   SET_SORT_EDGES_BY,
-  SET_NODES_AND_EDGES
+  SET_NODES_AND_EDGES,
+  SET_AVERAGE_POSITION_PLACEHOLDER
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -14,6 +15,7 @@ const initialState = {
   edges: [],
   selectedNodes: [],
   selectedEdges: [],
+  averagePositionPlaceholder: undefined,
   sortNodesBy: 'id',
   sortEdgesBy: 'id',
   updateScene: false,
@@ -61,6 +63,11 @@ const networkElementsReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedEdges: action.payload
+      };
+    case SET_AVERAGE_POSITION_PLACEHOLDER:
+      return {
+        ...state,
+        averagePositionPlaceholder: action.payload
       };
     case SET_SORT_NODES_BY:
       return {

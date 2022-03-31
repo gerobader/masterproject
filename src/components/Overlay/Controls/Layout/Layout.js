@@ -1,11 +1,12 @@
 import React, {useState} from 'react';
-import {useSelector} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
 import * as THREE from 'three';
 import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
 import Loader from '../../UI/Loader/Loader';
+import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {
   fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
 } from './forceFunctions';
@@ -13,6 +14,7 @@ import {
 import './Layout.scss';
 
 let interval;
+let changes = [];
 
 const Layout = () => {
   const {nodes, edges} = useSelector((state) => state.networkElements);
@@ -23,11 +25,17 @@ const Layout = () => {
   const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
   const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
   const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(70);
+  const dispatch = useDispatch();
 
   const stopCalculation = () => {
     clearInterval(interval);
     interval = undefined;
     setRunning(false);
+    nodes.forEach((node, index) => {
+      changes[index].setPositionAbsolute.after = node.instance.position.clone();
+    });
+    dispatch(addToActionHistory(changes));
+    changes = [];
   };
 
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
@@ -69,7 +77,7 @@ const Layout = () => {
       nodes.forEach((node) => {
         const displacement = node.disp.clone().normalize();
         if (type === 1) displacement.min(temp);
-        node.setPositionRelative(displacement.x, displacement.y, displacement.z, true, size);
+        node.setPositionRelative(displacement, true, size);
       });
       if (type === 1) {
         if (temp.x > 1 / maxIterationsFloat) temp.subScalar(1 / maxIterationsFloat);
@@ -82,6 +90,11 @@ const Layout = () => {
   };
 
   const startCalculation = () => {
+    nodes.forEach((node) => {
+      const elementChanges = {element: node};
+      elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
+      changes.push(elementChanges);
+    });
     if (layoutAlgorithm === 'Fruchterman and Reingold') {
       forceDirectedPlacement(1, fruchtAndReinAttraction, fruchtAndReinRepulsion);
     } else if (layoutAlgorithm === 'Eades') {

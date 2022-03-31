@@ -12,7 +12,7 @@ import redoIcon from '../../../../assets/redo-icon.svg';
 import downloadIcon from '../../../../assets/download-icon.svg';
 import uploadIcon from '../../../../assets/upload-icon.svg';
 
-const SettingsMenu = ({hideSettings}) => {
+const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   const menuRef = useRef();
   const fileInput = useRef();
   const dispatch = useDispatch();
@@ -43,8 +43,8 @@ const SettingsMenu = ({hideSettings}) => {
   return (
     <div className="settings-menu" ref={menuRef}>
       <input type="file" ref={fileInput} onChange={loadNetwork} className="file-upload"/>
-      <MenuSetting menuText="Undo" imgSource={undoIcon}/>
-      <MenuSetting menuText="Redo" imgSource={redoIcon}/>
+      <MenuSetting menuText="Undo" imgSource={undoIcon} onClick={undoAction}/>
+      <MenuSetting menuText="Redo" imgSource={redoIcon} onClick={redoAction}/>
       <hr/>
       <MenuSetting menuText="Save Network" imgSource={downloadIcon} onClick={() => dispatch(setShowSaveNetworkModal(true))}/>
       <MenuSetting menuText="Load Network" imgSource={uploadIcon} onClick={() => fileInput.current.click()}/>

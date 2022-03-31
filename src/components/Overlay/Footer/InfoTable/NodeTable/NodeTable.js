@@ -11,11 +11,12 @@ const NodeTable = ({changeSortValue, nodes}) => {
     selectedNodes, sortNodesBy, nodesReversed
   } = useSelector((state) => state.networkElements);
   const dispatch = useDispatch();
+  const additionalKeys = nodes.length ? Object.keys(nodes[0].data) : [];
   return (
     <table>
       <thead>
         <tr>
-          {['id', 'name', 'size', 'color', ...Object.keys(nodes[0].data)].map((value) => {
+          {['id', 'name', 'size', 'color', ...additionalKeys].map((value) => {
             const result = value.replace(/([A-Z])/g, ' $1');
             const titleCaseValue = result.charAt(0).toUpperCase() + result.slice(1);
             return (

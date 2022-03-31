@@ -9,6 +9,8 @@ class Label {
     this.label = null;
     this.isHidden = true;
     this.container = document.getElementById('network-view');
+    this.color = '#ffffff';
+    this.size = 12;
     this.createLabel(camera);
   }
 
@@ -43,11 +45,17 @@ class Label {
   }
 
   setColor(color) {
-    this.label.style.color = color;
+    if (color) {
+      this.color = color;
+      this.label.style.color = color;
+    }
   }
 
   setSize(size) {
-    this.label.style.fontSize = `${size}px`;
+    if (size) {
+      this.size = size;
+      this.label.style.fontSize = `${size}px`;
+    }
   }
 }
 

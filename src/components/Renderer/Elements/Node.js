@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, r, color, id, label, data, colorLocked, shape, pathMap, camera) {
+  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, camera) {
     this.label = null;
     this.id = id;
     this.labelText = label;
@@ -12,17 +12,18 @@ class Node {
     this.sourceForEdges = [];
     this.color = color;
     this.colorIsMapped = false;
-    this.size = r;
+    this.size = size;
     this.disp = new THREE.Vector3();
     this.pathMap = pathMap;
     this.colorLocked = colorLocked;
+    this.shape = shape;
     this.buildGeometry(x, y, z, shape);
     if (label) {
       // this.addLabel(camera);
     }
   }
 
-  buildGeometry(x, y, z, shape) {
+  buildGeometry(x, y, z) {
     const geometry = new THREE.SphereGeometry(this.size, 16, 16);
     const material = new THREE.MeshLambertMaterial({color: this.color});
     this.instance = new THREE.Mesh(geometry, material);
@@ -30,7 +31,7 @@ class Node {
     this.instance.position.x = x;
     this.instance.position.y = y;
     this.instance.position.z = z;
-    if (shape && shape !== 'Sphere') this.setShape(shape);
+    if (this.shape && this.shape !== 'Sphere') this.setShape(this.shape);
   }
 
   computeStatisticalMeasures(nodes) {
@@ -53,10 +54,10 @@ class Node {
   }
 
   setSize(size) {
-    if (size && size !== this.size) {
-      const newSize = size / this.size;
-      this.instance.geometry.scale(newSize, newSize, newSize);
-      this.size = size;
+    const newSize = parseFloat(size);
+    if (newSize && newSize !== this.size) {
+      this.instance.scale.set(newSize, newSize, newSize);
+      this.size = newSize;
       this.targetForEdges.forEach((edge) => edge.updatePosition());
       this.sourceForEdges.forEach((edge) => edge.updatePosition());
     }
@@ -64,6 +65,7 @@ class Node {
 
   setShape(shape) {
     this.instance.geometry.dispose();
+    this.shape = shape;
     switch (shape) {
       case 'Box':
         this.instance.geometry = new THREE.BoxGeometry(this.size * 2, this.size * 2, this.size * 2);
@@ -121,20 +123,17 @@ class Node {
     });
   }
 
-  setPositionRelative(x, y, z, checkBoundaries = false, boundarySize) {
-    this.instance.position.x += x;
-    this.instance.position.y += y;
-    this.instance.position.z += z;
+  setPositionRelative(position, checkBoundaries = false, boundarySize) {
+    const {x, y, z} = this.instance.position;
+    this.instance.position.set(x + position.x, y + position.y, z + position.z);
     if (checkBoundaries) {
       this.instance.position.clampScalar(-boundarySize / 2, boundarySize / 2);
     }
     this.updateAssociatedEdgePosition();
   }
 
-  setPositionAbsolute(x, y, z) {
-    this.instance.position.x = x;
-    this.instance.position.y = y;
-    this.instance.position.z = z;
+  setPositionAbsolute(position) {
+    this.instance.position.set(position.x, position.y, position.z);
     this.updateAssociatedEdgePosition();
   }
 
@@ -199,7 +198,7 @@ class Node {
       size: this.size,
       pathMap: serializedPathMap,
       colorLocked: this.colorLocked,
-      shape: this.instance.geometry.type.replace('Geometry', '')
+      shape: this.shape
     };
   }
 }

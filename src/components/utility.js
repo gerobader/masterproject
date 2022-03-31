@@ -1,3 +1,5 @@
+import * as THREE from 'three';
+
 export const between = (value, min, max) => value > min && value < max;
 
 // source: https://stackoverflow.com/questions/21646738/convert-hex-to-rgba
@@ -56,4 +58,13 @@ export const sortElements = (elements, sortValue) => {
 export const sortArray = (a, b) => {
   if (a === b) return 0;
   return a < b ? -1 : 1;
+};
+
+export const calculateAveragePosition = (elements) => {
+  const averagePosition = new THREE.Vector3(0, 0, 0);
+  elements.forEach((element) => {
+    averagePosition.add(element.instance.position);
+  });
+  averagePosition.divideScalar(elements.length);
+  return averagePosition;
 };

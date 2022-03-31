@@ -4,7 +4,6 @@ import Overlay from '../components/Overlay/Overlay';
 import StartScreen from '../components/StartScreen/StartScreen';
 
 import './NetworkVisualizer.scss';
-import SaveNetworkModal from "../components/Overlay/SaveNetworkModal/SaveNetworkModal";
 
 const NetworkVisualizer = () => {
   const [elements, setElements] = useState({});

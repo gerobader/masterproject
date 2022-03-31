@@ -66,7 +66,6 @@ class Renderer extends Component {
     this.lookAt = this.lookAt.bind(this);
     this.cameraControls = this.cameraControls.bind(this);
     this.handleOutline = this.handleOutline.bind(this);
-    this.handleNodeDragging = this.handleNodeDragging.bind(this);
     this.handleControls = this.handleControls.bind(this);
     this.updateSceneElements = this.updateSceneElements.bind(this);
   }
@@ -168,7 +167,7 @@ class Renderer extends Component {
 
   handleMouseUp() {
     const {selectedNodes, _addToActionHistory} = this.props;
-    if (nodePositionChanges.length > 0) {
+    if (nodePositionChanges.length > 0 && nodePositionChanges.length === selectedNodes.length) {
       selectedNodes.forEach((node, index) => {
         nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
       });
@@ -183,7 +182,25 @@ class Renderer extends Component {
 
   handleMouseMove(e) {
     const {mouseDown, camera, controls} = this.state;
+    const {selectedNodes, averagePositionPlaceholder} = this.props;
     this.checkIntersect(e);
+    if (controls.dragging && selectedNodes.length) {
+      if (nodePositionChanges.length === 0) {
+        selectedNodes.forEach((node) => {
+          const elementChanges = {element: node};
+          elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
+          nodePositionChanges.push(elementChanges);
+        });
+      }
+      if (selectedNodes.length > 1) {
+        selectedNodes.forEach((node) => {
+          const newPosition = averagePositionPlaceholder.position.clone().sub(averagePositionPlaceholder.userData[node.id]);
+          node.setPositionAbsolute(newPosition);
+        });
+      } else {
+        selectedNodes[0].updateAssociatedEdgePosition();
+      }
+    }
     if (!mouseDown || controls.dragging) return;
     camera.rotation.y -= e.movementX * sensitivity;
     camera.rotation.x -= e.movementY * sensitivity;
@@ -239,7 +256,7 @@ class Renderer extends Component {
     const {scene} = this.state;
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
-      _setAveragePositionPlaceholder
+      _setAveragePositionPlaceholder, _addToActionHistory
     } = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key)) {
@@ -283,6 +300,13 @@ class Renderer extends Component {
             this.lookAt([...selectedNodes, ...selectedEdges]);
             return prevState;
           case 'escape':
+            if (nodePositionChanges.length > 0) {
+              selectedNodes.forEach((node, index) => {
+                nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
+              });
+              _addToActionHistory(nodePositionChanges);
+              nodePositionChanges = [];
+            }
             scene.remove(averagePositionPlaceholder);
             _setAveragePositionPlaceholder(undefined);
             _setSelectedNodes([]);
@@ -332,28 +356,6 @@ class Renderer extends Component {
       scene.add(newPlaceholder);
       controls.attach(newPlaceholder);
       _setAveragePositionPlaceholder(newPlaceholder);
-    }
-  }
-
-  handleNodeDragging() {
-    const {controls} = this.state;
-    const {selectedNodes, averagePositionPlaceholder} = this.props;
-    if (controls.dragging && selectedNodes.length) {
-      if (nodePositionChanges.length === 0) {
-        selectedNodes.forEach((node) => {
-          const elementChanges = {element: node};
-          elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
-          nodePositionChanges.push(elementChanges);
-        });
-      }
-      if (selectedNodes.length > 1) {
-        selectedNodes.forEach((node) => {
-          const newPosition = averagePositionPlaceholder.position.clone().sub(averagePositionPlaceholder.userData[node.id]);
-          node.setPositionAbsolute(newPosition);
-        });
-      } else {
-        selectedNodes[0].updateAssociatedEdgePosition();
-      }
     }
   }
 
@@ -597,7 +599,6 @@ class Renderer extends Component {
     }
     this.cameraControls();
     this.handleOutline();
-    this.handleNodeDragging();
     nodes.forEach((node) => {
       if (node.label) {
         node.updateLabelPosition(camera);

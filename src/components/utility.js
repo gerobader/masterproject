@@ -65,6 +65,5 @@ export const calculateAveragePosition = (elements) => {
   elements.forEach((element) => {
     averagePosition.add(element.instance.position);
   });
-  averagePosition.divideScalar(elements.length);
-  return averagePosition;
+  return averagePosition.divideScalar(elements.length);
 };

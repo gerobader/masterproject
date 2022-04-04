@@ -1,5 +1,5 @@
 import {
-  ADD_TO_ACTION_HISTORY,
+  ADD_TO_ACTION_HISTORY, SET_CAMERA,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_SAVE_NETWORK_MODAL
@@ -7,6 +7,7 @@ import {
 
 const initialState = {
   orbitPreview: true,
+  camera: undefined,
   showSaveNetworkModal: false,
   actionHistory: [],
   currentHistoryPosition: 0
@@ -18,6 +19,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         orbitPreview: action.payload
+      };
+    case SET_CAMERA:
+      return {
+        ...state,
+        camera: action.payload
       };
     case SET_SHOW_SAVE_NETWORK_MODAL:
       return {

@@ -1,5 +1,5 @@
 import {
-  ADD_TO_ACTION_HISTORY,
+  ADD_TO_ACTION_HISTORY, SET_CAMERA,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_SAVE_NETWORK_MODAL
@@ -8,6 +8,11 @@ import {
 export const setOrbitPreview = (state) => ({
   type: SET_ORBIT_PREVIEW,
   payload: state
+});
+
+export const setCamera = (camera) => ({
+  type: SET_CAMERA,
+  payload: camera
 });
 
 export const setShowSaveNetworkModal = (show) => ({

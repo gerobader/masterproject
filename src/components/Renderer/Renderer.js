@@ -10,13 +10,14 @@ import Edge from './Elements/Edge';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder
 } from '../../redux/networkElements/networkElements.actions';
-import {setOrbitPreview, addToActionHistory} from '../../redux/settings/settings.actions';
+import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition, RGBtoHex} from '../utility';
 import * as testNodes from '../../data/movies/nodes.json';
 import * as testEdges from '../../data/movies/edges.json';
 
 import './Renderer.scss';
 
+const networkElements = new THREE.Group();
 let animationRunning = false;
 const sensitivity = 0.002;
 const controlKeys = ['w', 'a', 's', 'd', 'f', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'c', ' ', 'escape'];
@@ -29,7 +30,6 @@ const raycaster = new THREE.Raycaster();
 const mousePosition = new THREE.Vector2(0, 0);
 let hoveredElementOutline;
 let selectedElementOutline;
-
 const clock = new THREE.Clock();
 let targetQuaternion;
 let interpolation = 0;
@@ -42,7 +42,6 @@ class Renderer extends Component {
     super(props);
     this.state = {
       scene: undefined,
-      camera: undefined,
       renderer: undefined,
       composer: undefined,
       controls: undefined,
@@ -127,13 +126,8 @@ class Renderer extends Component {
 
   handleMouseDown(e) {
     e.preventDefault();
-    const {
-      _setOrbitPreview, orbitPreview, _setSelectedNodes, _setSelectedEdges
-    } = this.props;
+    const {_setSelectedNodes, _setSelectedEdges} = this.props;
     const {hoveredElement} = this.state;
-    if (orbitPreview) {
-      _setOrbitPreview(false);
-    }
     targetQuaternion = undefined;
     interpolation = 0;
     if (hoveredElement) {
@@ -181,8 +175,8 @@ class Renderer extends Component {
   }
 
   handleMouseMove(e) {
-    const {mouseDown, camera, controls} = this.state;
-    const {selectedNodes, averagePositionPlaceholder} = this.props;
+    const {mouseDown, controls} = this.state;
+    const {selectedNodes, averagePositionPlaceholder, camera} = this.props;
     this.checkIntersect(e);
     if (controls.dragging && selectedNodes.length) {
       if (nodePositionChanges.length === 0) {
@@ -360,7 +354,8 @@ class Renderer extends Component {
   }
 
   updateSceneElements() {
-    const {scene, camera} = this.state;
+    const {scene} = this.state;
+    const {camera} = this.props;
     const {
       nodes: serializedNodes, edges: serializedEdges, _setNodesAndEdges
     } = this.props;
@@ -396,14 +391,10 @@ class Renderer extends Component {
   }
 
   lookAt(elements) {
-    const {camera} = this.state;
+    const {camera} = this.props;
     if (elements.length) {
-      const position = new THREE.Vector3();
       interpolation = 0;
-      elements.forEach((element) => {
-        position.add(element.instance.position);
-      });
-      position.divideScalar(elements.length);
+      const position = calculateAveragePosition(elements);
       const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
       targetQuaternion = new THREE.Quaternion();
       targetQuaternion.setFromRotationMatrix(rotationMatrix);
@@ -412,8 +403,9 @@ class Renderer extends Component {
 
   cameraControls() {
     const {
-      camera, cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
+      cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
     } = this.state;
+    const {camera} = this.props;
     const delta = clock.getDelta();
     if (targetQuaternion) {
       camera.quaternion.slerp(targetQuaternion, delta * 5);
@@ -442,7 +434,8 @@ class Renderer extends Component {
   }
 
   checkIntersect(e) {
-    const {camera, scene, hoveredElement} = this.state;
+    const {scene, hoveredElement} = this.state;
+    const {camera} = this.props;
     const {clientX, clientY} = e;
     mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -471,7 +464,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setNodesAndEdges, remoteNodes, remoteEdges, use2Dimensions
+      _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -501,7 +494,6 @@ class Renderer extends Component {
     window.addEventListener('keydown', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
-    const networkElements = new THREE.Group();
     networkElements.name = 'Network';
     let nodes = [];
     let edges = [];
@@ -577,26 +569,22 @@ class Renderer extends Component {
     controls.setSize(0.5);
     scene.add(controls);
 
+    _setCamera(camera);
     _setNodesAndEdges(nodes, edges, false);
     this.setState((state) => ({
       ...state,
       renderer,
       composer,
       scene,
-      camera,
       controls
     }));
   }
 
   animate() {
-    const {composer, scene, camera} = this.state;
-    const {orbitPreview, nodes} = this.props;
+    const {composer} = this.state;
+    const {orbitPreview, nodes, camera} = this.props;
     requestAnimationFrame(this.animate);
-    if (orbitPreview) {
-      camera.position.x = camera.position.x * Math.cos(0.002) - camera.position.z * Math.sin(0.002);
-      camera.position.z = camera.position.z * Math.cos(0.002) + camera.position.x * Math.sin(0.002);
-      camera.lookAt(scene.position);
-    }
+    if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     this.handleOutline();
     nodes.forEach((node) => {
@@ -628,6 +616,8 @@ class Renderer extends Component {
 
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
+  camera: state.settings.camera,
+  cameraTarget: state.settings.cameraTarget,
   nodes: state.networkElements.nodes,
   edges: state.networkElements.edges,
   updateScene: state.networkElements.updateScene,
@@ -637,7 +627,7 @@ const mapStateToPros = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  _setOrbitPreview: (state) => dispatch(setOrbitPreview(state)),
+  _setCamera: (camera) => dispatch(setCamera(camera)),
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),

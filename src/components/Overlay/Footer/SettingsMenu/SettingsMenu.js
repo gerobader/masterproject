@@ -1,10 +1,12 @@
 import React, {useEffect, useRef} from 'react';
-import {useDispatch} from 'react-redux';
+import {useSelector, useDispatch} from 'react-redux';
+import * as THREE from 'three';
 import MenuSetting from './MenuSetting/MenuSetting';
 import {setOrbitPreview, setShowSaveNetworkModal} from '../../../../redux/settings/settings.actions';
 import {
   setSelectedEdges, setSelectedNodes, setNodesAndEdges
 } from '../../../../redux/networkElements/networkElements.actions';
+import {calculateAveragePosition} from '../../../utility';
 
 import './SettingsMenu.scss';
 import undoIcon from '../../../../assets/undo-icon.svg';
@@ -13,6 +15,8 @@ import downloadIcon from '../../../../assets/download-icon.svg';
 import uploadIcon from '../../../../assets/upload-icon.svg';
 
 const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
+  const {orbitPreview, camera} = useSelector((state) => state.settings);
+  const {nodes} = useSelector((state) => state.networkElements);
   const menuRef = useRef();
   const fileInput = useRef();
   const dispatch = useDispatch();
@@ -40,6 +44,11 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
     fileReader.readAsText(e.target.files[0]);
   };
 
+  const centerView = () => {
+    const networkCenter = nodes ? calculateAveragePosition(nodes) : new THREE.Vector3();
+    camera.lookAt(networkCenter);
+  };
+
   return (
     <div className="settings-menu" ref={menuRef}>
       <input type="file" ref={fileInput} onChange={loadNetwork} className="file-upload"/>
@@ -49,8 +58,9 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
       <MenuSetting menuText="Save Network" imgSource={downloadIcon} onClick={() => dispatch(setShowSaveNetworkModal(true))}/>
       <MenuSetting menuText="Load Network" imgSource={uploadIcon} onClick={() => fileInput.current.click()}/>
       <hr/>
-      <MenuSetting menuText="Rotate Network" onClick={() => dispatch(setOrbitPreview(true))}/>
-      <MenuSetting menuText="Use First Person Controls"/>
+      <MenuSetting menuText="Rotate Network" onClick={() => dispatch(setOrbitPreview(!orbitPreview))}/>
+      <MenuSetting menuText="Center View" onClick={centerView}/>
+      <MenuSetting menuText="Show Keyboard Controls"/>
     </div>
   );
 };

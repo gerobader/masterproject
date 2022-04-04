@@ -56,7 +56,8 @@ class Edge {
   }
 
   setRotation() {
-    const targetVector = this.targetNode.instance.position.clone();
+    const targetVector = new THREE.Vector3();
+    this.targetNode.instance.getWorldPosition(targetVector);
     this.instance.lookAt(targetVector);
     this.instance.rotateX(THREE.Math.degToRad(90));
   }

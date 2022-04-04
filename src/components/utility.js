@@ -63,7 +63,14 @@ export const sortArray = (a, b) => {
 export const calculateAveragePosition = (elements) => {
   const averagePosition = new THREE.Vector3(0, 0, 0);
   elements.forEach((element) => {
-    averagePosition.add(element.instance.position);
+    const elementPosition = new THREE.Vector3();
+    element.instance.getWorldPosition(elementPosition);
+    averagePosition.add(elementPosition);
   });
   return averagePosition.divideScalar(elements.length);
 };
+
+export const titleCase = (text) => {
+  const result = text.replace(/([A-Z])/g, ' $1');
+  return text.charAt(0).toUpperCase() + result.slice(1);
+}

@@ -17,10 +17,12 @@ onmessage = (e) => {
         connectedNodes.push(nodes[incomingEdge.sourceNode]);
       });
       currentNode.sourceForEdges.forEach((outgoingEdge) => {
-        connectedNodes.push(nodes[outgoingEdge.targetNode]);
+        if (!connectedNodes.includes(nodes[outgoingEdge.targetNode])) {
+          connectedNodes.push(nodes[outgoingEdge.targetNode]);
+        }
       });
-      const found = connectedNodes.filter((connectedNode) => connectedNode.id === targetNode.id);
-      if (found.length) {
+      const found = connectedNodes.find((connectedNode) => connectedNode.id === targetNode.id);
+      if (found) {
         usedNodes.add(targetNode);
         const shortestPaths = result.paths.filter((path) => path.size <= usedNodes.size) || [];
         result.distance = distance;

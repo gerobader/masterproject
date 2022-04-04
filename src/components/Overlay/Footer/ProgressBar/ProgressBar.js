@@ -1,4 +1,5 @@
 import React from 'react';
+import Loader from '../../UI/Loader/Loader';
 
 import './ProgressBar.scss';
 
@@ -10,6 +11,7 @@ const ProgressBar = ({progressInfo}) => {
         <div className="progress" style={{width: `${progressInfo.percentage}%`}}/>
       </div>
       <p className="progress-info">{progressInfo.info}</p>
+      <Loader/>
     </div>
   );
 };

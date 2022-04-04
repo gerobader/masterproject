@@ -17,8 +17,13 @@
   user-select: none;
   font-size: $uiElementFontSize;
   font-weight: 400;
-  span{
+  .selected-value{
     white-space: nowrap;
+  }
+  &:not(.has-value){
+    .selected-value {
+      color: $menuWindowFontColorDisabled;
+    }
   }
   &.open{
     border-radius: 5px 5px 0 0;

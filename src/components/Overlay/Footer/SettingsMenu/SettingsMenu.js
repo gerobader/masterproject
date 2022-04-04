@@ -2,6 +2,7 @@ import React, {useEffect, useRef} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import * as THREE from 'three';
 import MenuSetting from './MenuSetting/MenuSetting';
+import Checkbox from '../../UI/Checkbox/Checkbox';
 import {setOrbitPreview, setShowSaveNetworkModal} from '../../../../redux/settings/settings.actions';
 import {
   setSelectedEdges, setSelectedNodes, setNodesAndEdges
@@ -52,13 +53,23 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   return (
     <div className="settings-menu" ref={menuRef}>
       <input type="file" ref={fileInput} onChange={loadNetwork} className="file-upload"/>
-      <MenuSetting menuText="Undo" imgSource={undoIcon} onClick={undoAction}/>
-      <MenuSetting menuText="Redo" imgSource={redoIcon} onClick={redoAction}/>
+      <MenuSetting menuText="Undo" onClick={undoAction}>
+        <img alt="undo-icon" src={undoIcon}/>
+      </MenuSetting>
+      <MenuSetting menuText="Redo" onClick={redoAction}>
+        <img alt="redo-icon" src={redoIcon}/>
+      </MenuSetting>
       <hr/>
-      <MenuSetting menuText="Save Network" imgSource={downloadIcon} onClick={() => dispatch(setShowSaveNetworkModal(true))}/>
-      <MenuSetting menuText="Load Network" imgSource={uploadIcon} onClick={() => fileInput.current.click()}/>
+      <MenuSetting menuText="Save Network" onClick={() => dispatch(setShowSaveNetworkModal(true))}>
+        <img alt="save network icon" src={downloadIcon}/>
+      </MenuSetting>
+      <MenuSetting menuText="Load Network" onClick={() => fileInput.current.click()}>
+        <img alt="load network icon" src={uploadIcon}/>
+      </MenuSetting>
       <hr/>
-      <MenuSetting menuText="Rotate Network" onClick={() => dispatch(setOrbitPreview(!orbitPreview))}/>
+      <MenuSetting menuText="Rotate Network" onClick={() => dispatch(setOrbitPreview(!orbitPreview))}>
+        <Checkbox name="rotation-active" checked={orbitPreview} small/>
+      </MenuSetting>
       <MenuSetting menuText="Center View" onClick={centerView}/>
       <MenuSetting menuText="Show Keyboard Controls"/>
     </div>

@@ -505,9 +505,9 @@ class Renderer extends Component {
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
           RGBtoHex([Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)]),
-          index,
+          node.id || index,
           node.label,
-          node.data,
+          node.data || {},
           false,
           'Sphere',
           undefined,
@@ -517,8 +517,14 @@ class Renderer extends Component {
         return nodeClass;
       });
       edges = testEdges.default.map((edge, index) => {
-        const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
-        const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
+        const sourceNode = nodes.find((node) => {
+          if (typeof edge.source === 'string') return node.labelText === edge.source;
+          return node.id === edge.source;
+        });
+        const targetNode = nodes.find((node) => {
+          if (typeof edge.source === 'string') return node.labelText === edge.target;
+          return node.id === edge.target;
+        });
         const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
@@ -617,7 +623,6 @@ class Renderer extends Component {
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   camera: state.settings.camera,
-  cameraTarget: state.settings.cameraTarget,
   nodes: state.networkElements.nodes,
   edges: state.networkElements.edges,
   updateScene: state.networkElements.updateScene,

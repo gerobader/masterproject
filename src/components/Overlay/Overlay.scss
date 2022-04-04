@@ -1,7 +1,11 @@
 #user-interface{
-  .left-menu{
+  .left-menu, .right-menu{
     position: absolute;
     top: 20px;
     left: 20px;
+  }
+  .right-menu{
+    left: unset;
+    right: 20px;
   }
 }

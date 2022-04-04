@@ -1,0 +1,33 @@
+@import '../../../../assets/settings';
+
+.filters-wrapper{
+  padding: 0 10px;
+  display: flex;
+  flex-grow: 1;
+  flex-direction: column;
+  position: relative;
+  .add-filter-wrapper{
+    display: flex;
+    flex-direction: row;
+    .add-button{
+      height: $uiElementHeight;
+      width: $uiElementHeight;
+      border: 1px solid $menuWindowBorderColor;
+      font-size: $uiElementFontSize;
+      border-radius: $uiElementBorderRadius;
+      margin-right: 10px;
+      cursor: pointer;
+      background: $uiElementBackground url('../../../../assets/plus-icon.svg') center no-repeat;
+    }
+  }
+  .controls{
+    text-align: right;
+    position: absolute;
+    bottom: 0;
+    right: 10px;
+    width: calc(100% - 20px);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+}

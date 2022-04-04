@@ -23,6 +23,8 @@ const ExpandableSetting = ({
             setSelected={setMappingValue}
             parentOpenState={expanded}
             className="overflow-fix"
+            defaultOption="- Select -"
+            titleCaseOptions
           />
           {mappingValue && (<Button text="reset" className="reset" onClick={() => setMappingValue(undefined)}/>)}
         </Setting>

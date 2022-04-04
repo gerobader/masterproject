@@ -4,14 +4,16 @@ import './MenuElement.scss';
 import menuIcon from '../../../assets/menu-icon.svg';
 
 const MenuElement = ({
-  children, headline, icon, simpleHeader
+  children, headline, icon, simpleHeader, rightSide
 }) => {
   const [minimized, setMinimized] = useState(false);
   return (
     <div className={`menu-element${minimized ? ' minimized' : ''}`}>
-      <div className="header">
+      <div className={`header${rightSide ? ' reverse' : ''}`}>
         {!simpleHeader && (
-          <img onClick={() => setMinimized(!minimized)} alt="menu-button" className="menu-button" src={menuIcon}/>
+          <div className="menu-button-wrapper" onClick={() => setMinimized(!minimized)}>
+            <img alt="menu-button" className="menu-button" src={menuIcon}/>
+          </div>
         )}
         <h2>{headline}</h2>
         {!simpleHeader && (

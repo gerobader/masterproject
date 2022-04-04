@@ -34,13 +34,11 @@
       opacity: 1;
       transition: opacity 0.2s ease-in-out;
     }
-    img.menu-button{
+    .menu-button-wrapper{
       position: absolute;
       cursor: pointer;
-      &.menu-button{
-        left: 0;
-        height: 27px;
-      }
+      left: 0;
+      height: 27px;
     }
     .type-icon-wrapper{
       width: 50px;
@@ -51,7 +49,17 @@
       right: 0;
       top: 0;
       height: 27px;
-      transition: right 0.2s ease-in-out, top 0.2s ease-in-out;
+      transition: right 0.2s ease-in-out, left 0.2s ease-in-out, top 0.2s ease-in-out;
+    }
+    &.reverse{
+      .menu-button-wrapper{
+        left: unset;
+        right: 0;
+      }
+      .type-icon-wrapper{
+        left: 0;
+        right: unset;
+      }
     }
   }
   .controls-wrapper{
@@ -75,6 +83,12 @@
       .type-icon-wrapper{
         top: -28px;
         right: -12px;
+      }
+      &.reverse{
+        .type-icon-wrapper{
+          right: unset;
+          left: -12px;
+        }
       }
     }
     .controls-wrapper{

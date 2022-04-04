@@ -1,6 +1,7 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setNodes, setSelectedEdges, setSelectedNodes} from '../../../../../redux/networkElements/networkElements.actions';
+import {titleCase} from '../../../../utility';
 
 import './NodeTable.scss';
 
@@ -17,12 +18,11 @@ const NodeTable = ({changeSortValue, nodes}) => {
       <thead>
         <tr>
           {['id', 'name', 'size', 'color', ...additionalKeys].map((value) => {
-            const result = value.replace(/([A-Z])/g, ' $1');
-            const titleCaseValue = result.charAt(0).toUpperCase() + result.slice(1);
+            const titleCaseValue = titleCase(value);
             return (
               <th
                 key={value}
-                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'edge')}
+                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'node')}
                 onMouseDown={(e) => { mouseDownX = e.clientX; }}
                 className={sortNodesBy === value ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
               >

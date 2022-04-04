@@ -1,6 +1,8 @@
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedEdges, setSelectedNodes} from '../../../../../redux/networkElements/networkElements.actions';
+import {titleCase} from '../../../../utility';
 
 import './EdgeTable.scss';
 
@@ -29,8 +31,7 @@ const EdgeTable = ({changeSortValue, edges}) => {
       <thead>
         <tr>
           {['id', 'sourceName', 'targetName', 'color', 'size'].map((value) => {
-            const result = value.replace(/([A-Z])/g, ' $1');
-            const titleCaseValue = result.charAt(0).toUpperCase() + result.slice(1);
+            const titleCaseValue = titleCase(value);
             return (
               <th
                 key={value}

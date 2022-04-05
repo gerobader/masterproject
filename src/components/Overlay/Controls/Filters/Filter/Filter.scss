@@ -1,0 +1,28 @@
+.filter-wrapper{
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 17px;
+  width: 100%;
+  .move-field{
+    background: url('../../../../../assets/move-button.svg') center no-repeat;
+    cursor: pointer;
+    height: 24px;
+    width: 24px;
+    min-width: 24px;
+    margin-right: 10px;
+  }
+  .input-wrapper{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    margin-right: 10px;
+  }
+  .remove-button{
+    background: url('../../../../../assets/close-icon.svg') center no-repeat;
+    height: 12px;
+    width: 12px;
+    min-width: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+}

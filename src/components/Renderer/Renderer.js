@@ -342,12 +342,12 @@ class Renderer extends Component {
     ) {
       scene.remove(averagePositionPlaceholder);
       const newPlaceholder = new THREE.Object3D();
-      const averagePosition = calculateAveragePosition(newSelectedNodes);
+      const averagePosition = calculateAveragePosition(newSelectedNodes, false);
       newPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
       newSelectedNodes.forEach((node) => {
         newPlaceholder.userData[node.id] = averagePosition.clone().sub(node.instance.position);
       });
-      scene.add(newPlaceholder);
+      networkElements.add(newPlaceholder);
       controls.attach(newPlaceholder);
       _setAveragePositionPlaceholder(newPlaceholder);
     }

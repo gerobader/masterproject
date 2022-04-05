@@ -1,0 +1,20 @@
+.row{
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  &.margin{
+    margin-bottom: 17px;
+  }
+  span{
+    margin-right: 5px;
+  }
+  .function-select{
+    max-width: 70px;
+  }
+  .small-number-input-wrapper{
+    margin-right: 5px;
+    .small-number-input{
+      width: 35px;
+    }
+  }
+}

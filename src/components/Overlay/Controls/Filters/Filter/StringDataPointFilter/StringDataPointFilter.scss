@@ -1,0 +1,18 @@
+.user-select{
+  display: flex;
+  flex-direction: row;
+  .datapoint-select{
+    max-width: unset;
+    min-width: 165px;
+  }
+  .function-select{
+    max-width: unset;
+    min-width: 130px;
+    width: auto;
+    margin: 0;
+  }
+  margin-bottom: 17px;
+}
+.vis-text-input{
+  max-width: unset;
+}

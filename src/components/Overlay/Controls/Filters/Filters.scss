@@ -1,23 +1,34 @@
 @import '../../../../assets/settings';
 
-.filters-wrapper{
+.filters-container{
   padding: 0 10px;
   display: flex;
   flex-grow: 1;
   flex-direction: column;
   position: relative;
-  .add-filter-wrapper{
-    display: flex;
-    flex-direction: row;
-    .add-button{
-      height: $uiElementHeight;
-      width: $uiElementHeight;
-      border: 1px solid $menuWindowBorderColor;
-      font-size: $uiElementFontSize;
-      border-radius: $uiElementBorderRadius;
-      margin-right: 10px;
-      cursor: pointer;
-      background: $uiElementBackground url('../../../../assets/plus-icon.svg') center no-repeat;
+  .filters-wrapper{
+    max-height: 295px;
+    height: 295px;
+    overflow: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    position: relative;
+    &::-webkit-scrollbar{
+      display: none;
+    }    .add-filter-wrapper{
+      display: flex;
+      flex-direction: row;
+      .add-button{
+        height: $uiElementHeight;
+        width: $uiElementHeight;
+        box-sizing: border-box;
+        border: 1px solid $menuWindowBorderColor;
+        font-size: $uiElementFontSize;
+        border-radius: $uiElementBorderRadius;
+        margin-right: 10px;
+        cursor: pointer;
+        background: $uiElementBackground url('../../../../assets/plus-icon.svg') center no-repeat;
+      }
     }
   }
   .controls{

@@ -1,6 +1,7 @@
 .user-select{
   display: flex;
   flex-direction: row;
+  margin-bottom: 10px;
   .datapoint-select{
     max-width: unset;
     min-width: 165px;
@@ -11,7 +12,6 @@
     width: auto;
     margin: 0;
   }
-  margin-bottom: 17px;
 }
 .vis-text-input{
   max-width: unset;

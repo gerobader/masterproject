@@ -12,7 +12,7 @@ const NumberDataPointFilter = ({dataPoints, filter, changeFilterConfig}) => {
       <div className="row margin">
         <Select
           options={dataPoints}
-          value={newFilter.dataPoint}
+          value={newFilter.filterBy}
           setSelected={(value) => changeFilterConfig('dataPoint', value)}
           className="datapoint-select"
           alwaysShowArrow

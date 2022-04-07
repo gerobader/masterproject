@@ -1,4 +1,13 @@
+@import '../../assets/settings';
 #user-interface{
+  color: $menuWindowFontColor;
+  #filter-clone-wrapper{
+    position: fixed;
+    z-index: 10;
+    pointer-events: none;
+    cursor: pointer;
+    opacity: 0.5;
+  }
   .left-menu, .right-menu{
     position: absolute;
     top: 20px;

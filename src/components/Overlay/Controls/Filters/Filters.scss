@@ -15,7 +15,25 @@
     position: relative;
     &::-webkit-scrollbar{
       display: none;
-    }    .add-filter-wrapper{
+    }
+    .hover-indicator-wrapper{
+      height: 17px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      .indicator{
+        width: 100%;
+        height: 2px;
+        background: $menuWindowBorderColor;
+        display: none;
+      }
+      &.active:hover{
+        .indicator{
+          display: block;
+        }
+      }
+    }
+    .add-filter-wrapper{
       display: flex;
       flex-direction: row;
       .add-button{

@@ -1,48 +1,41 @@
-import React, {useMemo} from 'react';
-import {useSelector} from 'react-redux';
+import React from 'react';
 import StringDataPointFilter from './StringDataPointFilter/StringDataPointFilter';
 import NumberDataPointFilter from './NumberDataPointFilter/NumberDataPointFilter';
 
 import './Filter.scss';
 
 const Filter = ({
-  id, filter, updateFilter, removeFilter
+  filter, updateFilter, removeFilter, stringFilterTypes, numberFilterTypes, setFilterCloneSettings, filterCloneSettings,
+  setFilterClonePosition, setCurrentFilterIndex
 }) => {
-  const {nodes} = useSelector((state) => state.networkElements);
   const newFilter = {...filter};
-  const stringDataPoints = useMemo(() => {
-    if (nodes.length === 0) return [];
-    const dataPoints = [];
-    Object.keys(nodes[0].data).forEach((dataPoint) => {
-      if (typeof nodes[0].data[dataPoint] === 'string') dataPoints.push(dataPoint);
-    });
-    return dataPoints;
-  }, [nodes]);
-  const numberDataPoints = useMemo(() => {
-    if (nodes.length === 0) return [];
-    const dataPoints = [];
-    Object.keys(nodes[0].data).forEach((dataPoint) => {
-      if (typeof nodes[0].data[dataPoint] === 'number') dataPoints.push(dataPoint);
-    });
-    return dataPoints;
-  }, [nodes]);
+  const isMoving = filterCloneSettings ? filterCloneSettings.id === filter.id : false;
 
   const changeFilterConfig = (filterOption, newVal) => {
     newFilter[filterOption] = newVal;
-    updateFilter(id, newFilter);
+    updateFilter(newFilter);
+  };
+
+  const moveFieldClick = (e) => {
+    setCurrentFilterIndex(filter.position);
+    setFilterCloneSettings(filter);
+    setFilterClonePosition({x: e.clientX, y: e.clientY});
   };
 
   return (
-    <div className="filter-wrapper">
-      <div className="move-field"/>
+    <div className={`filter-wrapper${isMoving ? ' moving' : ''}`}>
+      <div
+        className="move-field"
+        onMouseDown={moveFieldClick}
+      />
       <div className="input-wrapper">
         {filter.type === 'string' ? (
-          <StringDataPointFilter dataPoints={stringDataPoints} filter={filter} changeFilterConfig={changeFilterConfig}/>
+          <StringDataPointFilter dataPoints={stringFilterTypes} filter={filter} changeFilterConfig={changeFilterConfig}/>
         ) : (
-          <NumberDataPointFilter dataPoints={numberDataPoints} filter={filter} changeFilterConfig={changeFilterConfig}/>
+          <NumberDataPointFilter dataPoints={numberFilterTypes} filter={filter} changeFilterConfig={changeFilterConfig}/>
         )}
       </div>
-      <div className="remove-button" onClick={() => removeFilter(id)}/>
+      <div className="remove-button" onClick={() => removeFilter(filter.id)}/>
     </div>
   );
 };

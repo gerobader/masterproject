@@ -1,8 +1,11 @@
 .filter-wrapper{
   display: flex;
   flex-direction: row;
-  margin-bottom: 17px;
+  //margin-bottom: 17px;
   width: 100%;
+  &.moving{
+    opacity: 0.5;
+  }
   .move-field{
     background: url('../../../../../assets/move-button.svg') center no-repeat;
     cursor: pointer;

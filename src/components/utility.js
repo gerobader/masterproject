@@ -74,3 +74,9 @@ export const titleCase = (text) => {
   const result = text.replace(/([A-Z])/g, ' $1');
   return text.charAt(0).toUpperCase() + result.slice(1);
 };
+
+export const arrayMove = (array, currentIndex, newIndex) => {
+  const newArray = [...array];
+  newArray.splice(newIndex, 0, newArray.splice(currentIndex, 1)[0]);
+  return newArray;
+};

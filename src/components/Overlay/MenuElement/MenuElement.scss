@@ -10,6 +10,7 @@
   transition: height 0.2s ease-in-out, width 0.2s ease-in-out;
   box-sizing: border-box;
   background: $menuWindowBackgroundNonBlur;
+  user-select: none;
   @supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
     background: $menuWindowBackgroundColor;
   }
@@ -17,6 +18,11 @@
   display: flex;
   flex-direction: column;
   margin-bottom: 10px;
+  &.filter-menu{
+    .header{
+      margin-bottom: 0;
+    }
+  }
   .header{
     display: flex;
     flex-direction: row;

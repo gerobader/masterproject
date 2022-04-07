@@ -24,10 +24,7 @@ const Filter = ({
 
   return (
     <div className={`filter-wrapper${isMoving ? ' moving' : ''}`}>
-      <div
-        className="move-field"
-        onMouseDown={moveFieldClick}
-      />
+      <div className="move-field" onMouseDown={moveFieldClick}/>
       <div className="input-wrapper">
         {filter.type === 'string' ? (
           <StringDataPointFilter dataPoints={stringFilterTypes} filter={filter} changeFilterConfig={changeFilterConfig}/>

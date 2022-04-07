@@ -372,6 +372,7 @@ class Renderer extends Component {
         node.colorLocked,
         node.shape,
         node.pathMap,
+        node.visible,
         camera
       );
       scene.add(nodeClass.instance);
@@ -511,6 +512,7 @@ class Renderer extends Component {
           false,
           'Sphere',
           undefined,
+          true,
           camera
         );
         networkElements.add(nodeClass.instance);
@@ -525,7 +527,7 @@ class Renderer extends Component {
           if (typeof edge.source === 'string') return node.name === edge.target;
           return node.id === edge.target;
         });
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
         networkElements.add(edgeClass.instance);
@@ -545,6 +547,7 @@ class Renderer extends Component {
           false,
           'Sphere',
           undefined,
+          true,
           camera
         );
         networkElements.add(nodeClass.instance);
@@ -553,7 +556,7 @@ class Renderer extends Component {
       edges = remoteEdges.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.name === edge.source)[0];
         const targetNode = nodes.filter((node) => node.name === edge.target)[0];
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
         networkElements.add(edgeClass.instance);

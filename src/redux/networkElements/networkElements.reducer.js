@@ -24,6 +24,7 @@ const initialState = {
 };
 
 const sortElements = (elements, sortValue) => {
+  console.log('SORT ELEMENTS', sortValue);
   if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.name, b.sourceNode.name));
   if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.name, b.targetNode.name));
   if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.name, b.name));
@@ -40,7 +41,7 @@ const networkElementsReducer = (state = initialState, action) => {
     case SET_NODES:
       return {
         ...state,
-        nodes: sortElements(action.payload, state.sortBy)
+        nodes: sortElements(action.payload, state.sortNodesBy)
       };
     case SET_EDGES:
       return {

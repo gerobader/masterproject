@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, camera) {
+  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera) {
     this.label = null;
     this.id = id;
     this.name = label;
@@ -17,6 +17,7 @@ class Node {
     this.pathMap = pathMap;
     this.colorLocked = colorLocked;
     this.shape = shape;
+    this.visible = visible;
     this.buildGeometry(x, y, z, shape);
     if (label) {
       // this.addLabel(camera);
@@ -47,6 +48,13 @@ class Node {
       this.color = color;
       this.instance.material.color.set(color);
     }
+  }
+
+  setVisibility(visibility) {
+    this.visible = visibility;
+    this.instance.visible = visibility;
+    this.targetForEdges.forEach((edge) => edge.setVisibility(visibility));
+    this.sourceForEdges.forEach((edge) => edge.setVisibility(visibility));
   }
 
   setColorLock(lock) {
@@ -198,7 +206,8 @@ class Node {
       size: this.size,
       pathMap: serializedPathMap,
       colorLocked: this.colorLocked,
-      shape: this.shape
+      shape: this.shape,
+      visible: this.visible
     };
   }
 }

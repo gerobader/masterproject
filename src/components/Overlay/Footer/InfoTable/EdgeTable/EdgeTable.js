@@ -8,7 +8,7 @@ import './EdgeTable.scss';
 
 let mouseDownX = 0;
 
-const EdgeTable = ({changeSortValue, edges}) => {
+const EdgeTable = ({changeSortValue, edgesToShow}) => {
   const {
     selectedNodes, selectedEdges, sortEdgesBy, edgesReversed
   } = useSelector((state) => state.networkElements);
@@ -30,7 +30,7 @@ const EdgeTable = ({changeSortValue, edges}) => {
     <table>
       <thead>
         <tr>
-          {['id', 'sourceName', 'targetName', 'color', 'size'].map((value) => {
+          {['id', 'sourceName', 'targetName', 'color', 'size', 'visible'].map((value) => {
             const titleCaseValue = titleCase(value);
             return (
               <th
@@ -46,7 +46,7 @@ const EdgeTable = ({changeSortValue, edges}) => {
         </tr>
       </thead>
       <tbody>
-        {edges.map((edge) => (
+        {edgesToShow.map((edge) => (
           <tr className={selectedEdges.includes(edge) ? 'selected' : ''} key={edge.id}>
             <td
               onClick={(e) => {
@@ -77,6 +77,7 @@ const EdgeTable = ({changeSortValue, edges}) => {
             </td>
             <td>{edge.color}</td>
             <td>{edge.size}</td>
+            <td>{edge.visible ? 'Yes' : 'No'}</td>
           </tr>
         ))}
       </tbody>

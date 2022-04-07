@@ -7,17 +7,17 @@ import './NodeTable.scss';
 
 let mouseDownX = 0;
 
-const NodeTable = ({changeSortValue, nodes}) => {
+const NodeTable = ({changeSortValue, nodesToShow}) => {
   const {
-    selectedNodes, sortNodesBy, nodesReversed
+    nodes, selectedNodes, sortNodesBy, nodesReversed
   } = useSelector((state) => state.networkElements);
   const dispatch = useDispatch();
-  const additionalKeys = nodes.length ? Object.keys(nodes[0].data) : [];
+  const additionalKeys = nodesToShow.length ? Object.keys(nodesToShow[0].data) : [];
   return (
     <table>
       <thead>
         <tr>
-          {['id', 'name', 'size', 'color', ...additionalKeys].map((value) => {
+          {['id', 'name', 'size', 'color', 'visible', ...additionalKeys].map((value) => {
             const titleCaseValue = titleCase(value);
             return (
               <th
@@ -33,10 +33,10 @@ const NodeTable = ({changeSortValue, nodes}) => {
         </tr>
       </thead>
       <tbody>
-        {nodes.map((node) => (
+        {nodesToShow.map((node) => (
           <tr
             onClick={(e) => {
-              if (e.target.classList[0] !== 'lock') {
+              if (e.target.classList[0] !== 'extra-button') {
                 let newSelectedNodes = [node];
                 if (e.ctrlKey) {
                   if (selectedNodes.includes(node)) {
@@ -56,11 +56,21 @@ const NodeTable = ({changeSortValue, nodes}) => {
             <td>{node.name}</td>
             <td>{node.size}</td>
             <td>
-              {`${node.color}`}
+              {node.color}
               <div
-                className={`lock${node.colorLocked ? ' show' : ''}`}
+                className={`extra-button lock${node.colorLocked ? ' show' : ''}`}
                 onClick={() => {
                   node.setColorLock(!node.colorLocked);
+                  dispatch(setNodes(nodes));
+                }}
+              />
+            </td>
+            <td>
+              {node.visible ? 'Yes' : 'No'}
+              <div
+                className={`extra-button eye show ${node.visible ? 'open' : 'closed'}`}
+                onClick={() => {
+                  node.setVisibility(!node.visible);
                   dispatch(setNodes(nodes));
                 }}
               />

@@ -52,10 +52,11 @@ const Layout = () => {
     const iteration = () => {
       iterationCount++;
       nodes.forEach((v) => {
+        if (!v.visible) return;
         // repulsive forces
         v.disp.set(0, 0, 0);
         nodes.forEach((u) => {
-          if (v !== u) {
+          if (v !== u && u.visible) {
             const distance = v.instance.position.clone().sub(u.instance.position);
             const length = distance.length() || 0.1;
             const normalizedDistance = distance.clone().normalize();
@@ -64,6 +65,7 @@ const Layout = () => {
         });
       });
       edges.forEach((edge) => {
+        if (!edge.visible) return;
         // attractive forces
         const distance = edge.sourceNode.instance.position.clone().sub(edge.targetNode.instance.position);
         const length = distance.length();
@@ -75,6 +77,7 @@ const Layout = () => {
         edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForceStrength));
       });
       nodes.forEach((node) => {
+        if (!node.visible) return;
         const displacement = node.disp.clone().normalize();
         if (type === 1) displacement.min(temp);
         node.setPositionRelative(displacement, true, size);

@@ -5,7 +5,7 @@ import Select from '../../UI/Select/Select';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import Filter from './Filter/Filter';
-import {setSelectedNodes} from '../../../../redux/networkElements/networkElements.actions';
+import {setNodes, setSelectedNodes} from '../../../../redux/networkElements/networkElements.actions';
 import {arrayMove} from '../../../utility';
 
 import './Filters.scss';
@@ -37,28 +37,40 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   }, [nodes]);
 
   // eslint-disable-next-line no-shadow
-  const applyFilters = (filters) => {
-    let finalNodes = [...nodes];
-    filters.forEach((filter) => {
-      if (filter.type === 'string') {
-        finalNodes = finalNodes.filter((node) => {
-          const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
-          const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
-          if (filter.selectFunction === 'contains') return nodeValue.includes(filter.value.toLowerCase());
-          if (filter.selectFunction === 'doesn\'t contain') return !(nodeValue.includes(filter.value.toLowerCase()));
-          if (filter.selectFunction === 'is not') return nodeValue !== filter.value.toLowerCase();
-          return nodeValue === filter.value.toLowerCase();
-        });
+  const applyFilters = (filters, resultType) => {
+    nodes.forEach((node) => node.setVisibility(true));
+    if (filters.length) {
+      let finalNodes = [...nodes];
+      filters.forEach((filter) => {
+        if (filter.type === 'string') {
+          finalNodes = finalNodes.filter((node) => {
+            const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
+            const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
+            let returnVal = true;
+            if (filter.selectFunction === 'contains') returnVal = nodeValue.includes(filter.value.toLowerCase());
+            else if (filter.selectFunction === 'doesn\'t contain') returnVal = !(nodeValue.includes(filter.value.toLowerCase()));
+            else if (filter.selectFunction === 'is not') returnVal = nodeValue !== filter.value.toLowerCase();
+            else if (filter.selectFunction === 'is') returnVal = nodeValue === filter.value.toLowerCase();
+            return resultType === 'Show' ? !returnVal : returnVal;
+          });
+        } else {
+          finalNodes = finalNodes.filter((node) => {
+            const filterDataLocation = filter.filterBy === 'size' ? node : node.data;
+            const nodeValue = filterDataLocation[filter.filterBy];
+            let returnVal = true;
+            if (filter.selectFunction === 'is not') returnVal = nodeValue > filter.max || nodeValue < filter.min;
+            else if (filter.selectFunction === 'is') returnVal = nodeValue <= filter.max && nodeValue >= filter.min;
+            return resultType === 'Show' ? !returnVal : returnVal;
+          });
+        }
+      });
+      if (resultType === 'Select') {
+        dispatch(setSelectedNodes(finalNodes));
       } else {
-        finalNodes = finalNodes.filter((node) => {
-          const filterDataLocation = filter.filterBy === 'size' ? node : node.data;
-          const nodeValue = filterDataLocation[filter.filterBy];
-          if (filter.selectFunction === 'is not') return nodeValue > filter.max || nodeValue < filter.min;
-          return nodeValue <= filter.max && nodeValue >= filter.min;
-        });
+        finalNodes.forEach((node) => node.setVisibility(false));
       }
-    });
-    dispatch(setSelectedNodes(finalNodes));
+    }
+    dispatch(setNodes(nodes));
   };
 
   const moveFilter = () => {
@@ -70,7 +82,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
         newFilters = arrayMove(filters, currentFilterIndex, newFilterIndex);
       }
       newFilters.forEach((filter, index) => newFilters[index].position = index);
-      if (hotRefresh) applyFilters(newFilters);
+      if (hotRefresh) applyFilters(newFilters, filterResultType);
       setFilters(newFilters);
     }
     setNewFilterIndex(-1);
@@ -100,20 +112,20 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
       filter.max = Math.max(...dataRange);
     }
     const newFilters = [...filters, filter];
-    if (hotRefresh) applyFilters(newFilters);
+    if (hotRefresh) applyFilters(newFilters, filterResultType);
     setFilters(newFilters);
   };
 
   const updateFilter = (newFilter) => {
     const newFilters = filters.map((filter) => (filter.id === newFilter.id ? newFilter : filter));
-    if (hotRefresh) applyFilters(newFilters);
+    if (hotRefresh) applyFilters(newFilters, filterResultType);
     setFilters(newFilters);
   };
 
   const removeFilter = (id) => {
     const newFilters = filters.filter((filter) => (filter.id !== id));
     newFilters.forEach((filter, index) => newFilters[index].position = index);
-    if (hotRefresh) applyFilters(newFilters);
+    applyFilters(newFilters, filterResultType);
     setFilters(newFilters);
   };
 
@@ -121,6 +133,17 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     if (filterCloneSettings) {
       setNewFilterIndex(index);
     }
+  };
+
+  const updateFilterResultType = (type) => {
+    if (filterResultType === 'Select' && type === 'Show') dispatch(setSelectedNodes([]));
+    setFilterResultType(type);
+    if (hotRefresh) applyFilters(filters, type);
+  };
+
+  const updateHotRefresh = (enabled) => {
+    setHotRefresh(enabled);
+    applyFilters(filters, filterResultType);
   };
 
   return (
@@ -171,7 +194,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
         <Select
           options={['Select', 'Show']}
           value={filterResultType}
-          setSelected={setFilterResultType}
+          setSelected={updateFilterResultType}
           opensUp
           alwaysShowArrow
         />
@@ -179,9 +202,9 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
           name="hot-refresh"
           text="Hot refresh"
           checked={hotRefresh}
-          setChecked={setHotRefresh}
+          setChecked={updateHotRefresh}
         />
-        <Button text="Apply" onClick={() => applyFilters(filters)}/>
+        <Button text="Apply" onClick={() => applyFilters(filters, filterResultType)}/>
       </div>
     </div>
   );

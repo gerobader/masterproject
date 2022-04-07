@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 
 class Edge {
-  constructor(id, sourceNode, targetNode, size, color) {
+  constructor(id, sourceNode, targetNode, size, color, visible) {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
     this.instance = null;
     this.size = size;
     this.color = color;
+    this.visible = visible;
     this.buildGeometry();
   }
 
@@ -70,6 +71,11 @@ class Edge {
     }
   }
 
+  setVisibility(visibility) {
+    this.visible = visibility;
+    this.instance.visible = visibility;
+  }
+
   setSize(size, skipCheck) {
     if (size !== this.size || skipCheck) {
       this.instance.children[0].scale.set(size, 1, size);
@@ -85,7 +91,8 @@ class Edge {
       sourceNode: this.sourceNode.id,
       targetNode: this.targetNode.id,
       size: this.size,
-      color: this.color
+      color: this.color,
+      visible: this.visible
     };
   }
 }

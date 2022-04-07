@@ -102,9 +102,9 @@ const InfoTable = ({setProgressInfo}) => {
       </div>
       <div className="table-wrapper">
         {tableType === 'Node Table' ? (
-          <NodeTable changeSortValue={changeSortValue} nodes={filteredElements}/>
+          <NodeTable changeSortValue={changeSortValue} nodesToShow={filteredElements}/>
         ) : (
-          <EdgeTable changeSortValue={changeSortValue} edges={filteredElements}/>
+          <EdgeTable changeSortValue={changeSortValue} edgesToShow={filteredElements}/>
         )}
       </div>
     </div>

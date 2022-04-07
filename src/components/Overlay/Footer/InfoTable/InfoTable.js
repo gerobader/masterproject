@@ -36,7 +36,7 @@ const InfoTable = ({setProgressInfo}) => {
       nodes.forEach((node) => {
         nodeClones[node.id] = {
           id: node.id,
-          name: node.labelText,
+          name: node.name,
           targetForEdges: node.targetForEdges.map((edge) => edgeClones[edge.id]),
           sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
         };
@@ -80,11 +80,11 @@ const InfoTable = ({setProgressInfo}) => {
   const adjustedSearchValue = searchValue.trim().toLowerCase();
   let filteredElements;
   if (tableType === 'Node Table') {
-    filteredElements = nodes.filter((node) => node.labelText.toLowerCase().includes(adjustedSearchValue));
+    filteredElements = nodes.filter((node) => node.name.toLowerCase().includes(adjustedSearchValue));
   } else {
     filteredElements = edges.filter((edge) => (
-      edge.sourceNode.labelText.toLowerCase().includes(adjustedSearchValue)
-      || edge.targetNode.labelText.toLowerCase().includes(adjustedSearchValue)
+      edge.sourceNode.name.toLowerCase().includes(adjustedSearchValue)
+      || edge.targetNode.name.toLowerCase().includes(adjustedSearchValue)
     ));
   }
   return (

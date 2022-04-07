@@ -5,7 +5,7 @@ class Node {
   constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, camera) {
     this.label = null;
     this.id = id;
-    this.labelText = label;
+    this.name = label;
     this.data = data;
     this.instance = null;
     this.targetForEdges = [];
@@ -150,7 +150,7 @@ class Node {
   }
 
   addLabel(camera) {
-    this.label = new Label(this.labelText, this.instance, camera);
+    this.label = new Label(this.name, this.instance, camera);
   }
 
   removeLabel() {
@@ -191,7 +191,7 @@ class Node {
     }
     return {
       id: this.id,
-      labelText: this.labelText,
+      name: this.name,
       data: this.data,
       position: this.instance.position,
       color: this.color,

@@ -24,9 +24,9 @@ const initialState = {
 };
 
 const sortElements = (elements, sortValue) => {
-  if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.labelText, b.sourceNode.labelText));
-  if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.labelText, b.targetNode.labelText));
-  if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.labelText, b.labelText));
+  if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.name, b.sourceNode.name));
+  if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.name, b.targetNode.name));
+  if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.name, b.name));
   if (sortValue === 'color') return elements.sort((a, b) => sortArray(a.color, b.color));
   if (sortValue === 'size') return elements.sort((a, b) => a.size - b.size);
   if (elements[0].data && elements[0].data[sortValue]) {

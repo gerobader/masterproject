@@ -43,12 +43,11 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
       if (filter.type === 'string') {
         finalNodes = finalNodes.filter((node) => {
           const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
-          console.log(filterDataLocation);
-          const nodeValue = filterDataLocation[filter.filterBy];
-          if (filter.selectFunction === 'contains') return nodeValue.includes(filter.value);
-          if (filter.selectFunction === 'doesn\'t contain') return !(nodeValue.includes(filter.value));
-          if (filter.selectFunction === 'is not') return nodeValue !== filter.value;
-          return nodeValue === filter.value;
+          const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
+          if (filter.selectFunction === 'contains') return nodeValue.includes(filter.value.toLowerCase());
+          if (filter.selectFunction === 'doesn\'t contain') return !(nodeValue.includes(filter.value.toLowerCase()));
+          if (filter.selectFunction === 'is not') return nodeValue !== filter.value.toLowerCase();
+          return nodeValue === filter.value.toLowerCase();
         });
       } else {
         finalNodes = finalNodes.filter((node) => {

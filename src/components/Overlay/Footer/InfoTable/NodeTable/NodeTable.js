@@ -53,7 +53,7 @@ const NodeTable = ({changeSortValue, nodes}) => {
             key={node.id}
           >
             <td>{node.id}</td>
-            <td>{node.labelText}</td>
+            <td>{node.name}</td>
             <td>{node.size}</td>
             <td>
               {`${node.color}`}

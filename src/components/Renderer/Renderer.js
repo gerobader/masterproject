@@ -367,7 +367,7 @@ class Renderer extends Component {
         node.size,
         node.color,
         node.id,
-        node.labelText,
+        node.name,
         node.data,
         node.colorLocked,
         node.shape,
@@ -518,11 +518,11 @@ class Renderer extends Component {
       });
       edges = testEdges.default.map((edge, index) => {
         const sourceNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.labelText === edge.source;
+          if (typeof edge.source === 'string') return node.name === edge.source;
           return node.id === edge.source;
         });
         const targetNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.labelText === edge.target;
+          if (typeof edge.source === 'string') return node.name === edge.target;
           return node.id === edge.target;
         });
         const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
@@ -551,8 +551,8 @@ class Renderer extends Component {
         return nodeClass;
       });
       edges = remoteEdges.map((edge, index) => {
-        const sourceNode = nodes.filter((node) => node.labelText === edge.source)[0];
-        const targetNode = nodes.filter((node) => node.labelText === edge.target)[0];
+        const sourceNode = nodes.filter((node) => node.name === edge.source)[0];
+        const targetNode = nodes.filter((node) => node.name === edge.target)[0];
         const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff');
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);

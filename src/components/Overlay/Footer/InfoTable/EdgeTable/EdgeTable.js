@@ -67,13 +67,13 @@ const EdgeTable = ({changeSortValue, edges}) => {
               onClick={(e) => selectNodes(e, edge.sourceNode)}
               className={selectedNodes.includes(edge.sourceNode) ? 'selected' : null}
             >
-              {edge.sourceNode.labelText}
+              {edge.sourceNode.name}
             </td>
             <td
               onClick={(e) => selectNodes(e, edge.targetNode)}
               className={selectedNodes.includes(edge.targetNode) ? 'selected' : null}
             >
-              {edge.targetNode.labelText}
+              {edge.targetNode.name}
             </td>
             <td>{edge.color}</td>
             <td>{edge.size}</td>

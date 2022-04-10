@@ -3,7 +3,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import * as THREE from 'three';
 import MenuSetting from './MenuSetting/MenuSetting';
 import Checkbox from '../../UI/Checkbox/Checkbox';
-import {setOrbitPreview, setShowSaveNetworkModal} from '../../../../redux/settings/settings.actions';
+import {setOrbitPreview, setShowSaveNetworkModal, setShowControlsModal} from '../../../../redux/settings/settings.actions';
 import {
   setSelectedEdges, setSelectedNodes, setNodesAndEdges
 } from '../../../../redux/networkElements/networkElements.actions';
@@ -71,7 +71,7 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
         <Checkbox name="rotation-active" checked={orbitPreview} small/>
       </MenuSetting>
       <MenuSetting menuText="Center View" onClick={centerView}/>
-      <MenuSetting menuText="Show Keyboard Controls"/>
+      <MenuSetting menuText="Show Controls" onClick={() => dispatch(setShowControlsModal(true))}/>
     </div>
   );
 };

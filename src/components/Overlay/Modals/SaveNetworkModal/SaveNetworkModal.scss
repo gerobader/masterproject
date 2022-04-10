@@ -1,0 +1,26 @@
+@import '../../../../assets/settings';
+
+.save-network{
+  .menu-element{
+    height: 236px;
+    .header{
+      margin-bottom: 38px;
+    }
+    .controls-wrapper{
+      .vis-text-input{
+        width: 200px;
+        max-width: unset;
+        margin-bottom: 13px;
+      }
+      .checkbox-wrapper{
+        flex-direction: row-reverse;
+        label{
+          margin: 0 0 0 8px;
+        }
+      }
+      .button-wrapper{
+        margin-top: 30px;
+      }
+    }
+  }
+}

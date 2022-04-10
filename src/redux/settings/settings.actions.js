@@ -2,6 +2,7 @@ import {
   ADD_TO_ACTION_HISTORY, SET_CAMERA,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
+  SET_SHOW_CONTROLS_MODAL,
   SET_SHOW_SAVE_NETWORK_MODAL
 } from '../actionTypes';
 
@@ -17,6 +18,11 @@ export const setCamera = (camera) => ({
 
 export const setShowSaveNetworkModal = (show) => ({
   type: SET_SHOW_SAVE_NETWORK_MODAL,
+  payload: show
+});
+
+export const setShowControlsModal = (show) => ({
+  type: SET_SHOW_CONTROLS_MODAL,
   payload: show
 });
 

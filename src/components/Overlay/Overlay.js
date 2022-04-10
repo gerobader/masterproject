@@ -5,7 +5,8 @@ import Appearance from './Controls/Appearance/Appearance';
 import Layout from './Controls/Layout/Layout';
 import Filters from './Controls/Filters/Filters';
 import Footer from './Footer/Footer';
-import SaveNetworkModal from './SaveNetworkModal/SaveNetworkModal';
+import SaveNetworkModal from './Modals/SaveNetworkModal/SaveNetworkModal';
+import ControlsModal from './Modals/ControlsModal/ControlsModal';
 
 import './Overlay.scss';
 import appearanceIcon from '../../assets/appearance-icon.svg';
@@ -41,6 +42,7 @@ const Overlay = () => {
         </div>
       )}
       <SaveNetworkModal/>
+      <ControlsModal/>
       <div className="left-menu">
         <MenuElement headline="Appearance" icon={appearanceIcon}>
           <Appearance/>

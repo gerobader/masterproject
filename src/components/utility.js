@@ -55,9 +55,10 @@ export const sortElements = (elements, sortValue) => {
   return elements.map((element) => ({object: element, percentage: Math.ceil(((element.data[sortValue] - min) / max) * 100)}));
 };
 
-export const sortArray = (a, b) => {
+export const sortArray = (a, b, reverse = false) => {
+  const compareFunction = reverse ? b < a : a < b;
   if (a === b) return 0;
-  return a < b ? -1 : 1;
+  return compareFunction ? -1 : 1;
 };
 
 export const calculateAveragePosition = (elements, useWorldPosition = true) => {

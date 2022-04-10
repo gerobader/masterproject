@@ -1,0 +1,77 @@
+@import '../../../../assets/settings';
+
+.controls{
+  font-size: $uiElementFontSize;
+  .menu-element{
+    width: 350px;
+    height: auto;
+    .title{
+      text-decoration: underline;
+      margin-bottom: 10px;
+    }
+    .control-rules{
+      margin-bottom: 10px;
+      .rule{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 7px;
+        .keys{
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          width: 150px;
+          justify-content: center;
+          .key{
+            text-align: center;
+            line-height: 24px;
+            height: 24px;
+            width: 24px;
+            border-radius: 5px;
+            box-sizing: border-box;
+            border: 1px solid $menuWindowBorderColor;
+            background: $uiElementBackgroundNotTransparent;
+            margin: 0 5px;
+            &.middle{
+              width: 40px;
+            }
+            &.big{
+              width: 71px
+            }
+            .arrow-down{
+              transform: rotate(180deg);
+            }
+            .arrow-left{
+              transform: rotate(-90deg);
+            }
+            .arrow-right{
+              transform: rotate(90deg);
+            }
+          }
+          .mouse{
+            width: 21px;
+            height: 33px;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 21px 33px;
+          }
+          .left-click{
+            background-image: url('../../../../assets/mouse-left-click.svg');
+          }
+          .middle-click{
+            background-image: url('../../../../assets/mouse-middle-click.svg');
+
+          }
+        }
+        .separator{
+          width: 20px;
+          text-align: center;
+        }
+        .function{
+          width: 150px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}

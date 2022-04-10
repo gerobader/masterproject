@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import MenuElement from '../MenuElement/MenuElement';
-import TextInput from '../UI/TextInput/TextInput';
-import Checkbox from '../UI/Checkbox/Checkbox';
-import Button from '../UI/Button/Button';
-import {setShowSaveNetworkModal} from '../../../redux/settings/settings.actions';
+import Modal from '../Modal';
+import TextInput from '../../UI/TextInput/TextInput';
+import Checkbox from '../../UI/Checkbox/Checkbox';
+import Button from '../../UI/Button/Button';
+import {setShowSaveNetworkModal} from '../../../../redux/settings/settings.actions';
 
 import './SaveNetworkModal.scss';
 
@@ -35,22 +35,23 @@ const SaveNetworkModal = () => {
   };
 
   return (
-    <div className={`save-network-modal${showSaveNetworkModal ? ' show' : ''}`}>
-      <div className="background-overlay"/>
-      <MenuElement headline="Save Network" simpleHeader>
-        <div className="close-button" onClick={() => dispatch(setShowSaveNetworkModal(false))}/>
-        <TextInput value={networkName} setValue={setNetworkName} placeholder="Filename"/>
-        <Checkbox
-          text="Save Path Map (increases File size)"
-          checked={savePathMap}
-          setChecked={setSavePathMap}
-          name="path-map-setting"
-        />
-        <div className="button-wrapper">
-          <Button text="Save Network" onClick={saveNetwork} disabled={networkName === ''}/>
-        </div>
-      </MenuElement>
-    </div>
+    <Modal
+      className="save-network"
+      show={showSaveNetworkModal}
+      headline="Save Network"
+      closeFunction={() => dispatch(setShowSaveNetworkModal(false))}
+    >
+      <TextInput value={networkName} setValue={setNetworkName} placeholder="Filename"/>
+      <Checkbox
+        text="Save Path Map (increases File size)"
+        checked={savePathMap}
+        setChecked={setSavePathMap}
+        name="path-map-setting"
+      />
+      <div className="button-wrapper">
+        <Button text="Save Network" onClick={saveNetwork} disabled={networkName === ''}/>
+      </div>
+    </Modal>
   );
 };
 

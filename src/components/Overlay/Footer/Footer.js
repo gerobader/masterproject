@@ -81,7 +81,6 @@ const Footer = () => {
         <SettingsMenu hideSettings={() => setShowSettings(false)} undoAction={undoAction} redoAction={redoAction}/>
       )}
       <div className="footer">
-        {/* eslint-disable-next-line max-len */}
         <div className="left-info">
           <p className="margin-right">
             {`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}

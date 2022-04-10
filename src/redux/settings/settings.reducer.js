@@ -1,5 +1,7 @@
 import {
-  ADD_TO_ACTION_HISTORY, SET_CAMERA,
+  ADD_TO_ACTION_HISTORY,
+  SET_KEYBOARD_INPUTS_BLOCKED,
+  SET_CAMERA,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
@@ -12,7 +14,8 @@ const initialState = {
   showSaveNetworkModal: false,
   showControlsModal: false,
   actionHistory: [],
-  currentHistoryPosition: 0
+  currentHistoryPosition: 0,
+  keyboardInputsBlocked: false
 };
 
 const settingsReducer = (state = initialState, action) => {
@@ -47,6 +50,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         currentHistoryPosition: action.payload
+      };
+    case SET_KEYBOARD_INPUTS_BLOCKED:
+      return {
+        ...state,
+        keyboardInputsBlocked: action.payload
       };
     default:
       return state;

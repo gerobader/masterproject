@@ -201,8 +201,9 @@ class Renderer extends Component {
   }
 
   handleKeyPress(e) {
+    const {keyboardInputsBlocked} = this.props;
     const key = e.key.toLowerCase();
-    if (controlKeys.includes(key)) {
+    if (controlKeys.includes(key) && !keyboardInputsBlocked) {
       this.setState((prevState) => {
         switch (key) {
           case 'arrowup':
@@ -250,10 +251,10 @@ class Renderer extends Component {
     const {scene} = this.state;
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
-      _setAveragePositionPlaceholder, _addToActionHistory
+      _setAveragePositionPlaceholder, _addToActionHistory, keyboardInputsBlocked
     } = this.props;
     const key = e.key.toLowerCase();
-    if (controlKeys.includes(key)) {
+    if (controlKeys.includes(key) && !keyboardInputsBlocked) {
       this.setState((prevState) => {
         switch (key) {
           case 'arrowup':
@@ -631,7 +632,8 @@ const mapStateToPros = (state) => ({
   updateScene: state.networkElements.updateScene,
   selectedNodes: state.networkElements.selectedNodes,
   selectedEdges: state.networkElements.selectedEdges,
-  averagePositionPlaceholder: state.networkElements.averagePositionPlaceholder
+  averagePositionPlaceholder: state.networkElements.averagePositionPlaceholder,
+  keyboardInputsBlocked: state.settings.keyboardInputsBlocked
 });
 
 const mapDispatchToProps = (dispatch) => ({

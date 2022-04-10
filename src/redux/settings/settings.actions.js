@@ -1,5 +1,7 @@
 import {
-  ADD_TO_ACTION_HISTORY, SET_CAMERA,
+  ADD_TO_ACTION_HISTORY,
+  SET_KEYBOARD_INPUTS_BLOCKED,
+  SET_CAMERA,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
@@ -34,4 +36,9 @@ export const addToActionHistory = (action) => ({
 export const setCurrentHistoryPosition = (position) => ({
   type: SET_CURRENT_HISTORY_POSITION,
   payload: position
+});
+
+export const setBlockKeyboardInput = (block) => ({
+  type: SET_KEYBOARD_INPUTS_BLOCKED,
+  payload: block
 });

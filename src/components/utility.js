@@ -56,8 +56,8 @@ export const sortElements = (elements, sortValue) => {
 };
 
 export const sortArray = (a, b, reverse = false) => {
-  const compareFunction = reverse ? b < a : a < b;
   if (a === b) return 0;
+  const compareFunction = reverse ? b < a : a < b;
   return compareFunction ? -1 : 1;
 };
 

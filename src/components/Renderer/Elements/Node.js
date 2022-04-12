@@ -11,7 +11,6 @@ class Node {
     this.targetForEdges = [];
     this.sourceForEdges = [];
     this.color = color;
-    this.colorIsMapped = false;
     this.size = size;
     this.disp = new THREE.Vector3();
     this.pathMap = pathMap;

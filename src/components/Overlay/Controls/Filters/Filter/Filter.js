@@ -5,25 +5,27 @@ import NumberDataPointFilter from './NumberDataPointFilter/NumberDataPointFilter
 import './Filter.scss';
 
 const Filter = ({
-  filter, updateFilter, removeFilter, stringFilterTypes, numberFilterTypes, setFilterCloneSettings, filterCloneSettings,
-  setFilterClonePosition, setCurrentFilterIndex
+  id, filter, updateFilter, removeFilter, stringFilterTypes, numberFilterTypes, setFilterCloneSettings, filterCloneSettings,
+  setFilterClonePosition, setCurrentFilterLocation, collectionId
 }) => {
   const newFilter = {...filter};
   const isMoving = filterCloneSettings ? filterCloneSettings.id === filter.id : false;
 
   const changeFilterConfig = (filterOption, newVal) => {
     newFilter[filterOption] = newVal;
-    updateFilter(newFilter);
+    updateFilter(id, newFilter);
   };
 
   const moveFieldClick = (e) => {
-    setCurrentFilterIndex(filter.position);
+    setCurrentFilterLocation({collectionId, position: filter.position, elementId: id});
     setFilterCloneSettings(filter);
     setFilterClonePosition({x: e.clientX, y: e.clientY});
   };
 
   return (
-    <div className={`filter-wrapper${isMoving ? ' moving' : ''}`}>
+    <div
+      className={`filter-wrapper${isMoving ? ' moving' : ''}${filterCloneSettings ? ' hover-enabled' : ''}`}
+    >
       <div className="move-field" onMouseDown={moveFieldClick}/>
       <div className="input-wrapper">
         {filter.type === 'string' ? (
@@ -32,7 +34,7 @@ const Filter = ({
           <NumberDataPointFilter dataPoints={numberFilterTypes} filter={filter} changeFilterConfig={changeFilterConfig}/>
         )}
       </div>
-      <div className="remove-button" onClick={() => removeFilter(filter.id)}/>
+      <div className="remove-button" onClick={() => removeFilter(collectionId, filter.id)}/>
     </div>
   );
 };

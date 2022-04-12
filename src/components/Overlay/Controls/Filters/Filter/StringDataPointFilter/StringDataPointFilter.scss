@@ -4,12 +4,12 @@
   margin-bottom: 10px;
   .datapoint-select{
     max-width: unset;
-    min-width: 165px;
+    width: 100%;
+    display: flex;
   }
   .function-select{
-    max-width: unset;
+    max-width: 130px;
     min-width: 130px;
-    width: auto;
     margin: 0;
   }
 }

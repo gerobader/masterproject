@@ -16,5 +16,11 @@
   .right-menu{
     left: unset;
     right: 20px;
+    .filter-menu{
+      height: 700px;
+      &.minimized{
+        height: 58px;
+      }
+    }
   }
 }

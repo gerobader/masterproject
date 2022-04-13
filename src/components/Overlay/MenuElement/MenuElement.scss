@@ -72,7 +72,7 @@
     overflow: hidden;
   }
   &.minimized{
-    height: 58px;
+    height: 58px !important;
     width: 58px;
     .header{
       border-bottom: none;

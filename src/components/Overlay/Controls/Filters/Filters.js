@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid';
 import Select from '../../UI/Select/Select';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
-import Filter from './Filter/Filter';
+import Collection from './Collection/Collection';
 import {setNodes, setSelectedNodes} from '../../../../redux/networkElements/networkElements.actions';
 import {arrayMove} from '../../../utility';
 
@@ -243,93 +243,22 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     applyFilters(filterCollection, filterResultType);
   };
 
-  const renderFilterCollection = (collection, parentCollection) => (
-    <div key={collection.id}>
-      <div className="collection">
-        <div className="top-wrapper">
-          <Select
-            options={['and', 'or']}
-            value={collection.operator}
-            setSelected={(value) => updateCollectionElement(collection.id, {...collection, operator: value})}
-            alwaysShowArrow
-            titleCaseOptions
-          />
-          {parentCollection && (
-            <div className="remove-button" onClick={() => removeElementFromCollection(parentCollection.id, collection.id)}/>
-          )}
-        </div>
-        <div className="element-wrapper">
-          <div
-            className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
-            onMouseEnter={() => updateNewFilterLocation({collectionId: collection.id, position: 0, groupElements: false})}
-            // onMouseLeave={() => updateNewFilterLocation(-1)}
-          >
-            <div className="indicator"/>
-          </div>
-          {collection.elements.map((element) => {
-            if (element.type === 'collection') return renderFilterCollection(element, collection);
-            return (
-              <div key={element.id}>
-                <Filter
-                  id={element.id}
-                  collectionId={collection.id}
-                  filter={element}
-                  updateFilter={updateCollectionElement}
-                  removeFilter={removeElementFromCollection}
-                  stringFilterTypes={stringFilterTypes}
-                  numberFilterTypes={numberFilterTypes}
-                  filterCloneSettings={filterCloneSettings}
-                  setFilterCloneSettings={setFilterCloneSettings}
-                  setFilterClonePosition={setFilterClonePosition}
-                  setCurrentFilterLocation={setCurrentFilterLocation}
-                  onMouseEnter={() => updateNewFilterLocation(
-                    {collectionId: collection.id, position: element.position, groupElements: true}
-                  )}
-                  // onMouseLeave={() => updateNewFilterLocation(-1)}
-                />
-                <div
-                  className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
-                  onMouseEnter={() => updateNewFilterLocation(
-                    {collectionId: collection.id, position: element.position + 1, groupElements: false}
-                  )}
-                  // onMouseLeave={() => updateNewFilterLocation(-1)}
-                >
-                  <div className="indicator"/>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        <div className="add-filter-wrapper">
-          <div className="add-button" onClick={() => addFilter(collection.id)}/>
-          <Select
-            options={[...stringFilterTypes, ...numberFilterTypes]}
-            defaultOption="- Select -"
-            alwaysShowArrow
-            value={collection.filterSelectType}
-            setSelected={(value) => updateCollectionElement(collection.id, {...collection, filterSelectType: value})}
-            titleCaseOptions
-          />
-        </div>
-      </div>
-      {parentCollection && (
-        <div
-          className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
-          onMouseEnter={() => updateNewFilterLocation(
-            {collectionId: parentCollection.id, position: collection.position + 1, groupElements: false}
-          )}
-          // onMouseLeave={() => updateNewFilterLocation(-1)}
-        >
-          <div className="indicator"/>
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="filters-container">
       <div className="filters-wrapper">
-        {renderFilterCollection(filterCollection)}
+        <Collection
+          collection={filterCollection}
+          updateCollectionElement={updateCollectionElement}
+          removeElementFromCollection={removeElementFromCollection}
+          filterCloneSettings={filterCloneSettings}
+          updateNewFilterLocation={updateNewFilterLocation}
+          stringFilterTypes={stringFilterTypes}
+          numberFilterTypes={numberFilterTypes}
+          setFilterCloneSettings={setFilterCloneSettings}
+          setFilterClonePosition={setFilterClonePosition}
+          setCurrentFilterLocation={setCurrentFilterLocation}
+          addFilter={addFilter}
+        />
       </div>
       <div className="controls">
         <Select

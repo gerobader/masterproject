@@ -1,0 +1,65 @@
+@import '../../../../../assets/settings';
+
+.collection{
+  border-left: 1px solid $menuWindowBorderColor;
+  padding-left: 10px;
+  margin-bottom: 17px;
+  .top-wrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    .left-wrapper{
+      display: flex;
+      flex-direction: row;
+      .move-field{
+        background: url('../../../../../assets/move-button.svg') center no-repeat;
+        cursor: pointer;
+        height: 24px;
+        width: 24px;
+        min-width: 24px;
+        margin-right: 10px;
+      }
+    }
+  }
+  .remove-button{
+    background: url('../../../../../assets/close-icon.svg') center no-repeat;
+    height: 12px;
+    width: 12px;
+    min-width: 12px;
+    cursor: pointer;
+    margin-top: 6px;
+  }
+  .hover-indicator-wrapper{
+    height: 17px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    .indicator{
+      width: 100%;
+      height: 2px;
+      background: $menuWindowBorderColor;
+      display: none;
+    }
+    &.active:hover{
+      .indicator{
+        display: block;
+      }
+    }
+  }
+  .add-filter-wrapper{
+    display: flex;
+    flex-direction: row;
+    .add-button{
+      height: $uiElementHeight;
+      width: $uiElementHeight;
+      box-sizing: border-box;
+      border: 1px solid $menuWindowBorderColor;
+      font-size: $uiElementFontSize;
+      border-radius: $uiElementBorderRadius;
+      margin-right: 10px;
+      cursor: pointer;
+      background: $buttonBackgroundColor url('../../../../../assets/plus-icon.svg') center no-repeat;
+    }
+  }
+}

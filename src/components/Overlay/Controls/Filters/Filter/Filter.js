@@ -6,7 +6,7 @@ import './Filter.scss';
 
 const Filter = ({
   id, filter, updateFilter, removeFilter, stringFilterTypes, numberFilterTypes, setFilterCloneSettings, filterCloneSettings,
-  setFilterClonePosition, setCurrentFilterLocation, collectionId
+  setFilterClonePosition, setCurrentFilterLocation, collectionId, onMouseEnter
 }) => {
   const newFilter = {...filter};
   const isMoving = filterCloneSettings ? filterCloneSettings.id === filter.id : false;
@@ -25,6 +25,7 @@ const Filter = ({
   return (
     <div
       className={`filter-wrapper${isMoving ? ' moving' : ''}${filterCloneSettings ? ' hover-enabled' : ''}`}
+      onMouseEnter={onMouseEnter}
     >
       <div className="move-field" onMouseDown={moveFieldClick}/>
       <div className="input-wrapper">

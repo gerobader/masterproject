@@ -5,7 +5,7 @@
   height: $uiElementHeight;
   border: 1px solid $menuWindowBorderColor;
   border-radius: $uiElementBorderRadius;
-  background: $uiElementBackground;
+  background: $uiElementBackgroundNotTransparent;
   color: $menuWindowFontColor;
   font-size: $uiElementFontSize;
   margin-right: 10px;

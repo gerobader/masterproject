@@ -9,7 +9,7 @@
     width: $uiElementHeight + $uiElementHeight;
     text-align: center;
     height: $uiElementHeight;
-    background: $uiElementBackground;
+    background: $uiElementBackgroundNotTransparent;
     border: 1px solid $menuWindowBorderColor;
     border-radius: $uiElementBorderRadius;
     margin: 0;

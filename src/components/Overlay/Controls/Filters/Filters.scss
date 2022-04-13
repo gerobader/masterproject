@@ -20,6 +20,19 @@
       border-left: 1px solid $menuWindowBorderColor;
       padding-left: 10px;
       margin-bottom: 17px;
+      .top-wrapper{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      .remove-button{
+        background: url('../../../../assets/close-icon.svg') center no-repeat;
+        height: 12px;
+        width: 12px;
+        min-width: 12px;
+        cursor: pointer;
+        margin-top: 6px;
+      }
       .hover-indicator-wrapper{
         height: 17px;
         width: 100%;

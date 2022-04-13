@@ -13,48 +13,13 @@ import './Filters.scss';
 const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePosition}) => {
   const {nodes} = useSelector((state) => state.networkElements);
   const [filterResultType, setFilterResultType] = useState('Select');
-  const [hotRefresh, setHotRefresh] = useState(false);
-  const [filterType, setFilterType] = useState();
-  const [filters, setFilters] = useState([]);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [filterCollection, setFilterCollection] = useState({
     type: 'collection',
     operator: 'and',
     id: uuidv4(),
-    elements: [
-      {
-        filterBy: 'name',
-        id: uuidv4(),
-        position: 0,
-        type: 'string',
-        selectFunction: 'contains',
-        value: ''
-      },
-      {
-        filterBy: 'name',
-        id: uuidv4(),
-        position: 1,
-        type: 'string',
-        selectFunction: 'contains',
-        value: ''
-      },
-      {
-        type: 'collection',
-        id: uuidv4(),
-        operator: 'or',
-        position: 2,
-        elements: [
-          {
-            filterBy: 'size',
-            id: uuidv4(),
-            position: 0,
-            type: 'number',
-            selectFunction: 'is',
-            min: 1,
-            max: 12
-          }
-        ]
-      }
-    ]
+    filterSelectType: '',
+    elements: []
   });
   const [currentFilterLocation, setCurrentFilterLocation] = useState();
   const [newFilterLocation, setNewFilterLocation] = useState();
@@ -99,33 +64,61 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   };
 
   // eslint-disable-next-line no-shadow
-  const applyFilters = (filters, resultType) => {
+  const filterNodes = (nodes, filter, resultType) => {
+    let resultNodes = [...nodes];
+    if (filter.type === 'string') {
+      resultNodes = resultNodes.filter((node) => {
+        const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
+        const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
+        let returnVal = true;
+        if (filter.selectFunction === 'contains') returnVal = nodeValue.includes(filter.value.toLowerCase());
+        else if (filter.selectFunction === 'doesn\'t contain') returnVal = !(nodeValue.includes(filter.value.toLowerCase()));
+        else if (filter.selectFunction === 'is not') returnVal = nodeValue !== filter.value.toLowerCase();
+        else if (filter.selectFunction === 'is') returnVal = nodeValue === filter.value.toLowerCase();
+        return resultType === 'Show' ? !returnVal : returnVal;
+      });
+    } else {
+      resultNodes = resultNodes.filter((node) => {
+        const filterDataLocation = filter.filterBy === 'size' ? node : node.data;
+        const nodeValue = filterDataLocation[filter.filterBy];
+        let returnVal = true;
+        if (filter.selectFunction === 'is not') returnVal = nodeValue > filter.max || nodeValue < filter.min;
+        else if (filter.selectFunction === 'is') returnVal = nodeValue <= filter.max && nodeValue >= filter.min;
+        return resultType === 'Show' ? !returnVal : returnVal;
+      });
+    }
+    return resultNodes;
+  };
+
+  // eslint-disable-next-line no-shadow
+  const applyFilters = (filterCollection, resultType) => {
     nodes.forEach((node) => node.setVisibility(true));
-    if (filters.length) {
-      let finalNodes = [...nodes];
-      filters.forEach((filter) => {
-        if (filter.type === 'string') {
-          finalNodes = finalNodes.filter((node) => {
-            const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
-            const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
-            let returnVal = true;
-            if (filter.selectFunction === 'contains') returnVal = nodeValue.includes(filter.value.toLowerCase());
-            else if (filter.selectFunction === 'doesn\'t contain') returnVal = !(nodeValue.includes(filter.value.toLowerCase()));
-            else if (filter.selectFunction === 'is not') returnVal = nodeValue !== filter.value.toLowerCase();
-            else if (filter.selectFunction === 'is') returnVal = nodeValue === filter.value.toLowerCase();
-            return resultType === 'Show' ? !returnVal : returnVal;
+    if (filterCollection.elements.length) {
+      const applyCollectionFilter = (collection, availableNodes) => {
+        let temporaryNodes = [];
+        if (collection.operator === 'and') {
+          temporaryNodes = [...availableNodes];
+          collection.elements.forEach((collectionElement) => {
+            if (collectionElement.type === 'collection' && collectionElement.elements.length) {
+              temporaryNodes = applyCollectionFilter(collectionElement, temporaryNodes);
+            } else {
+              temporaryNodes = filterNodes(temporaryNodes, collectionElement, resultType);
+            }
           });
         } else {
-          finalNodes = finalNodes.filter((node) => {
-            const filterDataLocation = filter.filterBy === 'size' ? node : node.data;
-            const nodeValue = filterDataLocation[filter.filterBy];
-            let returnVal = true;
-            if (filter.selectFunction === 'is not') returnVal = nodeValue > filter.max || nodeValue < filter.min;
-            else if (filter.selectFunction === 'is') returnVal = nodeValue <= filter.max && nodeValue >= filter.min;
-            return resultType === 'Show' ? !returnVal : returnVal;
+          collection.elements.forEach((collectionElement) => {
+            if (collectionElement.type === 'collection') {
+              temporaryNodes = [...temporaryNodes, ...applyCollectionFilter(collectionElement, availableNodes)];
+            } else {
+              temporaryNodes = [...temporaryNodes, ...filterNodes(availableNodes, collectionElement, resultType)];
+            }
           });
+          // remove duplicate nodes
+          temporaryNodes = [...new Set(temporaryNodes)];
         }
-      });
+        return temporaryNodes;
+      };
+      const finalNodes = applyCollectionFilter(filterCollection, nodes);
       if (resultType === 'Select') {
         dispatch(setSelectedNodes(finalNodes));
       } else {
@@ -136,10 +129,35 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   };
 
   const moveFilter = () => {
-    if (currentFilterLocation !== newFilterLocation) {
+    if (currentFilterLocation && newFilterLocation && !(
+      currentFilterLocation.position === newFilterLocation.position
+      && currentFilterLocation.collectionId === newFilterLocation.collectionId
+    )) {
       const newFilterCollection = {...filterCollection};
       const collection = findCollectionElementById(newFilterCollection, newFilterLocation.collectionId);
-      if (currentFilterLocation.collectionId === newFilterLocation.collectionId) {
+      if (newFilterLocation.groupElements) {
+        // get the 2 filters
+        const sourceCollection = findCollectionElementById(newFilterCollection, currentFilterLocation.collectionId);
+        const targetFilter = {...collection.elements[newFilterLocation.position], position: 0};
+        const sourceFilter = {...sourceCollection.elements[currentFilterLocation.position], position: 1};
+        // create collection with the 2 filters
+        const newCollection = {
+          type: 'collection',
+          id: uuidv4(),
+          operator: 'and',
+          position: targetFilter.position,
+          filterSelectType: '',
+          elements: [targetFilter, sourceFilter]
+        };
+        // add collection in place of the target filter
+        collection.elements.push(newCollection);
+        collection.elements = arrayMove(collection.elements, collection.elements.length - 1, newFilterLocation.position);
+        // remove the two filters from their parent collections
+        sourceCollection.elements = sourceCollection.elements.filter((element) => (element.id !== sourceFilter.id));
+        sourceCollection.elements.forEach((element, index) => sourceCollection.elements[index].position = index);
+        collection.elements = collection.elements.filter((element) => (element.id !== targetFilter.id));
+        collection.elements.forEach((element, index) => collection.elements[index].position = index);
+      } else if (currentFilterLocation.collectionId === newFilterLocation.collectionId) {
         if (currentFilterLocation.position < newFilterLocation.position) {
           collection.elements = arrayMove(collection.elements, currentFilterLocation.position, newFilterLocation.position - 1);
         } else {
@@ -154,7 +172,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
         oldParentCollection.elements.forEach((element, index) => oldParentCollection.elements[index].position = index);
       }
       collection.elements.forEach((element, index) => collection.elements[index].position = index);
-      // if (hotRefresh) applyFilters(newFilters, filterResultType);
+      if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
       setFilterCollection(newFilterCollection);
     }
     setNewFilterLocation(-1);
@@ -166,25 +184,28 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     }
   }, [filterCloneSettings, newFilterLocation]);
 
-  const addFilter = () => {
-    if (!filterType) return;
+  const addFilter = (collectionId) => {
+    const newFilterCollection = {...filterCollection};
+    const collection = findCollectionElementById(newFilterCollection, collectionId);
+    const {filterSelectType, elements} = collection;
+    if (!filterSelectType) return;
     const filter = {};
-    filter.filterBy = filterType;
+    filter.filterBy = filterSelectType;
     filter.id = uuidv4();
-    filter.position = filterCollection.elements.length;
-    if (stringFilterTypes.includes(filterType)) {
+    filter.position = elements.length;
+    if (stringFilterTypes.includes(filterSelectType)) {
       filter.type = 'string';
       filter.selectFunction = 'contains';
       filter.value = '';
     } else {
-      const dataRange = nodes.map((node) => (filterType === 'size' ? node.size : node.data[filterType]));
+      const dataRange = nodes.map((node) => (filterSelectType === 'size' ? node.size : node.data[filterSelectType]));
       filter.type = 'number';
       filter.selectFunction = 'is';
       filter.min = Math.min(...dataRange);
       filter.max = Math.max(...dataRange);
     }
-    const newFilterCollection = {...filterCollection, elements: [...filterCollection.elements, filter]};
-    // if (hotRefresh) applyFilters(newFilters, filterResultType);
+    collection.elements.push(filter);
+    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
     setFilterCollection(newFilterCollection);
   };
 
@@ -192,6 +213,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     const newFilterCollection = {...filterCollection};
     const elementToUpdate = findCollectionElementById(newFilterCollection, id);
     Object.keys(newElement).forEach((attribute) => { elementToUpdate[attribute] = newElement[attribute]; });
+    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
     setFilterCollection(newFilterCollection);
   };
 
@@ -200,41 +222,47 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     const collection = findCollectionElementById(newFilterCollection, collectionId);
     collection.elements = collection.elements.filter((element) => (element.id !== elementId));
     collection.elements.forEach((element, index) => collection.elements[index].position = index);
+    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
     setFilterCollection(newFilterCollection);
   };
 
-  const updateNewFilterLocation = (index) => {
+  const updateNewFilterLocation = (locationSettings) => {
     if (filterCloneSettings) {
-      setNewFilterLocation(index);
+      setNewFilterLocation(locationSettings);
     }
   };
 
   const updateFilterResultType = (type) => {
     if (filterResultType === 'Select' && type === 'Show') dispatch(setSelectedNodes([]));
     setFilterResultType(type);
-    if (hotRefresh) applyFilters(filters, type);
+    if (autoRefresh) applyFilters(filterCollection, type);
   };
 
-  const updateHotRefresh = (enabled) => {
-    setHotRefresh(enabled);
-    applyFilters(filters, filterResultType);
+  const updateAutoRefresh = (enabled) => {
+    setAutoRefresh(enabled);
+    applyFilters(filterCollection, filterResultType);
   };
 
   const renderFilterCollection = (collection, parentCollection) => (
-    <div className="collection-wrapper" key={collection.id}>
+    <div key={collection.id}>
       <div className="collection">
-        <Select
-          options={['and', 'or']}
-          value={collection.operator}
-          setSelected={(value) => updateCollectionElement(collection.id, {...collection, operator: value})}
-          alwaysShowArrow
-          titleCaseOptions
-        />
+        <div className="top-wrapper">
+          <Select
+            options={['and', 'or']}
+            value={collection.operator}
+            setSelected={(value) => updateCollectionElement(collection.id, {...collection, operator: value})}
+            alwaysShowArrow
+            titleCaseOptions
+          />
+          {parentCollection && (
+            <div className="remove-button" onClick={() => removeElementFromCollection(parentCollection.id, collection.id)}/>
+          )}
+        </div>
         <div className="element-wrapper">
           <div
             className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
-            onMouseEnter={() => updateNewFilterLocation({collectionId: collection.id, position: 0})}
-            onMouseLeave={() => updateNewFilterLocation(-1)}
+            onMouseEnter={() => updateNewFilterLocation({collectionId: collection.id, position: 0, groupElements: false})}
+            // onMouseLeave={() => updateNewFilterLocation(-1)}
           >
             <div className="indicator"/>
           </div>
@@ -254,11 +282,17 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
                   setFilterCloneSettings={setFilterCloneSettings}
                   setFilterClonePosition={setFilterClonePosition}
                   setCurrentFilterLocation={setCurrentFilterLocation}
+                  onMouseEnter={() => updateNewFilterLocation(
+                    {collectionId: collection.id, position: element.position, groupElements: true}
+                  )}
+                  // onMouseLeave={() => updateNewFilterLocation(-1)}
                 />
                 <div
                   className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
-                  onMouseEnter={() => updateNewFilterLocation({collectionId: collection.id, position: element.position + 1})}
-                  onMouseLeave={() => updateNewFilterLocation(-1)}
+                  onMouseEnter={() => updateNewFilterLocation(
+                    {collectionId: collection.id, position: element.position + 1, groupElements: false}
+                  )}
+                  // onMouseLeave={() => updateNewFilterLocation(-1)}
                 >
                   <div className="indicator"/>
                 </div>
@@ -267,13 +301,13 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
           })}
         </div>
         <div className="add-filter-wrapper">
-          <div className="add-button" onClick={addFilter}/>
+          <div className="add-button" onClick={() => addFilter(collection.id)}/>
           <Select
             options={[...stringFilterTypes, ...numberFilterTypes]}
             defaultOption="- Select -"
             alwaysShowArrow
-            value={filterType}
-            setSelected={setFilterType}
+            value={collection.filterSelectType}
+            setSelected={(value) => updateCollectionElement(collection.id, {...collection, filterSelectType: value})}
             titleCaseOptions
           />
         </div>
@@ -282,9 +316,9 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
         <div
           className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
           onMouseEnter={() => updateNewFilterLocation(
-            {collectionId: parentCollection.id, position: collection.position + 1}
+            {collectionId: parentCollection.id, position: collection.position + 1, groupElements: false}
           )}
-          onMouseLeave={() => updateNewFilterLocation(-1)}
+          // onMouseLeave={() => updateNewFilterLocation(-1)}
         >
           <div className="indicator"/>
         </div>
@@ -306,12 +340,12 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
           alwaysShowArrow
         />
         <Checkbox
-          name="hot-refresh"
-          text="Hot refresh"
-          checked={hotRefresh}
-          setChecked={updateHotRefresh}
+          name="auto-refresh"
+          text="Auto refresh"
+          checked={autoRefresh}
+          setChecked={updateAutoRefresh}
         />
-        <Button text="Apply" onClick={() => applyFilters(filters, filterResultType)}/>
+        <Button text="Apply" onClick={() => applyFilters(filterCollection, filterResultType)}/>
       </div>
     </div>
   );

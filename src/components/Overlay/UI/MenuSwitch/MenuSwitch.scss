@@ -6,7 +6,7 @@
   margin-bottom: 20px;
   .switch {
     border: 1px solid $menuWindowBorderColor;
-    background: $uiElementBackground;
+    background: $uiElementBackgroundNotTransparent;
     flex-grow: 1;
     text-align: center;
     font-size: 14px;

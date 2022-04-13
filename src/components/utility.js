@@ -72,6 +72,7 @@ export const calculateAveragePosition = (elements, useWorldPosition = true) => {
 };
 
 export const titleCase = (text) => {
+  if (!text) return '';
   const result = text.replace(/([A-Z])/g, ' $1');
   return text.charAt(0).toUpperCase() + result.slice(1);
 };

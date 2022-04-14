@@ -94,7 +94,7 @@ const Layout = () => {
 
   const startCalculation = () => {
     nodes.forEach((node) => {
-      const elementChanges = {element: node};
+      const elementChanges = {element: node, type: 'graphElement'};
       elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
       changes.push(elementChanges);
     });

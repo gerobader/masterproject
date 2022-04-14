@@ -181,7 +181,7 @@ class Renderer extends Component {
     if (controls.dragging && selectedNodes.length) {
       if (nodePositionChanges.length === 0) {
         selectedNodes.forEach((node) => {
-          const elementChanges = {element: node};
+          const elementChanges = {element: node, type: 'graphElement'};
           elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
           nodePositionChanges.push(elementChanges);
         });

@@ -5,6 +5,7 @@ import ProgressBar from './ProgressBar/ProgressBar';
 import SettingsMenu from './SettingsMenu/SettingsMenu';
 import {setCurrentHistoryPosition} from '../../../redux/settings/settings.actions';
 import {setNodes} from '../../../redux/networkElements/networkElements.actions';
+import {setFilterCollection} from '../../../redux/filter/filter.action';
 import {calculateAveragePosition} from '../../utility';
 
 import './Footer.scss';
@@ -23,12 +24,16 @@ const Footer = () => {
     if (currentHistoryPosition > 0) {
       const actionsToUndo = actionHistory[currentHistoryPosition - 1];
       actionsToUndo.forEach((action) => {
-        const actionTypes = Object.keys(action);
-        actionTypes.forEach((actionType) => {
-          if (typeof action.element[actionType] === 'function') {
-            action.element[actionType](action[actionType].before);
-          }
-        });
+        if (action.type === 'graphElement') {
+          const actionTypes = Object.keys(action);
+          actionTypes.forEach((actionType) => {
+            if (typeof action.element[actionType] === 'function') {
+              action.element[actionType](action[actionType].before);
+            }
+          });
+        } else if (action.type === 'filterChange') {
+          dispatch(setFilterCollection(action.before));
+        }
       });
       if (averagePositionPlaceholder) {
         const averagePosition = calculateAveragePosition(selectedNodes);
@@ -43,12 +48,16 @@ const Footer = () => {
     if (currentHistoryPosition < actionHistory.length) {
       const actionsToRedo = actionHistory[currentHistoryPosition];
       actionsToRedo.forEach((action) => {
-        const actionTypes = Object.keys(action);
-        actionTypes.forEach((actionType) => {
-          if (typeof action.element[actionType] === 'function') {
-            action.element[actionType](action[actionType].after);
-          }
-        });
+        if (action.type === 'graphElement') {
+          const actionTypes = Object.keys(action);
+          actionTypes.forEach((actionType) => {
+            if (typeof action.element[actionType] === 'function') {
+              action.element[actionType](action[actionType].after);
+            }
+          });
+        } else if (action.type === 'filterChange') {
+          dispatch(setFilterCollection(action.after));
+        }
       });
       if (averagePositionPlaceholder) {
         const averagePosition = calculateAveragePosition(selectedNodes);
@@ -62,6 +71,7 @@ const Footer = () => {
   const functionShortcuts = (e) => {
     const {key, ctrlKey, shiftKey} = e;
     if (key.toLowerCase() === 'z' && ctrlKey) {
+      e.preventDefault();
       if (shiftKey) redoAction();
       else undoAction();
     }

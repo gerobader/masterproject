@@ -3,7 +3,9 @@
 .collection{
   border-left: 1px solid $menuWindowBorderColor;
   padding-left: 10px;
-  margin-bottom: 17px;
+  &:not(.is-root){
+    margin: 10px 0;
+  }
   .top-wrapper{
     display: flex;
     flex-direction: row;

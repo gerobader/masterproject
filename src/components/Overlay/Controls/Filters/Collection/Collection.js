@@ -20,7 +20,7 @@ const Collection = ({
 
   return (
     <>
-      <div className="collection">
+      <div className={`collection${!parentCollection ? ' is-root' : ''}`}>
         <div className="top-wrapper">
           <div className="left-wrapper">
             {parentCollection && <div className="move-field" onMouseDown={moveFieldClick}/>}
@@ -40,6 +40,7 @@ const Collection = ({
           <div
             className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
             onMouseEnter={() => updateNewFilterLocation({collectionId: collection.id, position: 0, groupElements: false})}
+            onMouseLeave={() => updateNewFilterLocation(-1)}
           >
             <div className="indicator"/>
           </div>
@@ -80,12 +81,14 @@ const Collection = ({
                   onMouseEnter={() => updateNewFilterLocation(
                     {collectionId: collection.id, position: element.position, groupElements: true}
                   )}
+                  onMouseLeave={() => updateNewFilterLocation(-1)}
                 />
                 <div
                   className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
                   onMouseEnter={() => updateNewFilterLocation(
                     {collectionId: collection.id, position: element.position + 1, groupElements: false}
                   )}
+                  onMouseLeave={() => updateNewFilterLocation(-1)}
                 >
                   <div className="indicator"/>
                 </div>
@@ -105,6 +108,17 @@ const Collection = ({
           />
         </div>
       </div>
+      {parentCollection && (
+        <div
+          className={`hover-indicator-wrapper${filterCloneSettings ? ' active' : ''}`}
+          onMouseEnter={() => updateNewFilterLocation(
+            {collectionId: parentCollection.id, position: collection.position + 1, groupElements: false}
+          )}
+          onMouseLeave={() => updateNewFilterLocation(-1)}
+        >
+          <div className="indicator"/>
+        </div>
+      )}
     </>
   );
 };

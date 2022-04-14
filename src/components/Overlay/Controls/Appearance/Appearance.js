@@ -89,7 +89,7 @@ const Appearance = () => {
         ).pop();
         const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
         if (color) {
-          const elementChanges = {element};
+          const elementChanges = {element, type: 'graphElement'};
           if (targetElement === 'node' && typeof element.object.setColor === 'function') {
             elementChanges.setColor = {before: element.object.color, after: color};
             changes.push(elementChanges);
@@ -105,7 +105,7 @@ const Appearance = () => {
       dispatch(setNodes(nodes));
     } else if (mappingValue) {
       nodes.forEach((node) => {
-        const elementChanges = {element: node};
+        const elementChanges = {element: node, type: 'graphElement'};
         if (targetElement === 'node') {
           elementChanges.setColor = {before: node.color, after: colorMapIndicators[node.data[mappingValue]]};
           changes.push(elementChanges);
@@ -130,7 +130,7 @@ const Appearance = () => {
         const min = parseFloat(sizeMapping[0]);
         const max = parseFloat(sizeMapping[1]);
         sortedElements.forEach((element) => {
-          const elementChanges = {element};
+          const elementChanges = {element, type: 'graphElement'};
           const newSize = min + ((max - min) * (element.percentage / 100));
           if (targetElement === 'node' && typeof element.object.setSize === 'function') {
             elementChanges.setSize = {before: element.object.size, after: newSize};
@@ -147,7 +147,7 @@ const Appearance = () => {
       }
     } else if (mappingValue) {
       elementsToUse.forEach((node) => {
-        const elementChanges = {element: node};
+        const elementChanges = {element: node, type: 'graphElement'};
         if (targetElement === 'node') {
           elementChanges.setSize = {before: node.size, after: sizeMapping[node.data[mappingValue]]};
           changes.push(elementChanges);
@@ -169,7 +169,7 @@ const Appearance = () => {
       const nodeData = node.data[dataToMapOn];
       const shape = dataMapping[nodeData];
       node.setShape(shape);
-      const elementChanges = {element: node};
+      const elementChanges = {element: node, type: 'graphElement'};
       elementChanges.setShape = {before: node.shape, after: shape};
       changes.push(elementChanges);
     });
@@ -204,7 +204,7 @@ const Appearance = () => {
       }
       const changes = [];
       elementsToEdit.forEach((element) => {
-        const elementChanges = {element};
+        const elementChanges = {element, type: 'graphElement'};
         if (fillColor && typeof element.setColor === 'function' && element.color !== fillColor) {
           elementChanges.setColor = {before: element.color, after: fillColor};
           element.setColor(fillColor);

@@ -9,7 +9,7 @@ import {
 } from '../actionTypes';
 
 const initialState = {
-  orbitPreview: true,
+  orbitPreview: false,
   camera: undefined,
   showSaveNetworkModal: false,
   showControlsModal: false,

@@ -6,21 +6,17 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import Collection from './Collection/Collection';
 import {setNodes, setSelectedNodes} from '../../../../redux/networkElements/networkElements.actions';
+import {setFilterCollection} from '../../../../redux/filter/filter.action';
+import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {arrayMove} from '../../../utility';
 
 import './Filters.scss';
 
 const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePosition}) => {
   const {nodes} = useSelector((state) => state.networkElements);
+  const {filterCollection} = useSelector((state) => state.filter);
   const [filterResultType, setFilterResultType] = useState('Select');
   const [autoRefresh, setAutoRefresh] = useState(false);
-  const [filterCollection, setFilterCollection] = useState({
-    type: 'collection',
-    operator: 'and',
-    id: uuidv4(),
-    filterSelectType: '',
-    elements: []
-  });
   const [currentFilterLocation, setCurrentFilterLocation] = useState();
   const [newFilterLocation, setNewFilterLocation] = useState();
   const dispatch = useDispatch();
@@ -40,6 +36,16 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     });
     return filterTypes;
   }, [nodes]);
+
+  const updateFilterCollection = (newFilterCollection) => {
+    const filterChange = [{
+      type: 'filterChange',
+      before: filterCollection,
+      after: newFilterCollection
+    }];
+    dispatch(addToActionHistory(filterChange));
+    dispatch(setFilterCollection(newFilterCollection));
+  };
 
   const findCollectionElementById = (collection, id) => {
     let result;
@@ -133,7 +139,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
       currentFilterLocation.position === newFilterLocation.position
       && currentFilterLocation.collectionId === newFilterLocation.collectionId
     )) {
-      const newFilterCollection = {...filterCollection};
+      const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
       const collection = findCollectionElementById(newFilterCollection, newFilterLocation.collectionId);
       if (newFilterLocation.groupElements) {
         // get the 2 filters
@@ -172,8 +178,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
         oldParentCollection.elements.forEach((element, index) => oldParentCollection.elements[index].position = index);
       }
       collection.elements.forEach((element, index) => collection.elements[index].position = index);
-      if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
-      setFilterCollection(newFilterCollection);
+      updateFilterCollection(newFilterCollection);
     }
     setNewFilterLocation(-1);
   };
@@ -184,8 +189,12 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     }
   }, [filterCloneSettings, newFilterLocation]);
 
+  useEffect(() => {
+    if (autoRefresh) applyFilters(filterCollection, filterResultType);
+  }, [autoRefresh, filterCollection, filterResultType]);
+
   const addFilter = (collectionId) => {
-    const newFilterCollection = {...filterCollection};
+    const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const collection = findCollectionElementById(newFilterCollection, collectionId);
     const {filterSelectType, elements} = collection;
     if (!filterSelectType) return;
@@ -205,25 +214,22 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
       filter.max = Math.max(...dataRange);
     }
     collection.elements.push(filter);
-    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
-    setFilterCollection(newFilterCollection);
+    updateFilterCollection(newFilterCollection);
   };
 
   const updateCollectionElement = (id, newElement) => {
-    const newFilterCollection = {...filterCollection};
+    const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const elementToUpdate = findCollectionElementById(newFilterCollection, id);
     Object.keys(newElement).forEach((attribute) => { elementToUpdate[attribute] = newElement[attribute]; });
-    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
-    setFilterCollection(newFilterCollection);
+    updateFilterCollection(newFilterCollection);
   };
 
   const removeElementFromCollection = (collectionId, elementId) => {
-    const newFilterCollection = {...filterCollection};
+    const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const collection = findCollectionElementById(newFilterCollection, collectionId);
     collection.elements = collection.elements.filter((element) => (element.id !== elementId));
     collection.elements.forEach((element, index) => collection.elements[index].position = index);
-    if (autoRefresh) applyFilters(newFilterCollection, filterResultType);
-    setFilterCollection(newFilterCollection);
+    updateFilterCollection(newFilterCollection);
   };
 
   const updateNewFilterLocation = (locationSettings) => {
@@ -235,7 +241,6 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   const updateFilterResultType = (type) => {
     if (filterResultType === 'Select' && type === 'Show') dispatch(setSelectedNodes([]));
     setFilterResultType(type);
-    if (autoRefresh) applyFilters(filterCollection, type);
   };
 
   const updateAutoRefresh = (enabled) => {

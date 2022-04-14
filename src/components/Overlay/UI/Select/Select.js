@@ -26,7 +26,7 @@ const Select = ({
             <div
               key={option}
               className={`option${value === option ? ' selected' : ''}`}
-              onClick={() => setSelected(option)}
+              onClick={() => { if (option !== value) setSelected(option); }}
             >
               {titleCaseOptions ? titleCase(option) : option}
             </div>

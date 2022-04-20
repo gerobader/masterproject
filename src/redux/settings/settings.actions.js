@@ -5,7 +5,7 @@ import {
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
-  SET_SHOW_SAVE_NETWORK_MODAL
+  SET_SHOW_SAVE_NETWORK_MODAL, SET_SHOW_LABEL
 } from '../actionTypes';
 
 export const setOrbitPreview = (state) => ({
@@ -16,6 +16,11 @@ export const setOrbitPreview = (state) => ({
 export const setCamera = (camera) => ({
   type: SET_CAMERA,
   payload: camera
+});
+
+export const setShowLabel = (labelState) => ({
+  type: SET_SHOW_LABEL,
+  payload: labelState
 });
 
 export const setShowSaveNetworkModal = (show) => ({

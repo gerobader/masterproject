@@ -7,10 +7,11 @@ class Label {
     this.parent = parent;
     this.position = null;
     this.label = null;
-    this.isHidden = true;
+    this.isHidden = false;
     this.container = document.getElementById('network-view');
     this.color = '#ffffff';
     this.size = 12;
+    this.camera = camera;
     this.createLabel(camera);
   }
 
@@ -27,11 +28,11 @@ class Label {
     this.label.remove();
   }
 
-  updatePosition(camera) {
+  updatePosition() {
     const position = new THREE.Vector3();
     this.parent.getWorldPosition(position);
-    camera.updateMatrixWorld();
-    position.project(camera);
+    this.camera.updateMatrixWorld();
+    position.project(this.camera);
     if (position.z >= 1 || !between(position.x, -1, 1) || !between(position.y, -1, 1)) {
       this.label.style.display = 'none';
       return;
@@ -55,6 +56,20 @@ class Label {
     if (size) {
       this.size = size;
       this.label.style.fontSize = `${size}px`;
+    }
+  }
+
+  hide() {
+    if (!this.isHidden) {
+      this.isHidden = true;
+      this.label.style.display = 'none';
+    }
+  }
+
+  show() {
+    if (this.isHidden) {
+      this.isHidden = false;
+      this.label.style.display = 'block';
     }
   }
 }

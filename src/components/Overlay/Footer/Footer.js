@@ -3,6 +3,7 @@ import {useSelector, useDispatch} from 'react-redux';
 import InfoTable from './InfoTable/InfoTable';
 import ProgressBar from './ProgressBar/ProgressBar';
 import SettingsMenu from './SettingsMenu/SettingsMenu';
+import LabelSwitch from './LabelSwitch/LabelSwitch';
 import {setCurrentHistoryPosition} from '../../../redux/settings/settings.actions';
 import {setNodes} from '../../../redux/networkElements/networkElements.actions';
 import {setFilterCollection} from '../../../redux/filter/filter.action';
@@ -102,6 +103,7 @@ const Footer = () => {
           <ProgressBar progressInfo={progressInfo}/>
         </div>
         <div className="right-button-wrapper">
+          <LabelSwitch/>
           <div
             className={`footer-button table${showInfoTable ? ' active' : ''}`}
             onClick={() => setShowInfoTable(!showInfoTable)}

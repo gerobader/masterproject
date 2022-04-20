@@ -20,6 +20,7 @@ class Node {
     this.buildGeometry(x, y, z, shape);
     if (label) {
       // this.addLabel(camera);
+      this.label = new Label(this.name, this.instance, camera);
     }
   }
 
@@ -137,11 +138,13 @@ class Node {
       this.instance.position.clampScalar(-boundarySize / 2, boundarySize / 2);
     }
     this.updateAssociatedEdgePosition();
+    if (!this.label.isHidden) this.updateLabelPosition();
   }
 
   setPositionAbsolute(position) {
     this.instance.position.set(position.x, position.y, position.z);
     this.updateAssociatedEdgePosition();
+    if (!this.label.isHidden) this.updateLabelPosition();
   }
 
   addTargetEdge(edge) {
@@ -156,16 +159,8 @@ class Node {
     }
   }
 
-  addLabel(camera) {
-    this.label = new Label(this.name, this.instance, camera);
-  }
-
-  removeLabel() {
-    this.label.removeFromDom();
-  }
-
-  updateLabelPosition(camera) {
-    this.label.updatePosition(camera);
+  updateLabelPosition() {
+    this.label.updatePosition();
   }
 
   unserializePathMap(nodes) {

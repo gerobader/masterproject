@@ -5,12 +5,14 @@ import {
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
-  SET_SHOW_SAVE_NETWORK_MODAL
+  SET_SHOW_SAVE_NETWORK_MODAL,
+  SET_SHOW_LABEL
 } from '../actionTypes';
 
 const initialState = {
   orbitPreview: false,
   camera: undefined,
+  showLabel: 2, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
   showControlsModal: false,
   actionHistory: [],
@@ -29,6 +31,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         camera: action.payload
+      };
+    case SET_SHOW_LABEL:
+      return {
+        ...state,
+        showLabel: action.payload
       };
     case SET_SHOW_SAVE_NETWORK_MODAL:
       return {

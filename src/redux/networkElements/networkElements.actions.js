@@ -26,10 +26,21 @@ export const setNodesAndEdges = (nodes, edges, shouldUpdateScene) => ({
   shouldUpdateScene
 });
 
-export const setSelectedNodes = (nodes) => ({
+const updateSelectedNodes = (nodes) => ({
   type: SET_SELECTED_NODES,
   payload: nodes
 });
+
+export const setSelectedNodes = (selectedNodes) => (dispatch, getState) => {
+  const {showLabel} = getState().settings;
+  const {nodes} = getState().networkElements;
+  if (showLabel === 1) {
+    nodes.forEach((node) => node.label.hide());
+    selectedNodes.forEach((node) => node.label.show());
+  }
+  dispatch(setNodes(nodes));
+  dispatch(updateSelectedNodes(selectedNodes));
+};
 
 export const setSelectedEdges = (edges) => ({
   type: SET_SELECTED_EDGES,

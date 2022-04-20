@@ -126,14 +126,13 @@ class Renderer extends Component {
 
   handleMouseDown(e) {
     e.preventDefault();
-    const {_setSelectedNodes, _setSelectedEdges, showLabel} = this.props;
+    const {_setSelectedNodes, _setSelectedEdges} = this.props;
     const {hoveredElement} = this.state;
     targetQuaternion = undefined;
     interpolation = 0;
     if (hoveredElement) {
       if (e.button === 0) {
         const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
-        if (showLabel === 1) newSelectedNodes.forEach((node) => node.label.show());
         _setSelectedNodes(newSelectedNodes);
         _setSelectedEdges(newSelectedEdges);
       } else if (e.button === 1) {
@@ -150,7 +149,6 @@ class Renderer extends Component {
           newSelectedEdges = selectedEdges;
           newSelectedNodes = [selectedEdges[0].sourceNode, selectedEdges[0].targetNode];
         }
-        if (showLabel === 1) newSelectedNodes.forEach((node) => node.label.show());
         _setSelectedNodes(newSelectedNodes);
         _setSelectedEdges(newSelectedEdges);
       }
@@ -599,11 +597,7 @@ class Renderer extends Component {
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     this.handleOutline();
-    nodes.forEach((node) => {
-      if (!node.label.isHidden) {
-        node.updateLabelPosition();
-      }
-    });
+    nodes.forEach((node) => node.label.updatePosition());
     composer.render();
   }
 
@@ -629,7 +623,6 @@ class Renderer extends Component {
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   camera: state.settings.camera,
-  showLabel: state.settings.showLabel,
   nodes: state.networkElements.nodes,
   edges: state.networkElements.edges,
   updateScene: state.networkElements.updateScene,

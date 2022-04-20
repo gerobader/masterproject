@@ -35,8 +35,8 @@ export const setSelectedNodes = (selectedNodes) => (dispatch, getState) => {
   const {showLabel} = getState().settings;
   const {nodes} = getState().networkElements;
   if (showLabel === 1) {
-    nodes.forEach((node) => node.label.hide());
-    selectedNodes.forEach((node) => node.label.show());
+    nodes.forEach((node) => node.hideLabel(true));
+    selectedNodes.forEach((node) => node.showLabel(true));
   }
   dispatch(setNodes(nodes));
   dispatch(updateSelectedNodes(selectedNodes));

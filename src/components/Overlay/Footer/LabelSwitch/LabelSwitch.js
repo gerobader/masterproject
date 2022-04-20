@@ -16,10 +16,10 @@ const LabelSwitch = () => {
 
   const updateShowLabelState = () => {
     const newState = (showLabel + 1) % 3;
-    if (newState === 0 || newState === 1) nodes.forEach((node) => node.label.hide());
-    else nodes.forEach((node) => node.label.show());
+    if (newState === 0 || newState === 1) nodes.forEach((node) => node.hideLabel(true));
+    else nodes.forEach((node) => node.showLabel(true));
     if (newState === 1) {
-      selectedNodes.forEach((node) => node.label.show());
+      selectedNodes.forEach((node) => node.showLabel(true));
     }
     dispatch(setShowLabel(newState));
   };

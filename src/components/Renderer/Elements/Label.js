@@ -29,20 +29,22 @@ class Label {
   }
 
   updatePosition() {
-    const position = new THREE.Vector3();
-    this.parent.getWorldPosition(position);
-    this.camera.updateMatrixWorld();
-    position.project(this.camera);
-    if (position.z >= 1 || !between(position.x, -1, 1) || !between(position.y, -1, 1)) {
-      this.label.style.display = 'none';
-      return;
+    if (!this.isHidden) {
+      const position = new THREE.Vector3();
+      this.parent.getWorldPosition(position);
+      this.camera.updateMatrixWorld();
+      position.project(this.camera);
+      if (position.z >= 1 || !between(position.x, -1, 1) || !between(position.y, -1, 1)) {
+        this.label.style.display = 'none';
+        return;
+      }
+      position.x = (position.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.label.offsetWidth / 2;
+      position.y = -(position.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
+      this.label.style.left = `${position.x}px`;
+      this.label.style.top = `${position.y}px`;
+      // this.label.style.display = 'block';
+      this.position = position;
     }
-    position.x = (position.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.label.offsetWidth / 2;
-    position.y = -(position.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
-    this.label.style.left = `${position.x}px`;
-    this.label.style.top = `${position.y}px`;
-    this.label.style.display = 'block';
-    this.position = position;
   }
 
   setColor(color) {

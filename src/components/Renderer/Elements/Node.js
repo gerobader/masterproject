@@ -17,9 +17,9 @@ class Node {
     this.colorLocked = colorLocked;
     this.shape = shape;
     this.visible = visible;
+    this.labelVisible = true;
     this.buildGeometry(x, y, z, shape);
     if (label) {
-      // this.addLabel(camera);
       this.label = new Label(this.name, this.instance, camera);
     }
   }
@@ -55,6 +55,21 @@ class Node {
     this.instance.visible = visibility;
     this.targetForEdges.forEach((edge) => edge.setVisibility(visibility));
     this.sourceForEdges.forEach((edge) => edge.setVisibility(visibility));
+    if (!visibility) this.hideLabel(false);
+    else if (this.labelVisible) this.showLabel(false);
+  }
+
+  showLabel(changeLabelState) {
+    if (this.visible) {
+      this.label.show();
+      this.labelVisible = true;
+    }
+    if (changeLabelState) this.labelVisible = true;
+  }
+
+  hideLabel(changeLabelState) {
+    this.label.hide();
+    if (changeLabelState) this.labelVisible = false;
   }
 
   setColorLock(lock) {
@@ -138,13 +153,13 @@ class Node {
       this.instance.position.clampScalar(-boundarySize / 2, boundarySize / 2);
     }
     this.updateAssociatedEdgePosition();
-    if (!this.label.isHidden) this.updateLabelPosition();
+    this.label.updatePosition();
   }
 
   setPositionAbsolute(position) {
     this.instance.position.set(position.x, position.y, position.z);
     this.updateAssociatedEdgePosition();
-    if (!this.label.isHidden) this.updateLabelPosition();
+    this.label.updatePosition();
   }
 
   addTargetEdge(edge) {
@@ -157,10 +172,6 @@ class Node {
     if (edge) {
       this.sourceForEdges.push(edge);
     }
-  }
-
-  updateLabelPosition() {
-    this.label.updatePosition();
   }
 
   unserializePathMap(nodes) {

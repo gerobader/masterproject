@@ -42,7 +42,6 @@ class Label {
       position.y = -(position.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
       this.label.style.left = `${position.x}px`;
       this.label.style.top = `${position.y}px`;
-      // this.label.style.display = 'block';
       this.position = position;
     }
   }

@@ -10,8 +10,8 @@ const ProgressBar = ({progressInfo}) => {
       <div className="progress-bar">
         <div className="progress" style={{width: `${progressInfo.percentage}%`}}/>
       </div>
-      <p className="progress-info">{progressInfo.info}</p>
       <Loader/>
+      <p className="progress-info">{progressInfo.info}</p>
     </div>
   );
 };

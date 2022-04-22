@@ -8,6 +8,7 @@ import TextInput from '../../UI/TextInput/TextInput';
 import {setNodes, setSortEdgesBy, setSortNodesBy} from '../../../../redux/networkElements/networkElements.actions';
 
 import './InfoTable.scss';
+import {sortArray} from "../../../utility";
 
 const InfoTable = ({setProgressInfo}) => {
   const {nodes, edges} = useSelector((state) => state.networkElements);
@@ -33,6 +34,11 @@ const InfoTable = ({setProgressInfo}) => {
           targetNode: edge.targetNode.id
         };
       });
+      let nodeOrder = [...nodes];
+      nodeOrder.sort((a, b) => sortArray(
+        a.sourceForEdges.length + a.targetForEdges.length, b.sourceForEdges.length + b.targetForEdges.length
+      ));
+      nodeOrder = nodeOrder.map((node) => node.id);
       nodes.forEach((node) => {
         nodeClones[node.id] = {
           id: node.id,
@@ -42,7 +48,7 @@ const InfoTable = ({setProgressInfo}) => {
         };
       });
       const worker = new Worker('worker.js');
-      worker.postMessage(nodeClones);
+      worker.postMessage({nodeClones, nodeOrder});
       worker.addEventListener('message', (event) => {
         if (event.data.type === 'success') {
           setProgressInfo(undefined);

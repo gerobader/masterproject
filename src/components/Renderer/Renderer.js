@@ -35,7 +35,7 @@ let targetQuaternion;
 let interpolation = 0;
 let nodePositionChanges = [];
 
-const useTestNetwork = true;
+const useTestNetwork = false;
 
 class Renderer extends Component {
   constructor(props) {
@@ -541,7 +541,7 @@ class Renderer extends Component {
           Math.random() * 50 - 25,
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
-          new THREE.Color(Math.random(), Math.random(), Math.random()),
+          RGBtoHex([Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)]),
           index,
           node.label,
           node.data,

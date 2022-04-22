@@ -71,6 +71,13 @@ const ControlsModal = () => {
         </div>
         <div className="rule">
           <div className="keys">
+            <div className="key">F</div>
+          </div>
+          <div className="separator">-</div>
+          <div className="function">Center view on selected Element</div>
+        </div>
+        <div className="rule">
+          <div className="keys">
             <div className="key middle">Shift</div>
           </div>
           <div className="separator">-</div>

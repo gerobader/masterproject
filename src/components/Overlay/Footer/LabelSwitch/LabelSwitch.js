@@ -10,7 +10,7 @@ const LabelSwitch = () => {
   const dispatch = useDispatch();
   const getLabel = () => {
     if (showLabel === 0) return 'No Labels';
-    if (showLabel === 1) return 'Labels for selected';
+    if (showLabel === 1) return 'Labels for selected Nodes';
     return 'All Labels';
   };
 

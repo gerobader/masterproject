@@ -1,12 +1,16 @@
 onmessage = (e) => {
   const nodePathMaps = {};
-  const nodes = e.data;
+  const {nodeClones: nodes, nodeOrder} = e.data;
   const maxPathLength = 12;
   const calculatePathBetweenNodes = (startNode, targetNode) => {
+    console.log(startNode.name, '->', targetNode.name);
     if (nodePathMaps[targetNode.id]) {
       const pathInfo = nodePathMaps[targetNode.id][startNode.id];
-      const paths = pathInfo.paths.map((path) => new Set(Array.from(path).reverse()));
-      return {target: targetNode, paths, distance: pathInfo.paths[0].size - 1};
+      if (pathInfo.paths.length) {
+        const paths = pathInfo.paths.map((path) => new Set(Array.from(path).reverse()));
+        return {target: targetNode, paths, distance: pathInfo.paths[0].size - 1};
+      }
+      return {target: targetNode, paths: [], distance: 0};
     }
     const result = {target: targetNode, paths: []};
     const calculate = (currentNode, usedNodes, distance) => {
@@ -38,17 +42,16 @@ onmessage = (e) => {
     calculate(startNode, new Set(), 1);
     return result;
   };
-  const nodeKeys = Object.keys(nodes);
-  nodeKeys.forEach((startNodeId, index) => {
+  nodeOrder.forEach((startNodeId, index) => {
     nodePathMaps[startNodeId] = {};
     postMessage({
       type: 'progress',
       progress: {
         info: nodes[startNodeId].name,
-        percentage: ((index + 1) / nodeKeys.length) * 100
+        percentage: ((index + 1) / nodeOrder.length) * 100
       }
     });
-    nodeKeys.forEach((targetNodeId) => {
+    nodeOrder.forEach((targetNodeId) => {
       if (startNodeId !== targetNodeId) {
         nodePathMaps[startNodeId][targetNodeId] = calculatePathBetweenNodes(nodes[startNodeId], nodes[targetNodeId]);
       }

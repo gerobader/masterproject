@@ -76,7 +76,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
               />
             </td>
             {Object.keys(node.data).map((dataPoint) => (
-              <td key={dataPoint}>{node.data[dataPoint]}</td>
+              <td key={dataPoint}>{Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}</td>
             ))}
           </tr>
         ))}

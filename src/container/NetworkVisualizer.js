@@ -6,11 +6,11 @@ import StartScreen from '../components/StartScreen/StartScreen';
 import './NetworkVisualizer.scss';
 
 const NetworkVisualizer = () => {
-  const [elements, setElements] = useState({});
+  const [elements, setElements] = useState(false);
   const [use2Dimensions, setUse2Dimensions] = useState(false);
   return (
     <div>
-      {false ? (
+      {!elements ? (
         <StartScreen setElements={setElements} use2Dimensions={use2Dimensions} setUse2Dimensions={setUse2Dimensions}/>
       ) : (
         <>

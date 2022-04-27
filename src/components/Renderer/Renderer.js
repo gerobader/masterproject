@@ -95,29 +95,33 @@ class Renderer extends Component {
     if (!controls.dragging) {
       if (hoveredElement.type === 'Group') {
         const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
-        if (e.ctrlKey && !connectedSelect) {
-          if (selectedEdges.includes(newSelectedEdge)) {
-            newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
+        if (newSelectedEdge.visible) {
+          if (e.ctrlKey && !connectedSelect) {
+            if (selectedEdges.includes(newSelectedEdge)) {
+              newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
+            } else {
+              newSelectedEdges = [...selectedEdges, newSelectedEdge];
+            }
           } else {
-            newSelectedEdges = [...selectedEdges, newSelectedEdge];
+            newSelectedNodes = [];
+            newSelectedEdges = [newSelectedEdge];
           }
-        } else {
-          newSelectedNodes = [];
-          newSelectedEdges = [newSelectedEdge];
         }
       } else {
         const newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
-        if (e.ctrlKey && !connectedSelect) {
-          if (selectedNodes.includes(newSelectedNode)) {
-            newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
+        if (newSelectedNode.visible) {
+          if (e.ctrlKey && !connectedSelect) {
+            if (selectedNodes.includes(newSelectedNode)) {
+              newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
+            } else {
+              newSelectedNodes = [...selectedNodes, newSelectedNode];
+            }
           } else {
-            newSelectedNodes = [...selectedNodes, newSelectedNode];
+            scene.remove(averagePositionPlaceholder);
+            _setAveragePositionPlaceholder(undefined);
+            newSelectedNodes = [newSelectedNode];
+            newSelectedEdges = [];
           }
-        } else {
-          scene.remove(averagePositionPlaceholder);
-          _setAveragePositionPlaceholder(undefined);
-          newSelectedNodes = [newSelectedNode];
-          newSelectedEdges = [];
         }
       }
     }
@@ -445,14 +449,16 @@ class Renderer extends Component {
     let newHoveredElement;
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length) {
-      newHoveredElement = intersects.find(
+      newHoveredElement = intersects.filter(
         (intersectedElement) => (
-          intersectedElement?.object.name === 'Node'
-          || intersectedElement?.object.name === 'Edge'
-          || intersectedElement?.object.name === 'Arrow'
+          (intersectedElement?.object.name === 'Node'
+            || intersectedElement?.object.name === 'Edge'
+            || intersectedElement?.object.name === 'Arrow')
+          && intersectedElement?.object.visible
         )
       );
-      if (newHoveredElement && (newHoveredElement?.object.name === 'Edge' || newHoveredElement?.object.name === 'Arrow')) {
+      newHoveredElement = newHoveredElement.length ? newHoveredElement[0] : undefined;
+      if (newHoveredElement && (newHoveredElement.object.name === 'Edge' || newHoveredElement.object.name === 'Arrow')) {
         newHoveredElement = newHoveredElement.object.parent;
       }
     }
@@ -592,12 +598,12 @@ class Renderer extends Component {
 
   animate() {
     const {composer} = this.state;
-    const {orbitPreview, nodes, camera} = this.props;
+    const {orbitPreview, nodes} = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     this.handleOutline();
-    nodes.forEach((node) => node.label.updatePosition(camera));
+    nodes.forEach((node) => node.label.updatePosition());
     composer.render();
   }
 

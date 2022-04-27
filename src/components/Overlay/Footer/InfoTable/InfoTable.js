@@ -6,6 +6,7 @@ import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import TextInput from '../../UI/TextInput/TextInput';
 import {setNodes, setSortEdgesBy, setSortNodesBy} from '../../../../redux/networkElements/networkElements.actions';
+import {sortArray} from '../../../utility';
 
 import './InfoTable.scss';
 
@@ -43,8 +44,8 @@ const InfoTable = ({setProgressInfo}) => {
       });
       const worker = new Worker('calculateAllPaths.js');
       worker.postMessage(nodeClones);
-      // add timing info
       const timeArray = [];
+      let progressCount = 0;
       let startTime = new Date();
       worker.addEventListener('message', (event) => {
         if (event.data.type === 'success') {
@@ -76,8 +77,10 @@ const InfoTable = ({setProgressInfo}) => {
         } else if (event.data.type === 'progress') {
           const timeTaken = new Date() - startTime;
           timeArray.push(timeTaken);
+          if (timeArray.length > 50) timeArray.shift();
+          progressCount += 1;
           const averageTimePerNode = timeArray.reduce((a, b) => a + b, 0) / timeArray.length;
-          const remainingTime = averageTimePerNode * (nodes.length - timeArray.length);
+          const remainingTime = averageTimePerNode * (nodes.length - progressCount);
           startTime = new Date();
           setProgressInfo({...event.data.progress, remainingTime});
         }

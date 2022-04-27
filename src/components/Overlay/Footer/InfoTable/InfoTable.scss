@@ -33,6 +33,7 @@
     table{
       border-spacing: 0;
       position: relative;
+      padding-right: 6px;
       thead{
         position: sticky;
         top: 0;
@@ -81,6 +82,7 @@
             line-height: $uiElementHeight;
             border-right: 1px solid $menuWindowBorderColor;
             position: relative;
+            white-space: nowrap;
             &.selected{
               background: $menuWindowBackgroundColor;
             }
@@ -102,7 +104,7 @@
               &.eye{
                 width: 12px;
                 height: 7px;
-                top: 8px;
+                top: calc(50% - 3px);
                 background-size: 12px 7px;
                 &.open{
                   background-image: url('../../../../assets/open-eye.svg');

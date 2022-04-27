@@ -8,7 +8,7 @@ import Checkbox from '../Overlay/UI/Checkbox/Checkbox';
 
 import './StartScreen.scss';
 
-const networks = ['gameofthrones', 'movies'];
+const networks = ['gameofthrones', 'movies', 'twitter'];
 
 const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
   const [selectedNetwork, setSelectedNetwork] = useState();
@@ -60,6 +60,36 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
               label: target,
               data: {
                 type: 'movie'
+              }
+            });
+          }
+          return {source, target};
+        });
+      } else if (selectedNetwork === 'twitter') {
+        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 2500');
+        await session.close();
+        edges = res.records.map((r) => {
+          const path = r.get('p');
+          const source = path.start.properties.name;
+          const target = path.end.properties.name;
+          if (!nodes.some((node) => node.label === source)) {
+            nodes.push({
+              label: source,
+              data: {
+                followers: path.start.properties.followers.low,
+                following: path.start.properties.following.low,
+                location: path.start.properties.location
+              }
+            });
+          }
+          if (!nodes.some((node) => node.label === target)) {
+            nodes.push({
+              label: target,
+              data: {
+                followers: path.end.properties.followers.low,
+                following: path.end.properties.following.low,
+                location: path.end.properties.location
+
               }
             });
           }

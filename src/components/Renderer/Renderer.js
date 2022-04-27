@@ -592,12 +592,12 @@ class Renderer extends Component {
 
   animate() {
     const {composer} = this.state;
-    const {orbitPreview, nodes} = this.props;
+    const {orbitPreview, nodes, camera} = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     this.handleOutline();
-    nodes.forEach((node) => node.label.updatePosition());
+    nodes.forEach((node) => node.label.updatePosition(camera));
     composer.render();
   }
 

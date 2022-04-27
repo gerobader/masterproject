@@ -38,6 +38,7 @@ class Label {
         this.label.style.display = 'none';
         return;
       }
+      this.label.style.display = 'block';
       position.x = (position.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.label.offsetWidth / 2;
       position.y = -(position.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
       this.label.style.left = `${position.x}px`;

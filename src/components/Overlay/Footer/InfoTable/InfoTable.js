@@ -8,7 +8,6 @@ import TextInput from '../../UI/TextInput/TextInput';
 import {setNodes, setSortEdgesBy, setSortNodesBy} from '../../../../redux/networkElements/networkElements.actions';
 
 import './InfoTable.scss';
-import {sortArray} from "../../../utility";
 
 const InfoTable = ({setProgressInfo}) => {
   const {nodes, edges} = useSelector((state) => state.networkElements);
@@ -34,11 +33,6 @@ const InfoTable = ({setProgressInfo}) => {
           targetNode: edge.targetNode.id
         };
       });
-      let nodeOrder = [...nodes];
-      nodeOrder.sort((a, b) => sortArray(
-        a.sourceForEdges.length + a.targetForEdges.length, b.sourceForEdges.length + b.targetForEdges.length
-      ));
-      nodeOrder = nodeOrder.map((node) => node.id);
       nodes.forEach((node) => {
         nodeClones[node.id] = {
           id: node.id,
@@ -47,8 +41,11 @@ const InfoTable = ({setProgressInfo}) => {
           sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
         };
       });
-      const worker = new Worker('worker.js');
-      worker.postMessage({nodeClones, nodeOrder});
+      const worker = new Worker('calculateAllPaths.js');
+      worker.postMessage(nodeClones);
+      // add timing info
+      const timeArray = [];
+      let startTime = new Date();
       worker.addEventListener('message', (event) => {
         if (event.data.type === 'success') {
           setProgressInfo(undefined);
@@ -77,7 +74,12 @@ const InfoTable = ({setProgressInfo}) => {
           });
           dispatch(setNodes([...nodes]));
         } else if (event.data.type === 'progress') {
-          setProgressInfo(event.data.progress);
+          const timeTaken = new Date() - startTime;
+          timeArray.push(timeTaken);
+          const averageTimePerNode = timeArray.reduce((a, b) => a + b, 0) / timeArray.length;
+          const remainingTime = averageTimePerNode * (nodes.length - timeArray.length);
+          startTime = new Date();
+          setProgressInfo({...event.data.progress, remainingTime});
         }
       });
     }

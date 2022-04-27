@@ -4,12 +4,28 @@
   display: flex;
   flex-direction: row;
   align-items: center;
+  position: relative;
   .progress-info{
     margin: 0 0 0 10px;
     max-width: 100px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
+  }
+  .hover-info{
+    padding: 3px;
+    border: 1px solid $menuWindowBorderColor;
+    position: absolute;
+    top: -28px;
+    left: 0;
+    color: #fff;
+    background: $uiElementBackgroundNotTransparent;
+    display: none;
+  }
+  &:hover{
+    .hover-info{
+      display: block;
+    }
   }
   .progress-bar{
     width: 100px;

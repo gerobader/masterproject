@@ -5,6 +5,7 @@ import {EffectComposer} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
+import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import Node from './Elements/Node';
 import Edge from './Elements/Edge';
 import {
@@ -19,12 +20,11 @@ import './Renderer.scss';
 
 const networkElements = new THREE.Group();
 let animationRunning = false;
-const sensitivity = 0.002;
-const controlKeys = ['w', 'a', 's', 'd', 'f', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'c', ' ', 'escape'];
-let speed = 1;
+const controlKeys = ['f', 'escape'];
 const initialCameraZ = 200;
 const hoverElementOutlineColor = '#aaaaaa';
 const selectedElementOutlineColor = '#ff0000';
+let cameraControls;
 
 const raycaster = new THREE.Raycaster();
 const mousePosition = new THREE.Vector2(0, 0);
@@ -46,13 +46,7 @@ class Renderer extends Component {
       composer: undefined,
       controls: undefined,
       hoveredElement: undefined,
-      mouseDown: false,
-      cameraForward: false,
-      cameraLeft: false,
-      cameraRight: false,
-      cameraBack: false,
-      cameraUp: false,
-      cameraDown: false
+      mouseDown: false
     };
     this.canvasWrapper = createRef();
     this.createScene = this.createScene.bind(this);
@@ -60,7 +54,6 @@ class Renderer extends Component {
     this.handleMouseDown = this.handleMouseDown.bind(this);
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
     this.lookAt = this.lookAt.bind(this);
     this.cameraControls = this.cameraControls.bind(this);
@@ -95,33 +88,29 @@ class Renderer extends Component {
     if (!controls.dragging) {
       if (hoveredElement.type === 'Group') {
         const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
-        if (newSelectedEdge.visible) {
-          if (e.ctrlKey && !connectedSelect) {
-            if (selectedEdges.includes(newSelectedEdge)) {
-              newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
-            } else {
-              newSelectedEdges = [...selectedEdges, newSelectedEdge];
-            }
+        if (e.ctrlKey && !connectedSelect) {
+          if (selectedEdges.includes(newSelectedEdge)) {
+            newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
           } else {
-            newSelectedNodes = [];
-            newSelectedEdges = [newSelectedEdge];
+            newSelectedEdges = [...selectedEdges, newSelectedEdge];
           }
+        } else {
+          newSelectedNodes = [];
+          newSelectedEdges = [newSelectedEdge];
         }
       } else {
         const newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
-        if (newSelectedNode.visible) {
-          if (e.ctrlKey && !connectedSelect) {
-            if (selectedNodes.includes(newSelectedNode)) {
-              newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
-            } else {
-              newSelectedNodes = [...selectedNodes, newSelectedNode];
-            }
+        if (e.ctrlKey && !connectedSelect) {
+          if (selectedNodes.includes(newSelectedNode)) {
+            newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
           } else {
-            scene.remove(averagePositionPlaceholder);
-            _setAveragePositionPlaceholder(undefined);
-            newSelectedNodes = [newSelectedNode];
-            newSelectedEdges = [];
+            newSelectedNodes = [...selectedNodes, newSelectedNode];
           }
+        } else {
+          scene.remove(averagePositionPlaceholder);
+          _setAveragePositionPlaceholder(undefined);
+          newSelectedNodes = [newSelectedNode];
+          newSelectedEdges = [];
         }
       }
     }
@@ -165,6 +154,7 @@ class Renderer extends Component {
 
   handleMouseUp() {
     const {selectedNodes, _addToActionHistory} = this.props;
+    cameraControls.enabled = true;
     if (nodePositionChanges.length > 0 && nodePositionChanges.length === selectedNodes.length) {
       selectedNodes.forEach((node, index) => {
         nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
@@ -179,10 +169,11 @@ class Renderer extends Component {
   }
 
   handleMouseMove(e) {
-    const {mouseDown, controls} = this.state;
-    const {selectedNodes, averagePositionPlaceholder, camera} = this.props;
+    const {controls} = this.state;
+    const {selectedNodes, averagePositionPlaceholder} = this.props;
     this.checkIntersect(e);
     if (controls.dragging && selectedNodes.length) {
+      cameraControls.enabled = false;
       if (nodePositionChanges.length === 0) {
         selectedNodes.forEach((node) => {
           const elementChanges = {element: node, type: 'graphElement'};
@@ -199,56 +190,6 @@ class Renderer extends Component {
         selectedNodes[0].updateAssociatedEdgePosition();
       }
     }
-    if (!mouseDown || controls.dragging) return;
-    camera.rotation.y -= e.movementX * sensitivity;
-    camera.rotation.x -= e.movementY * sensitivity;
-  }
-
-  handleKeyPress(e) {
-    const {keyboardInputsBlocked} = this.props;
-    const key = e.key.toLowerCase();
-    if (controlKeys.includes(key) && !keyboardInputsBlocked) {
-      this.setState((prevState) => {
-        switch (key) {
-          case 'arrowup':
-          case 'w':
-            return {
-              ...prevState,
-              cameraForward: true
-            };
-          case 'arrowdown':
-          case 's':
-            return {
-              ...prevState,
-              cameraBack: true
-            };
-          case 'arrowleft':
-          case 'a':
-            return {
-              ...prevState,
-              cameraLeft: true
-            };
-          case 'arrowright':
-          case 'd':
-            return {
-              ...prevState,
-              cameraRight: true
-            };
-          case ' ':
-            return {
-              ...prevState,
-              cameraUp: true
-            };
-          case 'c':
-            return {
-              ...prevState,
-              cameraDown: true
-            };
-          default:
-            return prevState;
-        }
-      });
-    }
   }
 
   handleKeyUp(e) {
@@ -261,40 +202,6 @@ class Renderer extends Component {
     if (controlKeys.includes(key) && !keyboardInputsBlocked) {
       this.setState((prevState) => {
         switch (key) {
-          case 'arrowup':
-          case 'w':
-            return {
-              ...prevState,
-              cameraForward: false
-            };
-          case 'arrowdown':
-          case 's':
-            return {
-              ...prevState,
-              cameraBack: false
-            };
-          case 'arrowleft':
-          case 'a':
-            return {
-              ...prevState,
-              cameraLeft: false
-            };
-          case 'arrowright':
-          case 'd':
-            return {
-              ...prevState,
-              cameraRight: false
-            };
-          case ' ':
-            return {
-              ...prevState,
-              cameraUp: false
-            };
-          case 'c':
-            return {
-              ...prevState,
-              cameraDown: false
-            };
           case 'f':
             this.lookAt([...selectedNodes, ...selectedEdges]);
             return prevState;
@@ -401,6 +308,7 @@ class Renderer extends Component {
     if (elements.length) {
       interpolation = 0;
       const position = calculateAveragePosition(elements);
+      cameraControls.target = position;
       const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
       targetQuaternion = new THREE.Quaternion();
       targetQuaternion.setFromRotationMatrix(rotationMatrix);
@@ -408,9 +316,6 @@ class Renderer extends Component {
   }
 
   cameraControls() {
-    const {
-      cameraForward, cameraBack, cameraLeft, cameraRight, cameraUp, cameraDown
-    } = this.state;
     const {camera} = this.props;
     const delta = clock.getDelta();
     if (targetQuaternion) {
@@ -421,21 +326,6 @@ class Renderer extends Component {
       } else {
         interpolation += delta;
       }
-    }
-    if (cameraForward || cameraBack || cameraLeft || cameraRight || cameraUp || cameraDown) {
-      speed += 0.1;
-      const dir = new THREE.Vector3(0, 0, 0);
-      if (cameraForward) dir.z -= 1;
-      if (cameraBack) dir.z += 1;
-      if (cameraLeft) dir.x -= 1;
-      if (cameraRight) dir.x += 1;
-      if (cameraUp) dir.y += 1;
-      if (cameraDown) dir.y -= 1;
-      dir.applyQuaternion(camera.quaternion).normalize();
-      const divideVector = new THREE.Vector3(10 / speed, 10 / speed, 10 / speed);
-      camera.position.add(dir.divide(divideVector));
-    } else {
-      speed = 1;
     }
   }
 
@@ -493,13 +383,14 @@ class Renderer extends Component {
     camera.rotation.order = 'YXZ';
     camera.position.z = initialCameraZ;
 
+    cameraControls = new OrbitControls(camera, renderer.domElement);
+
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
     });
 
-    window.addEventListener('keydown', this.handleKeyPress);
     window.addEventListener('keyup', this.handleKeyUp);
 
     networkElements.name = 'Network';
@@ -618,9 +509,9 @@ class Renderer extends Component {
         id="network-view"
         className={`renderer${mouseDown ? ' hide-cursor' : ''}`}
         ref={(ref) => (this.canvasWrapper = ref)}
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}
+        onPointerDown={this.handleMouseDown}
+        onPointerMove={this.handleMouseMove}
+        onPointerUp={this.handleMouseUp}
       />
     );
   }

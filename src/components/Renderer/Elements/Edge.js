@@ -35,9 +35,6 @@ class Edge {
     // points.push(this.targetNode.instance.position.clone());
     // points.push(this.sourceNode.instance.position.clone());
     // const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    // const position = geometry.getAttribute('position');
-    // position.setUsage(THREE.DynamicDrawUsage);
-    // this.geometry = geometry;
     // this.instance = new THREE.Line(geometry, material);
   }
 

@@ -21,56 +21,6 @@ const ControlsModal = () => {
       <div className="control-rules">
         <div className="rule">
           <div className="keys">
-            <div className="key">W</div>
-            <span>or</span>
-            <div className="key"><img className="arrow-up" alt="arrow-up" src={arrowKey}/></div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Forward</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
-            <div className="key">S</div>
-            <span>or</span>
-            <div className="key"><img className="arrow-down" alt="arrow-up" src={arrowKey}/></div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Backward</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
-            <div className="key">A</div>
-            <span>or</span>
-            <div className="key"><img className="arrow-left" alt="arrow-up" src={arrowKey}/></div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Left</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
-            <div className="key">D</div>
-            <span>or</span>
-            <div className="key"><img className="arrow-right" alt="arrow-up" src={arrowKey}/></div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Right</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
-            <div className="key big">Space</div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Up</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
-            <div className="key">C</div>
-          </div>
-          <div className="separator">-</div>
-          <div className="function">Move Down</div>
-        </div>
-        <div className="rule">
-          <div className="keys">
             <div className="key">F</div>
           </div>
           <div className="separator">-</div>

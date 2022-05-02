@@ -6,7 +6,6 @@ import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import TextInput from '../../UI/TextInput/TextInput';
 import {setNodes, setSortEdgesBy, setSortNodesBy} from '../../../../redux/networkElements/networkElements.actions';
-import {sortArray} from '../../../utility';
 
 import './InfoTable.scss';
 

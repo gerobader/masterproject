@@ -119,10 +119,29 @@ class Renderer extends Component {
 
   handleMouseDown(e) {
     e.preventDefault();
-    const {_setSelectedNodes, _setSelectedEdges} = this.props;
-    const {hoveredElement} = this.state;
     targetQuaternion = undefined;
     interpolation = 0;
+    this.setState((prevState) => ({
+      ...prevState,
+      mouseDown: e.buttons === 1
+    }));
+  }
+
+  handleMouseUp(e) {
+    const {
+      selectedNodes: currentlySelectedNodes, _addToActionHistory, _setSelectedNodes, _setSelectedEdges
+    } = this.props;
+    const {hoveredElement} = this.state;
+
+    cameraControls.enabled = true;
+    if (nodePositionChanges.length > 0 && nodePositionChanges.length === currentlySelectedNodes.length) {
+      currentlySelectedNodes.forEach((node, index) => {
+        nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
+      });
+      _addToActionHistory(nodePositionChanges);
+      nodePositionChanges = [];
+    }
+
     if (hoveredElement) {
       if (e.button === 0) {
         const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
@@ -146,22 +165,7 @@ class Renderer extends Component {
         _setSelectedEdges(newSelectedEdges);
       }
     }
-    this.setState((prevState) => ({
-      ...prevState,
-      mouseDown: e.buttons === 1
-    }));
-  }
 
-  handleMouseUp() {
-    const {selectedNodes, _addToActionHistory} = this.props;
-    cameraControls.enabled = true;
-    if (nodePositionChanges.length > 0 && nodePositionChanges.length === selectedNodes.length) {
-      selectedNodes.forEach((node, index) => {
-        nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
-      });
-      _addToActionHistory(nodePositionChanges);
-      nodePositionChanges = [];
-    }
     this.setState((prevState) => ({
       ...prevState,
       mouseDown: false
@@ -403,7 +407,7 @@ class Renderer extends Component {
           Math.random() * 50 - 25,
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
-          RGBtoHex([Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)]),
+          '#008799',
           node.id || index,
           node.label,
           node.data || {},
@@ -438,7 +442,7 @@ class Renderer extends Component {
           Math.random() * 50 - 25,
           use2Dimensions ? 0 : Math.random() * 50 - 25,
           1,
-          RGBtoHex([Math.round(Math.random() * 255), Math.round(Math.random() * 255), Math.round(Math.random() * 255)]),
+          '#008799',
           index,
           node.label,
           node.data,
@@ -461,6 +465,7 @@ class Renderer extends Component {
         return edgeClass;
       });
     }
+    nodes.forEach((node) => node.calculateDegree());
     scene.add(networkElements);
     const composer = new EffectComposer(renderer);
     const renderPass = new RenderPass(scene, camera);

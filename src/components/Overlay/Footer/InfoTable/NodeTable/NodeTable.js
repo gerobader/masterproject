@@ -19,14 +19,21 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
         <tr>
           {['id', 'name', 'size', 'color', 'visible', ...additionalKeys].map((value) => {
             const titleCaseValue = titleCase(value);
+            let displayName = titleCaseValue;
+            if (titleCaseValue === 'Id') {
+              displayName = 'ID';
+            } else if (titleCaseValue === 'Lcc') {
+              displayName = 'LCC';
+            }
             return (
               <th
                 key={value}
                 onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'node')}
                 onMouseDown={(e) => { mouseDownX = e.clientX; }}
                 className={sortNodesBy === value ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
+                title={displayName === 'LCC' ? 'Local Clustering Coefficient' : undefined}
               >
-                {titleCaseValue === 'Id' ? 'ID' : titleCaseValue}
+                {displayName}
               </th>
             );
           })}

@@ -13,24 +13,30 @@ const Select = ({
     }
   }, [parentOpenState]);
   const selectedValue = value || defaultOption;
+  let displayName = titleCaseOptions ? titleCase(selectedValue) : selectedValue;
+  if (selectedValue === 'lcc') displayName = 'LCC';
   return (
     <div
       className={`vis-select${open ? ' open' : ''} ${className || ''}${opensUp ? ' opens-up' : ''}${value ? ' has-value' : ''}`}
       onClick={() => setOpen(!open)}
     >
-      <span className="selected-value">{titleCaseOptions ? titleCase(selectedValue) : selectedValue}</span>
+      <span className="selected-value">{displayName}</span>
       <div className={`select-arrow${alwaysShowArrow ? ' always-visible' : ''}`}/>
       {open && (
         <div className="options-wrapper">
-          {options.map((option) => (
-            <div
-              key={option}
-              className={`option${value === option ? ' selected' : ''}`}
-              onClick={() => { if (option !== value) setSelected(option); }}
-            >
-              {titleCaseOptions ? titleCase(option) : option}
-            </div>
-          ))}
+          {options.map((option) => {
+            let optionDisplayName = titleCaseOptions ? titleCase(option) : option;
+            if (option === 'lcc') optionDisplayName = 'LCC';
+            return (
+              <div
+                key={option}
+                className={`option${value === option ? ' selected' : ''}`}
+                onClick={() => { if (option !== value) setSelected(option); }}
+              >
+                {optionDisplayName}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

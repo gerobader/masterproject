@@ -29,7 +29,7 @@ const sortElements = (elements, sortValue, reverse = false) => {
   if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.name, b.name, reverse));
   if (sortValue === 'color') return elements.sort((a, b) => sortArray(a.color, b.color, reverse));
   if (sortValue === 'size') return elements.sort((a, b) => (reverse ? b.size - a.size : a.size - b.size));
-  if (elements[0].data && elements[0].data[sortValue]) {
+  if (elements[0].data && elements[0].data[sortValue] !== undefined) {
     return elements.sort((a, b) => sortArray(a.data[sortValue], b.data[sortValue], reverse));
   }
   return elements.sort((a, b) => (reverse ? b.id - a.id : a.id - b.id));

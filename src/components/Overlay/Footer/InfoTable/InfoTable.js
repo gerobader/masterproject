@@ -70,8 +70,8 @@ const InfoTable = ({setProgressInfo}) => {
             });
             // eslint-disable-next-line no-param-reassign
             node.pathMap = pathMap;
-            node.computeStatisticalMeasures(nodes);
           });
+          nodes.forEach((node) => node.computeStatisticalMeasures(nodes));
           dispatch(setNodes([...nodes]));
         } else if (event.data.type === 'progress') {
           const timeTaken = new Date() - startTime;

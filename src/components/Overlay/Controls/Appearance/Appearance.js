@@ -19,6 +19,7 @@ import './Appearance.scss';
 const shapes = [
   'Box', 'Cone', 'Cylinder', 'Dodecahedron', 'Icosahedron', 'Octahedron', 'Sphere', 'Tetrahedron', 'Torus', 'Torus Knot'
 ];
+const rangeMappingValues = ['degree', 'closeness', 'betweenness', 'lcc'];
 
 const Appearance = () => {
   const {
@@ -62,6 +63,12 @@ const Appearance = () => {
     if ('closeness' in data) {
       data.closeness.sort((a, b) => sortArray(a, b));
     }
+    if ('betweenness' in data) {
+      data.betweenness.sort((a, b) => sortArray(a, b));
+    }
+    if ('lcc' in data) {
+      data.lcc.sort((a, b) => sortArray(a, b));
+    }
     return data;
   }, [nodes]);
 
@@ -73,7 +80,7 @@ const Appearance = () => {
 
   const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
     const changes = [];
-    if (mappingValue === 'degree' || mappingValue === 'closeness') {
+    if (rangeMappingValues.includes(mappingValue)) {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
       const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
@@ -124,7 +131,7 @@ const Appearance = () => {
   const applySizeMapping = (mappingValue, sizeMapping, targetElement) => {
     const changes = [];
     const elementsToUse = applyOnlyToSelected ? selectedNodes : nodes;
-    if (mappingValue === 'degree' || mappingValue === 'closeness') {
+    if (rangeMappingValues.includes(mappingValue)) {
       if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
         const sortedElements = sortElements(elementsToUse, mappingValue);
         const min = parseFloat(sizeMapping[0]);
@@ -233,7 +240,7 @@ const Appearance = () => {
   };
 
   const createMappingInputs = (mappingType, mappingValue, rangeMapping, rangeMappingSetter) => {
-    if ((mappingValue === 'degree' || mappingValue === 'closeness') && mappingType !== 'shape') {
+    if (rangeMappingValues.includes(mappingValue) && mappingType !== 'shape') {
       return (
         <Setting name="Range">
           {mappingType === 'color' ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)

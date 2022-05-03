@@ -27,17 +27,17 @@ const NumberDataPointFilter = ({dataPoints, filter, changeFilterConfig}) => {
         />
       </div>
       <div className="row">
-        <span>between</span>
+        <span className="text">between</span>
         <SmallNumberInput
           value={filter.min}
           setValue={(value) => changeFilterConfig('min', value)}
         />
-        <span>and</span>
+        <span className="text">and</span>
         <SmallNumberInput
           value={filter.max}
           setValue={(value) => changeFilterConfig('max', value)}
         />
-        <span>inclusive</span>
+        <span className="text">inclusive</span>
       </div>
     </>
   );

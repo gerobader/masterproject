@@ -5,7 +5,7 @@ import {
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
-  SET_SHOW_SAVE_NETWORK_MODAL, SET_SHOW_LABEL
+  SET_SHOW_SAVE_NETWORK_MODAL, SET_SHOW_LABEL, RESET_ACTION_HISTORY
 } from '../actionTypes';
 
 export const setOrbitPreview = (state) => ({
@@ -31,6 +31,10 @@ export const setShowSaveNetworkModal = (show) => ({
 export const setShowControlsModal = (show) => ({
   type: SET_SHOW_CONTROLS_MODAL,
   payload: show
+});
+
+export const resetActionHistory = () => ({
+  type: RESET_ACTION_HISTORY
 });
 
 export const addToActionHistory = (action) => ({

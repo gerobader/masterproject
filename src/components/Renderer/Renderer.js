@@ -299,12 +299,13 @@ class Renderer extends Component {
     const edges = serializedEdges.map((edge) => {
       const sourceNode = nodes.filter((node) => node.id === edge.sourceNode)[0];
       const targetNode = nodes.filter((node) => node.id === edge.targetNode)[0];
-      const edgeClass = new Edge(edge.id, sourceNode, targetNode, edge.size, edge.color);
+      const edgeClass = new Edge(edge.id, sourceNode, targetNode, edge.size, edge.color, edge.visible);
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
       networkElements.add(edgeClass.instance);
       return edgeClass;
     });
+    nodes.forEach((node) => node.calculateDegree());
     scene.add(networkElements);
     nodes.forEach((node) => node.unserializePathMap(nodes));
     _setNodesAndEdges(nodes, edges, false);

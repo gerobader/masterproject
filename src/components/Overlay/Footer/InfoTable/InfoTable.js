@@ -135,7 +135,6 @@ const InfoTable = ({setProgressInfo}) => {
           value={tableType}
           setSelected={setTableType}
           alwaysShowArrow
-          opensUp
         />
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
         <Button text="Calculate Statistical Measures" onClick={calculateStatisticalMeasures}/>

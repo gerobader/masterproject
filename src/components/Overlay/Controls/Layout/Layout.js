@@ -41,9 +41,9 @@ const Layout = () => {
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
     const maxIterationsFloat = parseFloat(maxIterations);
     if (type === 1 && !maxIterationsFloat) return;
-    nodes.forEach((node) => {
-      node.instance.position.clampScalar(-size / 2, size / 2);
-    });
+    // nodes.forEach((node) => {
+    //   node.instance.position.clampScalar(-size / 2, size / 2);
+    // });
     setRunning(true);
     const area = size * size;
     const k = Math.sqrt(area / nodes.length);
@@ -58,7 +58,7 @@ const Layout = () => {
         nodes.forEach((u) => {
           if (v !== u && u.visible) {
             const distance = v.instance.position.clone().sub(u.instance.position);
-            const length = distance.length() || 0.1;
+            const length = distance.length() || 0.01;
             const normalizedDistance = distance.clone().normalize();
             v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
           }

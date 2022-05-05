@@ -3,7 +3,12 @@ import {useSelector, useDispatch} from 'react-redux';
 import * as THREE from 'three';
 import MenuSetting from './MenuSetting/MenuSetting';
 import Checkbox from '../../UI/Checkbox/Checkbox';
-import {setOrbitPreview, setShowSaveNetworkModal, setShowControlsModal} from '../../../../redux/settings/settings.actions';
+import {
+  setOrbitPreview,
+  setShowSaveNetworkModal,
+  setShowControlsModal,
+  resetActionHistory
+} from '../../../../redux/settings/settings.actions';
 import {
   setSelectedEdges, setSelectedNodes, setNodesAndEdges, setNetworkName, setNetworkStatistics
 } from '../../../../redux/network/network.actions';
@@ -46,6 +51,7 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
       dispatch(setNetworkStatistics(
         networkData?.diameter, networkData?.radius, networkData?.averageGeodesicDistance, networkData?.averageDegree
       ));
+      dispatch(resetActionHistory());
     };
     fileReader.readAsText(e.target.files[0]);
   };

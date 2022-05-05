@@ -6,7 +6,7 @@ import {
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
   SET_SHOW_SAVE_NETWORK_MODAL,
-  SET_SHOW_LABEL
+  SET_SHOW_LABEL, RESET_ACTION_HISTORY
 } from '../actionTypes';
 
 const initialState = {
@@ -46,6 +46,12 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         showControlsModal: action.payload
+      };
+    case RESET_ACTION_HISTORY:
+      return {
+        ...state,
+        actionHistory: [],
+        currentHistoryPosition: 0
       };
     case ADD_TO_ACTION_HISTORY:
       return {

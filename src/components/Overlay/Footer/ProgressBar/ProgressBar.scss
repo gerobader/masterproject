@@ -7,10 +7,10 @@
   position: relative;
   .progress-info{
     margin: 0 0 0 10px;
-    max-width: 100px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    &.border-right{
+      padding-right: 10px;
+      border-right: 1px solid $menuWindowBorderColor;
+    }
   }
   .hover-info{
     padding: 3px;

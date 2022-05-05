@@ -57,7 +57,7 @@ onmessage = (e) => {
     });
     nextStep(connectedNodes, [node], 1);
   });
-  postMessage({type: 'success', nodePathMaps});
+  postMessage({type: 'finished', nodePathMaps});
   // eslint-disable-next-line no-restricted-globals
   self.close();
 };

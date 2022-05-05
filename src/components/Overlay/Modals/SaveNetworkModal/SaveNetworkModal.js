@@ -10,7 +10,9 @@ import {setShowSaveNetworkModal} from '../../../../redux/settings/settings.actio
 import './SaveNetworkModal.scss';
 
 const SaveNetworkModal = () => {
-  const {name, diameter, radius, averageGeodesicDistance, averageDegree, nodes, edges} = useSelector((state) => state.network);
+  const {
+    name, diameter, radius, averageGeodesicDistance, averageDegree, nodes, edges
+  } = useSelector((state) => state.network);
   const {showSaveNetworkModal} = useSelector((state) => state.settings);
   const [savePathMap, setSavePathMap] = useState(false);
   const dispatch = useDispatch();

@@ -11,6 +11,10 @@ import {
 
 import './InfoTable.scss';
 
+let timeArray = [];
+let progressCount = 0;
+let startTime;
+
 const InfoTable = ({setProgressInfo}) => {
   const {
     nodes, selectedNodes, edges, selectedEdges, name: networkName, diameter: networkDiameter, radius: networkRadius,
@@ -25,6 +29,22 @@ const InfoTable = ({setProgressInfo}) => {
     if (e.clientX === prevX) {
       dispatch(elementType === 'node' ? setSortNodesBy(value) : setSortEdgesBy(value));
     }
+  };
+
+  const resetTimeVars = () => {
+    timeArray = [];
+    progressCount = 0;
+    startTime = new Date();
+  };
+
+  const getRemainingTime = () => {
+    const timeTaken = new Date() - startTime;
+    startTime = new Date();
+    timeArray.push(timeTaken);
+    if (timeArray.length > 50) timeArray.shift();
+    progressCount += 1;
+    const averageTimePerNode = timeArray.reduce((a, b) => a + b, 0) / timeArray.length;
+    return averageTimePerNode * (nodes.length - progressCount);
   };
 
   // eslint-disable-next-line no-shadow
@@ -51,7 +71,30 @@ const InfoTable = ({setProgressInfo}) => {
     dispatch(setNetworkStatistics(diameter, radius, averageGeodesicDistance, averageDegree));
   };
 
-  const calculateStatisticalMeasures = () => {
+  const calculateStatisticalMeasures = (nodeClones) => {
+    const statisticalMeasuresWorker = new Worker('calculateStatisticalMeasures.js');
+    statisticalMeasuresWorker.postMessage(nodeClones);
+    resetTimeVars();
+    statisticalMeasuresWorker.addEventListener('message', (e) => {
+      if (e.data.type === 'finished') {
+        calculateNetworkStatistics(nodes);
+        setProgressInfo(undefined);
+        dispatch(setNodes([...nodes]));
+      } else if (e.data.type === 'progress') {
+        const nodeToUpdate = nodes.find((node) => node.id === e.data.nodeId);
+        nodeToUpdate.data = {...nodeToUpdate.data, ...e.data.statisticalMeasures};
+        setProgressInfo({
+          info: nodeToUpdate.name,
+          percentage: (progressCount / nodes.length) * 100,
+          remainingTime: getRemainingTime(),
+          type: 'Calculate statistical measures',
+          step: 2
+        });
+      }
+    });
+  };
+
+  const calculateShortestPathBetweenNodes = () => {
     if (!calculationRunning) {
       setCalculationRunning(true);
       const edgeClones = {};
@@ -72,17 +115,17 @@ const InfoTable = ({setProgressInfo}) => {
       });
       const worker = new Worker('calculateAllPaths.js');
       worker.postMessage(nodeClones);
-      const timeArray = [];
-      let progressCount = 0;
-      let startTime = new Date();
+      resetTimeVars();
       worker.addEventListener('message', (event) => {
-        if (event.data.type === 'success') {
-          setProgressInfo(undefined);
+        if (event.data.type === 'finished') {
+          timeArray = [];
+          progressCount = 0;
           const calculatedPaths = event.data.nodePathMaps;
           setCalculationRunning(false);
           nodes.forEach((node) => {
             const pathMap = {};
             Object.keys(calculatedPaths[node.id]).forEach((targetNodeId) => {
+              nodeClones[node.id].pathMap = calculatedPaths[node.id];
               const targetNodeIdInt = parseInt(targetNodeId, 10);
               const paths = calculatedPaths[node.id][targetNodeIdInt].paths.map((path) => {
                 const newPathSet = new Set();
@@ -100,18 +143,14 @@ const InfoTable = ({setProgressInfo}) => {
             // eslint-disable-next-line no-param-reassign
             node.pathMap = pathMap;
           });
-          nodes.forEach((node) => node.computeStatisticalMeasures(nodes));
-          calculateNetworkStatistics(nodes);
-          dispatch(setNodes([...nodes]));
+          calculateStatisticalMeasures(nodeClones);
         } else if (event.data.type === 'progress') {
-          const timeTaken = new Date() - startTime;
-          timeArray.push(timeTaken);
-          if (timeArray.length > 50) timeArray.shift();
-          progressCount += 1;
-          const averageTimePerNode = timeArray.reduce((a, b) => a + b, 0) / timeArray.length;
-          const remainingTime = averageTimePerNode * (nodes.length - progressCount);
-          startTime = new Date();
-          setProgressInfo({...event.data.progress, remainingTime});
+          setProgressInfo({
+            ...event.data.progress,
+            type: 'Calculate shortest Paths between Nodes',
+            remainingTime: getRemainingTime(),
+            step: 1
+          });
         }
       });
     }
@@ -137,7 +176,7 @@ const InfoTable = ({setProgressInfo}) => {
           alwaysShowArrow
         />
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
-        <Button text="Calculate Statistical Measures" onClick={calculateStatisticalMeasures}/>
+        <Button text="Calculate Statistical Measures" onClick={calculateShortestPathBetweenNodes}/>
       </div>
       <div className="table-wrapper">
         {tableType === 'Node Table' ? (

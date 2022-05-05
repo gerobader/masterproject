@@ -17,7 +17,7 @@ class Node {
     this.colorLocked = colorLocked;
     this.shape = shape;
     this.visible = visible;
-    this.labelVisible = true;
+    this.labelVisible = false;
     this.buildGeometry(x, y, z, shape);
     if (label) {
       this.label = new Label(this.name, this.instance, camera);
@@ -37,58 +37,6 @@ class Node {
 
   calculateDegree() {
     this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
-  }
-
-  calculateCloseness(nodes) {
-    const sum = Object.keys(this.pathMap).reduce((prevVal, currVal) => prevVal + this.pathMap[currVal].distance, 0);
-    this.data.closeness = Math.round((sum / (nodes.length - 1)) * 1000) / 1000;
-  }
-
-  calculateBetweenness(nodes) {
-    let allShortestPathsCount = 0;
-    let shortestPathPassThroughCount = 0;
-    nodes.forEach((node) => {
-      if (node.id === this.id) return;
-      Object.keys(node.pathMap).forEach((targetNodeId) => {
-        if (parseInt(targetNodeId, 10) === this.id) return;
-        const pathsToTargetNode = node.pathMap[targetNodeId];
-        pathsToTargetNode.paths.forEach((path) => {
-          allShortestPathsCount++;
-          if (path.has(this)) shortestPathPassThroughCount++;
-        });
-      });
-    });
-    this.data.betweenness = Math.round(((shortestPathPassThroughCount / allShortestPathsCount) * 100) * 1000) / 1000;
-  }
-
-  calculateLocalClusteringCoefficient(isDirectedGraph) {
-    let maxPossibleLinks = this.data.degree * (this.data.degree - 1);
-    if (!isDirectedGraph) maxPossibleLinks /= 2;
-    if (maxPossibleLinks === 0) {
-      this.data.lcc = 0;
-    } else {
-      let existingLinks = 0;
-      const connectedNodes = new Set();
-      this.targetForEdges.forEach((edge) => connectedNodes.add(edge.sourceNode));
-      this.sourceForEdges.forEach((edge) => connectedNodes.add(edge.targetNode));
-      connectedNodes.forEach((connectedNode) => {
-        const connectedNodesV2 = new Set();
-        connectedNode.sourceForEdges.forEach((edge) => connectedNodesV2.add(edge.targetNode));
-        connectedNodesV2.forEach((connectedNodeV2) => {
-          if (connectedNodes.has(connectedNodeV2)) existingLinks++;
-        });
-      });
-      this.data.lcc = Math.round((existingLinks / maxPossibleLinks) * 1000) / 1000;
-    }
-  }
-
-  computeStatisticalMeasures(nodes) {
-    this.calculateDegree();
-    if (nodes.length > 1) {
-      this.calculateCloseness(nodes);
-      this.calculateBetweenness(nodes);
-      this.calculateLocalClusteringCoefficient(false);
-    }
   }
 
   setColor(color) {

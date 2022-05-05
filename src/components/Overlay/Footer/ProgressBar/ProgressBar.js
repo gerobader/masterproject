@@ -18,6 +18,8 @@ const ProgressBar = ({progressInfo}) => {
         <div className="progress" style={{width: `${progressInfo.percentage}%`}}/>
       </div>
       <Loader/>
+      <p className="progress-info">{`(${progressInfo.step}/2)`}</p>
+      <p className="progress-info border-right">{progressInfo.type}</p>
       <p className="progress-info">{`${remainingTime}${isMinutes ? 'm' : 's'} remaining`}</p>
     </div>
   );

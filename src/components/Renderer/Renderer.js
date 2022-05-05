@@ -305,7 +305,7 @@ class Renderer extends Component {
       networkElements.add(edgeClass.instance);
       return edgeClass;
     });
-    nodes.forEach((node) => node.calculateDegree());
+    if (!nodes[0].data.degree) nodes.forEach((node) => node.calculateDegree());
     scene.add(networkElements);
     nodes.forEach((node) => node.unserializePathMap(nodes));
     _setNodesAndEdges(nodes, edges, false);

@@ -4,7 +4,7 @@ import Modal from '../Modal';
 import {setShowControlsModal} from '../../../../redux/settings/settings.actions';
 
 import './ControlsModal.scss';
-import arrowKey from '../../../../assets/arrow-key.svg';
+// import arrowKey from '../../../../assets/arrow-key.svg';
 
 const ControlsModal = () => {
   const {showControlsModal} = useSelector((state) => state.settings);

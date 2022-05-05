@@ -12,7 +12,7 @@ import {
 const initialState = {
   orbitPreview: false,
   camera: undefined,
-  showLabel: 2, // 0 = hide, 1 = show for selected, 2 = show for all
+  showLabel: 0, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
   showControlsModal: false,
   actionHistory: [],

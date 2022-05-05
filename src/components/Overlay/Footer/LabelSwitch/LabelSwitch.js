@@ -6,7 +6,7 @@ import './LabelSwitch.scss';
 
 const LabelSwitch = () => {
   const {showLabel} = useSelector((state) => state.settings);
-  const {nodes, selectedNodes} = useSelector((state) => state.networkElements);
+  const {nodes, selectedNodes} = useSelector((state) => state.network);
   const dispatch = useDispatch();
   const getLabel = () => {
     if (showLabel === 0) return 'No Labels';

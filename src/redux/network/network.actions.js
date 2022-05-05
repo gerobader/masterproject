@@ -6,8 +6,22 @@ import {
   SET_SORT_NODES_BY,
   SET_SORT_EDGES_BY,
   SET_NODES_AND_EDGES,
-  SET_AVERAGE_POSITION_PLACEHOLDER
+  SET_AVERAGE_POSITION_PLACEHOLDER,
+  SET_NETWORK_NAME, SET_NETWORK_STATISTICS
 } from '../actionTypes';
+
+export const setNetworkName = (name) => ({
+  type: SET_NETWORK_NAME,
+  payload: name
+});
+
+export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, averageDegree) => ({
+  type: SET_NETWORK_STATISTICS,
+  diameter,
+  radius,
+  averageGeodesicDistance,
+  averageDegree
+});
 
 export const setNodes = (nodes) => ({
   type: SET_NODES,
@@ -33,7 +47,7 @@ const updateSelectedNodes = (nodes) => ({
 
 export const setSelectedNodes = (selectedNodes) => (dispatch, getState) => {
   const {showLabel} = getState().settings;
-  const {nodes} = getState().networkElements;
+  const {nodes} = getState().network;
   if (showLabel === 1) {
     nodes.forEach((node) => node.hideLabel(true));
     selectedNodes.forEach((node) => node.showLabel(true));

@@ -5,8 +5,8 @@ import MenuSetting from './MenuSetting/MenuSetting';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import {setOrbitPreview, setShowSaveNetworkModal, setShowControlsModal} from '../../../../redux/settings/settings.actions';
 import {
-  setSelectedEdges, setSelectedNodes, setNodesAndEdges
-} from '../../../../redux/networkElements/networkElements.actions';
+  setSelectedEdges, setSelectedNodes, setNodesAndEdges, setNetworkName, setNetworkStatistics
+} from '../../../../redux/network/network.actions';
 import {calculateAveragePosition} from '../../../utility';
 
 import './SettingsMenu.scss';
@@ -17,7 +17,7 @@ import uploadIcon from '../../../../assets/upload-icon.svg';
 
 const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   const {orbitPreview, camera} = useSelector((state) => state.settings);
-  const {nodes} = useSelector((state) => state.networkElements);
+  const {nodes} = useSelector((state) => state.network);
   const menuRef = useRef();
   const fileInput = useRef();
   const dispatch = useDispatch();
@@ -37,10 +37,15 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   const loadNetwork = (e) => {
     const fileReader = new FileReader();
     fileReader.onload = () => {
+      nodes.forEach((node) => node.label.removeFromDom());
       const networkData = JSON.parse(fileReader.result);
       dispatch(setSelectedNodes([]));
       dispatch(setSelectedEdges([]));
       dispatch(setNodesAndEdges(networkData.nodes, networkData.edges, true));
+      if (networkData.name) dispatch(setNetworkName(networkData.name));
+      dispatch(setNetworkStatistics(
+        networkData?.diameter, networkData?.radius, networkData?.averageGeodesicDistance, networkData?.averageDegree
+      ));
     };
     fileReader.readAsText(e.target.files[0]);
   };

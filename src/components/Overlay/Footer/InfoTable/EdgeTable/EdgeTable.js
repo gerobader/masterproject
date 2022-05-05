@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {setSelectedEdges, setSelectedNodes} from '../../../../../redux/networkElements/networkElements.actions';
+import {setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';
 
 import './EdgeTable.scss';
@@ -11,7 +11,7 @@ let mouseDownX = 0;
 const EdgeTable = ({changeSortValue, edgesToShow}) => {
   const {
     selectedNodes, selectedEdges, sortEdgesBy, edgesReversed
-  } = useSelector((state) => state.networkElements);
+  } = useSelector((state) => state.network);
   const dispatch = useDispatch();
 
   const selectNodes = (e, node) => {

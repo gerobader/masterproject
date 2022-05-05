@@ -5,7 +5,7 @@ import ProgressBar from './ProgressBar/ProgressBar';
 import SettingsMenu from './SettingsMenu/SettingsMenu';
 import LabelSwitch from './LabelSwitch/LabelSwitch';
 import {setCurrentHistoryPosition} from '../../../redux/settings/settings.actions';
-import {setNodes} from '../../../redux/networkElements/networkElements.actions';
+import {setNodes} from '../../../redux/network/network.actions';
 import {setFilterCollection} from '../../../redux/filter/filter.action';
 import {calculateAveragePosition} from '../../utility';
 
@@ -14,7 +14,7 @@ import './Footer.scss';
 const Footer = () => {
   const {
     nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder
-  } = useSelector((state) => state.networkElements);
+  } = useSelector((state) => state.network);
   const {actionHistory, currentHistoryPosition} = useSelector((state) => state.settings);
   const [progressInfo, setProgressInfo] = useState();
   const [showInfoTable, setShowInfoTable] = useState(false);

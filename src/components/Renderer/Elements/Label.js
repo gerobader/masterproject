@@ -7,7 +7,7 @@ class Label {
     this.parent = parent;
     this.position = null;
     this.label = null;
-    this.isHidden = false;
+    this.isHidden = true;
     this.container = document.getElementById('network-view');
     this.color = '#ffffff';
     this.size = 12;
@@ -19,6 +19,7 @@ class Label {
     const label = document.createElement('div');
     label.className = 'scene-label';
     label.innerHTML = this.text;
+    label.style.display = 'none';
     this.label = label;
     this.updatePosition(camera);
     this.container.appendChild(this.label);

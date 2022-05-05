@@ -5,7 +5,7 @@ import Select from '../../UI/Select/Select';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import Collection from './Collection/Collection';
-import {setNodes, setSelectedNodes} from '../../../../redux/networkElements/networkElements.actions';
+import {setNodes, setSelectedNodes} from '../../../../redux/network/network.actions';
 import {setFilterCollection} from '../../../../redux/filter/filter.action';
 import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {arrayMove} from '../../../utility';
@@ -13,7 +13,7 @@ import {arrayMove} from '../../../utility';
 import './Filters.scss';
 
 const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePosition}) => {
-  const {nodes} = useSelector((state) => state.networkElements);
+  const {nodes} = useSelector((state) => state.network);
   const {filterCollection} = useSelector((state) => state.filter);
   const [filterResultType, setFilterResultType] = useState('Select');
   const [autoRefresh, setAutoRefresh] = useState(false);

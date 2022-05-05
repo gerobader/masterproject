@@ -6,11 +6,16 @@ import {
   SET_SORT_NODES_BY,
   SET_SORT_EDGES_BY,
   SET_NODES_AND_EDGES,
-  SET_AVERAGE_POSITION_PLACEHOLDER
+  SET_AVERAGE_POSITION_PLACEHOLDER, SET_NETWORK_NAME, SET_NETWORK_STATISTICS
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
 const initialState = {
+  name: 'Network Name',
+  diameter: undefined,
+  radius: undefined,
+  averageGeodesicDistance: undefined,
+  averageDegree: undefined,
   nodes: [],
   edges: [],
   selectedNodes: [],
@@ -35,8 +40,21 @@ const sortElements = (elements, sortValue, reverse = false) => {
   return elements.sort((a, b) => (reverse ? b.id - a.id : a.id - b.id));
 };
 
-const networkElementsReducer = (state = initialState, action) => {
+const networkReducer = (state = initialState, action) => {
   switch (action.type) {
+    case SET_NETWORK_NAME:
+      return {
+        ...state,
+        name: action.payload
+      };
+    case SET_NETWORK_STATISTICS:
+      return {
+        ...state,
+        diameter: action.diameter,
+        radius: action.radius,
+        averageGeodesicDistance: action.averageGeodesicDistance,
+        averageDegree: action.averageDegree
+      };
     case SET_NODES:
       return {
         ...state,
@@ -88,4 +106,4 @@ const networkElementsReducer = (state = initialState, action) => {
   }
 };
 
-export default networkElementsReducer;
+export default networkReducer;

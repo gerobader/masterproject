@@ -10,15 +10,15 @@ import Node from './Elements/Node';
 import Edge from './Elements/Edge';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder
-} from '../../redux/networkElements/networkElements.actions';
+} from '../../redux/network/network.actions';
 import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
-import {calculateAveragePosition, RGBtoHex} from '../utility';
+import {calculateAveragePosition} from '../utility';
 import * as testNodes from '../../data/movies/nodes.json';
 import * as testEdges from '../../data/movies/edges.json';
 
 import './Renderer.scss';
 
-const networkElements = new THREE.Group();
+let networkElements = new THREE.Group();
 let animationRunning = false;
 const controlKeys = ['f', 'escape'];
 const initialCameraZ = 200;
@@ -275,6 +275,8 @@ class Renderer extends Component {
     const {
       nodes: serializedNodes, edges: serializedEdges, _setNodesAndEdges
     } = this.props;
+    networkElements = new THREE.Group();
+    networkElements.name = 'Network';
     const nodes = serializedNodes.map((node) => {
       const nodeClass = new Node(
         node.position.x,
@@ -291,7 +293,7 @@ class Renderer extends Component {
         node.visible,
         camera
       );
-      scene.add(nodeClass.instance);
+      networkElements.add(nodeClass.instance);
       return nodeClass;
     });
     const edges = serializedEdges.map((edge) => {
@@ -300,9 +302,10 @@ class Renderer extends Component {
       const edgeClass = new Edge(edge.id, sourceNode, targetNode, edge.size, edge.color);
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
-      scene.add(edgeClass.instance);
+      networkElements.add(edgeClass.instance);
       return edgeClass;
     });
+    scene.add(networkElements);
     nodes.forEach((node) => node.unserializePathMap(nodes));
     _setNodesAndEdges(nodes, edges, false);
   }
@@ -525,12 +528,12 @@ class Renderer extends Component {
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   camera: state.settings.camera,
-  nodes: state.networkElements.nodes,
-  edges: state.networkElements.edges,
-  updateScene: state.networkElements.updateScene,
-  selectedNodes: state.networkElements.selectedNodes,
-  selectedEdges: state.networkElements.selectedEdges,
-  averagePositionPlaceholder: state.networkElements.averagePositionPlaceholder,
+  nodes: state.network.nodes,
+  edges: state.network.edges,
+  updateScene: state.network.updateScene,
+  selectedNodes: state.network.selectedNodes,
+  selectedEdges: state.network.selectedEdges,
+  averagePositionPlaceholder: state.network.averagePositionPlaceholder,
   keyboardInputsBlocked: state.settings.keyboardInputsBlocked
 });
 

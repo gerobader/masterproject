@@ -11,7 +11,7 @@ import {calculateColorForElement, sortArray, sortElements} from '../../../utilit
 import RangeInput from '../../UI/RangeInput/RangeInput';
 import Setting from '../../UI/Setting/Setting';
 import ExpandableSetting from '../../UI/ExpandableSetting/ExpandableSetting';
-import {setNodes} from '../../../../redux/networkElements/networkElements.actions';
+import {setNodes} from '../../../../redux/network/network.actions';
 import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 
 import './Appearance.scss';
@@ -24,7 +24,7 @@ const rangeMappingValues = ['degree', 'closeness', 'betweenness', 'lcc'];
 const Appearance = () => {
   const {
     nodes, selectedNodes, edges, selectedEdges
-  } = useSelector((state) => state.networkElements);
+  } = useSelector((state) => state.network);
   const dispatch = useDispatch();
   const [activeMenu, setActiveMenu] = useState('left');
   const [fillColor, setFillColor] = useState();
@@ -57,18 +57,11 @@ const Appearance = () => {
         }
       });
     });
-    if ('degree' in data) {
-      data.degree.sort((a, b) => sortArray(a, b));
-    }
-    if ('closeness' in data) {
-      data.closeness.sort((a, b) => sortArray(a, b));
-    }
-    if ('betweenness' in data) {
-      data.betweenness.sort((a, b) => sortArray(a, b));
-    }
-    if ('lcc' in data) {
-      data.lcc.sort((a, b) => sortArray(a, b));
-    }
+    rangeMappingValues.forEach((mappingValue) => {
+      if (mappingValue in data) {
+        data[mappingValue].sort((a, b) => sortArray(a, b));
+      }
+    });
     return data;
   }, [nodes]);
 

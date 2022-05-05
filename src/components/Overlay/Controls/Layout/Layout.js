@@ -17,7 +17,7 @@ let interval;
 let changes = [];
 
 const Layout = () => {
-  const {nodes, edges} = useSelector((state) => state.networkElements);
+  const {nodes, edges} = useSelector((state) => state.network);
   const [running, setRunning] = useState(false);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);

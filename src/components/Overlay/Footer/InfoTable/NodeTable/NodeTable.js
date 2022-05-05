@@ -1,6 +1,6 @@
 import React from 'react';
 import {useDispatch, useSelector} from 'react-redux';
-import {setNodes, setSelectedEdges, setSelectedNodes} from '../../../../../redux/networkElements/networkElements.actions';
+import {setNodes, setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';
 
 import './NodeTable.scss';
@@ -10,7 +10,7 @@ let mouseDownX = 0;
 const NodeTable = ({changeSortValue, nodesToShow}) => {
   const {
     nodes, selectedNodes, sortNodesBy, nodesReversed
-  } = useSelector((state) => state.networkElements);
+  } = useSelector((state) => state.network);
   const dispatch = useDispatch();
   const additionalKeys = nodesToShow.length ? Object.keys(nodesToShow[0].data) : [];
   return (

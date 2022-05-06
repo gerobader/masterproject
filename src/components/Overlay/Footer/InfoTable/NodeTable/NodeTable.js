@@ -78,6 +78,10 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
                 className={`extra-button eye show ${node.visible ? 'open' : 'closed'}`}
                 onClick={() => {
                   node.setVisibility(!node.visible);
+                  if (selectedNodes.includes(node)) {
+                    const newSelectedNodes = selectedNodes.filter((selectedNode) => selectedNode.id !== node.id);
+                    dispatch(setSelectedNodes(newSelectedNodes));
+                  }
                   dispatch(setNodes(nodes));
                 }}
               />

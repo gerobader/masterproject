@@ -15,12 +15,14 @@ export const setNetworkName = (name) => ({
   payload: name
 });
 
-export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, averageDegree) => ({
+export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density) => ({
   type: SET_NETWORK_STATISTICS,
   diameter,
   radius,
   averageGeodesicDistance,
-  averageDegree
+  averageDegree,
+  reciprocity,
+  density
 });
 
 export const setNodes = (nodes) => ({

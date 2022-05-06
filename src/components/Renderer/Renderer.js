@@ -13,8 +13,8 @@ import {
 } from '../../redux/network/network.actions';
 import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
-import * as testNodes from '../../data/movies/nodes.json';
-import * as testEdges from '../../data/movies/edges.json';
+import * as testNodes from '../../data/test/nodes.json';
+import * as testEdges from '../../data/test/edges.json';
 
 import './Renderer.scss';
 

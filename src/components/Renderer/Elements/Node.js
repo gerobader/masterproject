@@ -49,8 +49,20 @@ class Node {
   setVisibility(visibility) {
     this.visible = visibility;
     this.instance.visible = visibility;
-    this.targetForEdges.forEach((edge) => edge.setVisibility(visibility));
-    this.sourceForEdges.forEach((edge) => edge.setVisibility(visibility));
+    this.targetForEdges.forEach((edge) => {
+      if (visibility) {
+        if (edge.sourceNode.visible) edge.setVisibility(true);
+      } else {
+        edge.setVisibility(false);
+      }
+    });
+    this.sourceForEdges.forEach((edge) => {
+      if (visibility) {
+        if (edge.targetNode.visible) edge.setVisibility(true);
+      } else {
+        edge.setVisibility(false);
+      }
+    });
     if (!visibility) this.hideLabel(false);
     else if (this.labelVisible) this.showLabel(false);
   }

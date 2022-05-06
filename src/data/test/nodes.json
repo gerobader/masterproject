@@ -1,34 +1,14 @@
 [
   {
     "id": 0,
-    "label": "Start"
+    "label": "First"
   },
   {
     "id": 1,
-    "label": "Left"
+    "label": "Second"
   },
   {
     "id": 2,
-    "label": "LeftLeft"
-  },
-  {
-    "id": 3,
-    "label": "LeftLeftLeft"
-  },
-  {
-    "id": 4,
-    "label": "LeftRight"
-  },
-  {
-    "id": 5,
-    "label": "Right"
-  },
-  {
-    "id": 6,
-    "label": "RightLeft"
-  },
-  {
-    "id": 7,
-    "label": "RightRight"
+    "label": "third"
   }
 ]

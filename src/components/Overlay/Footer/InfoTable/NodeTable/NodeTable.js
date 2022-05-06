@@ -43,7 +43,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
         {nodesToShow.map((node) => (
           <tr
             onClick={(e) => {
-              if (e.target.classList[0] !== 'extra-button') {
+              if (e.target.classList[0] !== 'extra-button' && node.visible) {
                 let newSelectedNodes = [node];
                 if (e.ctrlKey) {
                   if (selectedNodes.includes(node)) {
@@ -56,7 +56,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
                 dispatch(setSelectedEdges([]));
               }
             }}
-            className={selectedNodes.includes(node) ? 'selected' : ''}
+            className={`${selectedNodes.includes(node) ? 'selected' : ''}${!node.visible ? ' gray-out' : ''}`}
             key={node.id}
           >
             <td>{node.id}</td>

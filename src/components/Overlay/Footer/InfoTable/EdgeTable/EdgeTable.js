@@ -47,9 +47,10 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
       </thead>
       <tbody>
         {edgesToShow.map((edge) => (
-          <tr className={selectedEdges.includes(edge) ? 'selected' : ''} key={edge.id}>
+          <tr className={`${selectedEdges.includes(edge) ? 'selected' : ''}${!edge.visible ? ' gray-out' : ''}`} key={edge.id}>
             <td
               onClick={(e) => {
+                if (!edge.visible) return;
                 let newSelectedEdges = [edge];
                 if (e.ctrlKey) {
                   if (selectedEdges.includes(edge)) {
@@ -64,14 +65,18 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
               {edge.id}
             </td>
             <td
-              onClick={(e) => selectNodes(e, edge.sourceNode)}
-              className={selectedNodes.includes(edge.sourceNode) ? 'selected' : null}
+              onClick={(e) => { if (edge.sourceNode.visible) selectNodes(e, edge.sourceNode); }}
+              className={
+                `node${selectedNodes.includes(edge.sourceNode) ? ' selected' : ''}${edge.sourceNode.visible ? ' visible' : ''}`
+              }
             >
               {edge.sourceNode.name}
             </td>
             <td
-              onClick={(e) => selectNodes(e, edge.targetNode)}
-              className={selectedNodes.includes(edge.targetNode) ? 'selected' : null}
+              onClick={(e) => { if (edge.targetNode.visible) selectNodes(e, edge.targetNode); }}
+              className={
+                `node${selectedNodes.includes(edge.targetNode) ? ' selected' : ''}${edge.targetNode.visible ? ' visible' : ''}`
+              }
             >
               {edge.targetNode.name}
             </td>

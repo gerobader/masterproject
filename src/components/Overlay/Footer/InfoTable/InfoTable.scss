@@ -24,9 +24,9 @@
   .controls{
     box-sizing: border-box;
     padding: 10px 10px 10px 20px;
-    border-right: 1px solid $menuWindowBorderColor;
-    width: 240px;
-    min-width: 240px;
+    border-right: 2px solid $menuWindowBorderColor;
+    width: 235px;
+    min-width: 235px;
     .vis-select, .vis-text-input{
       margin-bottom: 20px;
     }
@@ -37,7 +37,7 @@
     min-width: 435px;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    border-right: 1px solid $menuWindowBorderColor;
+    border-right: 2px solid $menuWindowBorderColor;
     &::-webkit-scrollbar{
       display: none;
     }
@@ -90,6 +90,9 @@
           &.selected{
             background: $menuWindowBackgroundColor;
           }
+          &.gray-out{
+            color: #646464;
+          }
           td{
             padding: 0 8px;
             line-height: $uiElementHeight;
@@ -101,6 +104,9 @@
             }
             &.selected{
               background: $menuWindowBackgroundColor;
+            }
+            &.node.visible{
+              color: $menuWindowFontColor;
             }
             .extra-button{
               position: absolute;

@@ -22,6 +22,7 @@ onmessage = (e) => {
         });
       });
     });
+    if (allShortestPathsCount === 0) return 0;
     return Math.round(((shortestPathPassThroughCount / allShortestPathsCount) * 100) * 1000) / 1000;
   };
 

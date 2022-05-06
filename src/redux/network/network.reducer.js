@@ -16,6 +16,9 @@ const initialState = {
   radius: undefined,
   averageGeodesicDistance: undefined,
   averageDegree: undefined,
+  reciprocity: undefined,
+  density: undefined,
+  directed: true,
   nodes: [],
   edges: [],
   selectedNodes: [],
@@ -32,6 +35,13 @@ const sortElements = (elements, sortValue, reverse = false) => {
   if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.name, b.sourceNode.name, reverse));
   if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.name, b.targetNode.name, reverse));
   if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.name, b.name, reverse));
+  if (sortValue === 'visible') {
+    return elements.sort((a, b) => {
+      if (a.visible === b.visible) return 0;
+      if (reverse) return a.visible ? -1 : 1;
+      return a.visible ? 1 : -1;
+    });
+  }
   if (sortValue === 'color') return elements.sort((a, b) => sortArray(a.color, b.color, reverse));
   if (sortValue === 'size') return elements.sort((a, b) => (reverse ? b.size - a.size : a.size - b.size));
   if (elements[0].data && elements[0].data[sortValue] !== undefined) {
@@ -53,7 +63,9 @@ const networkReducer = (state = initialState, action) => {
         diameter: action.diameter,
         radius: action.radius,
         averageGeodesicDistance: action.averageGeodesicDistance,
-        averageDegree: action.averageDegree
+        averageDegree: action.averageDegree,
+        reciprocity: action.reciprocity,
+        density: action.density
       };
     case SET_NODES:
       return {

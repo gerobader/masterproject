@@ -17,8 +17,8 @@ let startTime;
 
 const InfoTable = ({setProgressInfo}) => {
   const {
-    nodes, selectedNodes, edges, selectedEdges, name: networkName, diameter: networkDiameter, radius: networkRadius,
-    averageGeodesicDistance: networkAverageGeodesicDistance, averageDegree: networkAverageDegree
+    nodes, edges, directed, name: networkName, diameter: networkDiameter, radius: networkRadius, density: networkDensity,
+    averageGeodesicDistance: networkAverageGeodesicDistance, averageDegree: networkAverageDegree, reciprocity: networkReciprocity
   } = useSelector((state) => state.network);
   const [tableType, setTableType] = useState('Node Table');
   const [searchValue, setSearchValue] = useState('');
@@ -68,7 +68,27 @@ const InfoTable = ({setProgressInfo}) => {
       (allDistances.reduce((partialSum, distance) => partialSum + distance, 0) / allDistances.length) * 1000
     ) / 1000;
     const averageDegree = Math.round((degreeSum / nodes.length) * 1000) / 1000;
-    dispatch(setNetworkStatistics(diameter, radius, averageGeodesicDistance, averageDegree));
+
+    let reciprocity;
+    if (directed) {
+      let mutualConnectionCount = 0;
+      nodes.forEach((node) => {
+        node.sourceForEdges.forEach((outgoindEdge) => {
+          outgoindEdge.targetNode.sourceForEdges.find((targetNodeOutgoingEdge) => {
+            if (targetNodeOutgoingEdge.targetNode.id === node.id) {
+              mutualConnectionCount++;
+              return true;
+            }
+            return false;
+          });
+        });
+      });
+      reciprocity = Math.round((mutualConnectionCount / edges.length) * 1000) / 1000;
+    }
+
+    let density = Math.round((edges.length / (nodes.length * (nodes.length - 1))) * 1000) / 1000;
+    if (!directed) density *= 2;
+    dispatch(setNetworkStatistics(diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density));
   };
 
   const calculateStatisticalMeasures = (nodeClones) => {
@@ -78,6 +98,7 @@ const InfoTable = ({setProgressInfo}) => {
     statisticalMeasuresWorker.addEventListener('message', (e) => {
       if (e.data.type === 'finished') {
         calculateNetworkStatistics(nodes);
+        setCalculationRunning(false);
         setProgressInfo(undefined);
         dispatch(setNodes([...nodes]));
       } else if (e.data.type === 'progress') {
@@ -87,7 +108,7 @@ const InfoTable = ({setProgressInfo}) => {
           info: nodeToUpdate.name,
           percentage: (progressCount / nodes.length) * 100,
           remainingTime: getRemainingTime(),
-          type: 'Calculate statistical measures',
+          type: 'Calculating statistical measures',
           step: 2
         });
       }
@@ -121,7 +142,6 @@ const InfoTable = ({setProgressInfo}) => {
           timeArray = [];
           progressCount = 0;
           const calculatedPaths = event.data.nodePathMaps;
-          setCalculationRunning(false);
           nodes.forEach((node) => {
             const pathMap = {};
             Object.keys(calculatedPaths[node.id]).forEach((targetNodeId) => {
@@ -147,7 +167,7 @@ const InfoTable = ({setProgressInfo}) => {
         } else if (event.data.type === 'progress') {
           setProgressInfo({
             ...event.data.progress,
-            type: 'Calculate shortest Paths between Nodes',
+            type: 'Calculating shortest Paths between Nodes',
             remainingTime: getRemainingTime(),
             step: 1
           });
@@ -214,19 +234,19 @@ const InfoTable = ({setProgressInfo}) => {
           </div>
           <div className="wrapper">
             <p className="network-info">
+              <span className="property-name">Density:</span>
+              <span>{networkDensity || '-'}</span>
+            </p>
+            <p className="network-info">
               <span className="property-name">Average Degree:</span>
               <span>{networkAverageDegree || '-'}</span>
             </p>
-            <p className="network-info">
-              <span className="property-name">Nodes:</span>
-              <span>
-                {`${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}`}
-              </span>
-            </p>
-            <p className="network-info">
-              <span className="property-name">Edges:</span>
-              <span>{`${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}</span>
-            </p>
+            {directed && (
+              <p className="network-info">
+                <span className="property-name">Reciprocity:</span>
+                <span>{typeof networkReciprocity === 'number' ? networkReciprocity : '-'}</span>
+              </p>
+            )}
           </div>
         </div>
       </div>

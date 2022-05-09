@@ -25,7 +25,7 @@ class Node {
   }
 
   buildGeometry(x, y, z) {
-    const geometry = new THREE.SphereGeometry(this.size, 16, 16);
+    const geometry = new THREE.SphereGeometry(this.size, 8, 8);
     const material = new THREE.MeshLambertMaterial({color: this.color});
     this.instance = new THREE.Mesh(geometry, material);
     this.instance.name = 'Node';

@@ -28,7 +28,7 @@ const ControlsModal = () => {
         </div>
         <div className="rule">
           <div className="keys">
-            <div className="key middle">Shift</div>
+            <div className="key middle">Ctrl</div>
           </div>
           <div className="separator">-</div>
           <div className="function">Multiple Select</div>

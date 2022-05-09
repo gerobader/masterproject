@@ -148,21 +148,30 @@ class Renderer extends Component {
         _setSelectedNodes(newSelectedNodes);
         _setSelectedEdges(newSelectedEdges);
       } else if (e.button === 1) {
-        const [selectedNodes, selectedEdges] = this.handleClickOnElement(e, true);
-        let newSelectedNodes = [];
-        let newSelectedEdges = [];
+        const [selectedNodes, selectedEdges] = this.handleClickOnElement(e, false);
+        const newSelectedNodes = new Set();
+        const newSelectedEdges = new Set();
         if (selectedNodes.length) {
-          newSelectedNodes = selectedNodes;
-          newSelectedEdges = [
-            ...selectedNodes[0].targetForEdges,
-            ...selectedNodes[0].sourceForEdges
-          ];
+          selectedNodes.forEach((node) => {
+            newSelectedNodes.add(node);
+            node.targetForEdges.forEach((edge) => {
+              newSelectedEdges.add(edge);
+              newSelectedNodes.add(edge.sourceNode);
+            });
+            node.sourceForEdges.forEach((edge) => {
+              newSelectedEdges.add(edge);
+              newSelectedNodes.add(edge.targetNode);
+            });
+          });
         } else if (selectedEdges.length) {
-          newSelectedEdges = selectedEdges;
-          newSelectedNodes = [selectedEdges[0].sourceNode, selectedEdges[0].targetNode];
+          selectedEdges.forEach((edge) => {
+            newSelectedEdges.add(edge);
+            newSelectedNodes.add(edge.sourceNode);
+            newSelectedNodes.add(edge.targetNode);
+          });
         }
-        _setSelectedNodes(newSelectedNodes);
-        _setSelectedEdges(newSelectedEdges);
+        _setSelectedNodes([...newSelectedNodes]);
+        _setSelectedEdges([...newSelectedEdges]);
       }
     }
 
@@ -334,6 +343,8 @@ class Renderer extends Component {
       } else {
         interpolation += delta;
       }
+    } else {
+      cameraControls.update();
     }
   }
 
@@ -392,6 +403,8 @@ class Renderer extends Component {
     camera.position.z = initialCameraZ;
 
     cameraControls = new OrbitControls(camera, renderer.domElement);
+    cameraControls.enableDamping = true;
+    cameraControls.dampingFactor = 0.2;
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);

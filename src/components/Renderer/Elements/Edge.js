@@ -17,7 +17,7 @@ class Edge {
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
     const material = new THREE.MeshBasicMaterial({color: this.color});
     material.transparent = true;
-    material.opacity = 0.5;
+    material.opacity = 0.2;
     const edge = new THREE.Mesh(geometry, material);
     edge.name = 'Edge';
     group.add(edge);

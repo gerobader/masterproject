@@ -11,7 +11,8 @@ import './SaveNetworkModal.scss';
 
 const SaveNetworkModal = () => {
   const {
-    name, diameter, radius, averageGeodesicDistance, averageDegree, nodes, edges
+    name, diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density,
+    directed, nodes, edges
   } = useSelector((state) => state.network);
   const {showSaveNetworkModal} = useSelector((state) => state.settings);
   const [savePathMap, setSavePathMap] = useState(false);
@@ -30,6 +31,9 @@ const SaveNetworkModal = () => {
         radius,
         averageGeodesicDistance,
         averageDegree,
+        reciprocity,
+        density,
+        directed,
         nodes: serializedNodes,
         edges: serializedEdges
       });

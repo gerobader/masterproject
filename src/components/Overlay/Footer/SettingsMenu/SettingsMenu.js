@@ -49,7 +49,8 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
       dispatch(setNodesAndEdges(networkData.nodes, networkData.edges, true));
       if (networkData.name) dispatch(setNetworkName(networkData.name));
       dispatch(setNetworkStatistics(
-        networkData?.diameter, networkData?.radius, networkData?.averageGeodesicDistance, networkData?.averageDegree
+        networkData?.diameter, networkData?.radius, networkData?.averageGeodesicDistance, networkData?.averageDegree,
+        networkData?.reciprocity, networkData?.density
       ));
       dispatch(resetActionHistory());
     };

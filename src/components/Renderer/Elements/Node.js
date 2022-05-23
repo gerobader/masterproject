@@ -149,11 +149,9 @@ class Node {
   updateAssociatedEdgePosition() {
     this.targetForEdges.forEach((edge) => {
       edge.updatePosition();
-      // this.edges.updatePositionFor(edge);
     });
     this.sourceForEdges.forEach((edge) => {
       edge.updatePosition();
-      // this.edges.updatePositionFor(edge);
     });
   }
 

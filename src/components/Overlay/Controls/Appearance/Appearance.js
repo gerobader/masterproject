@@ -207,7 +207,7 @@ const Appearance = () => {
         const elementChanges = {element, type: 'graphElement'};
         if (fillColor && typeof element.setColor === 'function' && element.color !== fillColor) {
           elementChanges.setColor = {before: element.color, after: fillColor};
-          element.setColor(fillColor);
+          element.setColor(fillColor, element.id);
         }
         if (elementSize && typeof element.setSize === 'function' && element.size !== elementSize) {
           elementChanges.setSize = {before: element.size, after: elementSize};

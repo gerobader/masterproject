@@ -1,15 +1,17 @@
 import * as THREE from 'three';
 
 class Edge {
-  constructor(id, sourceNode, targetNode, size, color, visible) {
+  constructor(id, sourceNode, targetNode, size, color, visible, edgeInstances) {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
+    this.edgeInstances = edgeInstances;
     this.instance = null;
     this.size = size;
     this.color = color;
     this.visible = visible;
-    this.buildGeometry();
+    this.rotation = Math.PI / 2;
+    // this.buildGeometry();
   }
 
   buildGeometry() {
@@ -29,6 +31,7 @@ class Edge {
     this.updatePosition();
     this.setRotation();
     if (this.size !== 1) this.setSize(this.size, true);
+
     // lines can be used for edges, which cannot be adjusted in width
     // const material = new THREE.LineBasicMaterial({color: 0xffffff});
     // const points = [];
@@ -39,51 +42,59 @@ class Edge {
   }
 
   updatePosition() {
-    const targetVector = this.targetNode.instance.position.clone();
-    const sourceVector = this.sourceNode.instance.position.clone();
-    const lineVector = targetVector.clone().sub(sourceVector);
-    const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
-    this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
-    // edge position
-    this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
-    // arrow position
-    this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
-    this.instance.position.set(
-      (sourceVector.x + targetVector.x) / 2,
-      (sourceVector.y + targetVector.y) / 2,
-      (sourceVector.z + targetVector.z) / 2
-    );
-    this.setRotation();
+    if (this.visible) {
+      const targetVector = this.targetNode.instance.position.clone();
+      const sourceVector = this.sourceNode.instance.position.clone();
+      this.edgeInstances.updatePositionFor(this.id, sourceVector, targetVector);
+    }
+    // const lineVector = targetVector.clone().sub(sourceVector);
+    // const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
+    // this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
+    // // edge position
+    // this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
+    // // arrow position
+    // this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
+    // this.instance.position.set(
+    //   (sourceVector.x + targetVector.x) / 2,
+    //   (sourceVector.y + targetVector.y) / 2,
+    //   (sourceVector.z + targetVector.z) / 2
+    // );
+    // this.setRotation();
   }
 
   setRotation() {
     const targetVector = new THREE.Vector3();
     this.targetNode.instance.getWorldPosition(targetVector);
     this.instance.lookAt(targetVector);
-    this.instance.rotateX(THREE.Math.degToRad(90));
+    this.instance.rotateX(this.rotation); // rotate by 90 degrees
   }
 
   setColor(color) {
     if (color) {
-      this.instance.children[0].material.color.set(color);
-      this.instance.children[1].material.color.set(color);
+      this.edgeInstances.setColorFor(this.id, color);
+      // this.instance.children[0].material.color.set(color);
+      // this.instance.children[1].material.color.set(color);
       this.color = color;
     }
   }
 
   setVisibility(visibility) {
+    const targetVector = this.targetNode.instance.position.clone();
+    const sourceVector = this.sourceNode.instance.position.clone();
+    this.edgeInstances.setVisibilityFor(this.id, visibility, sourceVector, targetVector);
     this.visible = visibility;
-    this.instance.visible = visibility;
-    this.instance.children[0].visible = visibility;
-    this.instance.children[1].visible = visibility;
+    // this.instance.visible = visibility;
+    // this.instance.children[0].visible = visibility;
+    // this.instance.children[1].visible = visibility;
   }
 
   setSize(size, skipCheck) {
     if (size !== this.size || skipCheck) {
-      this.instance.children[0].scale.set(size, 1, size);
-      this.instance.children[1].scale.set(size, size, size);
+      this.edgeInstances.setSizeFor(this.id, size);
+      // this.instance.children[0].scale.set(size, 1, size);
+      // this.instance.children[1].scale.set(size, size, size);
       this.size = size;
-      this.updatePosition();
+      // this.updatePosition();
     }
   }
 

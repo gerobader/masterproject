@@ -8,6 +8,7 @@ import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import Node from './Elements/Node';
 import Edge from './Elements/Edge';
+import Edges from './Elements/Edges';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder
 } from '../../redux/network/network.actions';
@@ -416,7 +417,8 @@ class Renderer extends Component {
 
     networkElements.name = 'Network';
     let nodes = [];
-    let edges = [];
+    let edges;
+    let edgeInstances;
     if (useTestNetwork) {
       nodes = testNodes.default.map((node, index) => {
         const nodeClass = new Node(
@@ -472,16 +474,21 @@ class Renderer extends Component {
         networkElements.add(nodeClass.instance);
         return nodeClass;
       });
+      edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
       edges = remoteEdges.map((edge, index) => {
         const sourceNode = nodes.filter((node) => node.name === edge.source)[0];
         const targetNode = nodes.filter((node) => node.name === edge.target)[0];
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true);
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, edgeInstances);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
-        networkElements.add(edgeClass.instance);
+        // networkElements.add(edgeClass.instance);
         return edgeClass;
       });
+      nodes.forEach((node) => {
+        node.setEdges(edgeInstances);
+      });
     }
+    networkElements.add(edgeInstances.instances);
     nodes.forEach((node) => node.calculateDegree());
     scene.add(networkElements);
     const composer = new EffectComposer(renderer);

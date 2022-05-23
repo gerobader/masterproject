@@ -8,6 +8,7 @@ class Node {
     this.name = label;
     this.data = data;
     this.instance = null;
+    this.edges = undefined;
     this.targetForEdges = [];
     this.sourceForEdges = [];
     this.color = color;
@@ -148,9 +149,11 @@ class Node {
   updateAssociatedEdgePosition() {
     this.targetForEdges.forEach((edge) => {
       edge.updatePosition();
+      // this.edges.updatePositionFor(edge);
     });
     this.sourceForEdges.forEach((edge) => {
       edge.updatePosition();
+      // this.edges.updatePositionFor(edge);
     });
   }
 
@@ -180,6 +183,10 @@ class Node {
     if (edge) {
       this.sourceForEdges.push(edge);
     }
+  }
+
+  setEdges(edges) {
+    this.edges = edges;
   }
 
   unserializePathMap(nodes) {

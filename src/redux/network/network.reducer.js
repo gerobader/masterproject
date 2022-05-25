@@ -6,7 +6,7 @@ import {
   SET_SORT_NODES_BY,
   SET_SORT_EDGES_BY,
   SET_NODES_AND_EDGES,
-  SET_AVERAGE_POSITION_PLACEHOLDER, SET_NETWORK_NAME, SET_NETWORK_STATISTICS
+  SET_AVERAGE_POSITION_PLACEHOLDER, SET_NETWORK_NAME, SET_NETWORK_STATISTICS, SET_DIRECTED
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -56,6 +56,11 @@ const networkReducer = (state = initialState, action) => {
       return {
         ...state,
         name: action.payload
+      };
+    case SET_DIRECTED:
+      return {
+        ...state,
+        directed: action.payload
       };
     case SET_NETWORK_STATISTICS:
       return {

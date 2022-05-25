@@ -1,21 +1,25 @@
 import React, {useState} from 'react';
+import {useDispatch} from 'react-redux';
 import * as neo4j from 'neo4j-driver';
 import MenuElement from '../Overlay/MenuElement/MenuElement';
 import Select from '../Overlay/UI/Select/Select';
 import Button from '../Overlay/UI/Button/Button';
 import Loader from '../Overlay/UI/Loader/Loader';
 import Checkbox from '../Overlay/UI/Checkbox/Checkbox';
+import {setNetworkName} from '../../redux/network/network.actions';
 
 import './StartScreen.scss';
 
 const networks = ['gameofthrones', 'movies', 'twitter'];
 
-const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
+const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
   const [selectedNetwork, setSelectedNetwork] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const getNetworkData = async () => {
     if (selectedNetwork && !isLoading) {
+      dispatch(setNetworkName(selectedNetwork));
       setIsLoading(true);
       const neoDriver = neo4j.driver(
         'bolt://demo.neo4jlabs.com',
@@ -26,6 +30,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
       let res;
       const nodes = [];
       let edges = [];
+      let isDirected = false;
       if (selectedNetwork === 'gameofthrones') {
         res = await session.run('MATCH (n)-[:INTERACTS1]->(m) RETURN n.name as source, m.name as target');
         await session.close();
@@ -42,6 +47,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
         });
       } else if (selectedNetwork === 'movies') {
         res = await session.run('MATCH p=()-[r:ACTED_IN]->() RETURN p');
+        isDirected = true;
         await session.close();
         edges = res.records.map((r) => {
           const path = r.get('p');
@@ -67,6 +73,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
         });
       } else if (selectedNetwork === 'twitter') {
         res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 2500');
+        isDirected = true;
         await session.close();
         edges = res.records.map((r) => {
           const path = r.get('p');
@@ -96,9 +103,10 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
           return {source, target};
         });
       }
-      setElements({
+      setNetworkInfo({
         nodes,
-        edges
+        edges,
+        isDirected
       });
     }
   };

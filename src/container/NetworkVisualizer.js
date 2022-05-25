@@ -6,15 +6,20 @@ import StartScreen from '../components/StartScreen/StartScreen';
 import './NetworkVisualizer.scss';
 
 const NetworkVisualizer = () => {
-  const [elements, setElements] = useState(false);
+  const [networkInfo, setNetworkInfo] = useState(false);
   const [use2Dimensions, setUse2Dimensions] = useState(false);
   return (
     <div>
-      {!elements ? (
-        <StartScreen setElements={setElements} use2Dimensions={use2Dimensions} setUse2Dimensions={setUse2Dimensions}/>
+      {!networkInfo ? (
+        <StartScreen setNetworkInfo={setNetworkInfo} use2Dimensions={use2Dimensions} setUse2Dimensions={setUse2Dimensions}/>
       ) : (
         <>
-          <Renderer remoteNodes={elements.nodes} remoteEdges={elements.edges} use2Dimensions={use2Dimensions}/>
+          <Renderer
+            remoteNodes={networkInfo.nodes}
+            remoteEdges={networkInfo.edges}
+            use2Dimensions={use2Dimensions}
+            isDirected={networkInfo.isDirected}
+          />
           <Overlay/>
         </>
       )}

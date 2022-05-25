@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 class Edge {
-  constructor(id, sourceNode, targetNode, size, color, visible) {
+  constructor(id, sourceNode, targetNode, size, color, visible, isDirected) {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
@@ -9,6 +9,7 @@ class Edge {
     this.size = size;
     this.color = color;
     this.visible = visible;
+    this.isDirected = isDirected;
     this.buildGeometry();
   }
 
@@ -17,14 +18,16 @@ class Edge {
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
     const material = new THREE.MeshBasicMaterial({color: this.color});
     material.transparent = true;
-    material.opacity = 0.2;
+    material.opacity = 0.3;
     const edge = new THREE.Mesh(geometry, material);
     edge.name = 'Edge';
     group.add(edge);
-    const arrowHeadGeometry = new THREE.ConeGeometry(0.325, 1.5, 16);
-    const arrowHead = new THREE.Mesh(arrowHeadGeometry, material);
-    arrowHead.name = 'Arrow';
-    group.add(arrowHead);
+    if (this.isDirected) {
+      const arrowHeadGeometry = new THREE.ConeGeometry(0.325, 1.5, 16);
+      const arrowHead = new THREE.Mesh(arrowHeadGeometry, material);
+      arrowHead.name = 'Arrow';
+      group.add(arrowHead);
+    }
     this.instance = group;
     this.updatePosition();
     this.setRotation();
@@ -42,12 +45,16 @@ class Edge {
     const targetVector = this.targetNode.instance.position.clone();
     const sourceVector = this.sourceNode.instance.position.clone();
     const lineVector = targetVector.clone().sub(sourceVector);
-    const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
-    this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
-    // edge position
-    this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
-    // arrow position
-    this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
+    if (this.isDirected) {
+      const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
+      this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
+      // edge position
+      this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
+      // arrow position
+      this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
+    } else {
+      this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size;
+    }
     this.instance.position.set(
       (sourceVector.x + targetVector.x) / 2,
       (sourceVector.y + targetVector.y) / 2,
@@ -66,7 +73,7 @@ class Edge {
   setColor(color) {
     if (color) {
       this.instance.children[0].material.color.set(color);
-      this.instance.children[1].material.color.set(color);
+      if (this.isDirected) this.instance.children[1].material.color.set(color);
       this.color = color;
     }
   }
@@ -75,13 +82,13 @@ class Edge {
     this.visible = visibility;
     this.instance.visible = visibility;
     this.instance.children[0].visible = visibility;
-    this.instance.children[1].visible = visibility;
+    if (this.isDirected) this.instance.children[1].visible = visibility;
   }
 
   setSize(size, skipCheck) {
     if (size !== this.size || skipCheck) {
       this.instance.children[0].scale.set(size, 1, size);
-      this.instance.children[1].scale.set(size, size, size);
+      if (this.isDirected) this.instance.children[1].scale.set(size, size, size);
       this.size = size;
       this.updatePosition();
     }

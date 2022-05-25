@@ -1,10 +1,13 @@
 onmessage = (e) => {
-  const nodeClones = e.data;
+  const {nodeClones, directed} = e.data;
   const nodeIds = Object.keys(nodeClones);
 
   const calculateCloseness = (node) => {
-    const sum = Object.keys(node.pathMap).reduce((prevVal, currVal) => prevVal + node.pathMap[currVal].distance, 0);
-    return Math.round((sum / (nodeIds.length - 1)) * 1000) / 1000;
+    if (!node.pathMap) return 0;
+    const reachableNodeIds = Object.keys(node.pathMap);
+    if (reachableNodeIds.length !== nodeIds.length - 1) return 0;
+    const distanceSum = reachableNodeIds.reduce((prevVal, targetNodeId) => prevVal + node.pathMap[targetNodeId].distance, 0);
+    return Math.round((reachableNodeIds.length / distanceSum) * 1000) / 1000;
   };
 
   const calculateBetweenness = (currentNode) => {
@@ -12,7 +15,7 @@ onmessage = (e) => {
     let shortestPathPassThroughCount = 0;
     nodeIds.forEach((nodeId) => {
       const node = nodeClones[nodeId];
-      if (node.id === currentNode.id) return;
+      if (node.id === currentNode.id || !node.pathMap) return;
       Object.keys(node.pathMap).forEach((targetNodeId) => {
         if (parseInt(targetNodeId, 10) === currentNode.id) return;
         const pathsToTargetNode = node.pathMap[targetNodeId];
@@ -26,10 +29,10 @@ onmessage = (e) => {
     return Math.round(((shortestPathPassThroughCount / allShortestPathsCount) * 100) * 1000) / 1000;
   };
 
-  const calculateLocalClusteringCoefficient = (node, isDirectedGraph) => {
+  const calculateLocalClusteringCoefficient = (node) => {
     const degree = node.targetForEdges.length + node.sourceForEdges.length;
     let maxPossibleLinks = degree * (degree - 1);
-    if (!isDirectedGraph) maxPossibleLinks /= 2;
+    if (!directed) maxPossibleLinks /= 2;
     if (maxPossibleLinks === 0) return 0;
     let existingLinks = 0;
     const connectedNodes = new Set();
@@ -49,7 +52,7 @@ onmessage = (e) => {
     const node = nodeClones[nodeId];
     const closeness = calculateCloseness(node);
     const betweenness = calculateBetweenness(node);
-    const lcc = calculateLocalClusteringCoefficient(node, false);
+    const lcc = calculateLocalClusteringCoefficient(node);
     postMessage({
       type: 'progress',
       nodeId: parseInt(nodeId, 10),

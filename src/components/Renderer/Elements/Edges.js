@@ -14,10 +14,16 @@ class Edges {
     const threeColor = new THREE.Color(color);
     const instances = new THREE.InstancedMesh(geometry, defaultMat, edges.length);
     edges.forEach((edge, index) => {
-      const sourceNode = nodes.filter((node) => node.name === edge.source)[0];
-      const targetNode = nodes.filter((node) => node.name === edge.target)[0];
-      const targetVector = targetNode.instance.position.clone();
-      const sourceVector = sourceNode.instance.position.clone();
+      const sourceNode = nodes.find((node) => {
+        if (typeof edge.source === 'string') return node.name === edge.source;
+        return node.id === edge.source;
+      });
+      const targetNode = nodes.find((node) => {
+        if (typeof edge.source === 'string') return node.name === edge.target;
+        return node.id === edge.target;
+      });
+      const targetVector = targetNode.position.clone();
+      const sourceVector = sourceNode.position.clone();
       const lineVector = targetVector.clone().sub(sourceVector);
       const position = new THREE.Vector3(
         (sourceVector.x + targetVector.x) / 2,
@@ -60,11 +66,9 @@ class Edges {
   }
 
   setColorFor(index, color) {
-    if (color) {
-      const threeColor = new THREE.Color(color);
-      this.instances.setColorAt(index, threeColor);
-      this.instances.instanceColor.needsUpdate = true;
-    }
+    const threeColor = new THREE.Color(color);
+    this.instances.setColorAt(index, threeColor);
+    this.instances.instanceColor.needsUpdate = true;
   }
 
   setVisibilityFor(index, visibility, sourceVector, targetVector) {

@@ -59,6 +59,7 @@
           cursor: pointer;
           user-select: none;
           position: relative;
+          white-space: nowrap;
           &:last-child{
             border-right: none;
           }

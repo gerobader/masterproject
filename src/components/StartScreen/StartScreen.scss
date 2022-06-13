@@ -6,7 +6,7 @@
   justify-content: center;
   align-items: center;
   .menu-element{
-    height: 236px;
+    height: 266px;
     .header{
       margin-bottom: 38px;
     }
@@ -19,9 +19,11 @@
     }
     .checkbox-wrapper{
       flex-direction: row-reverse;
+      &.dimension-check{
+        margin-bottom: 8px;
+      }
       label{
         margin: 0 0 0 8px;
-
       }
     }
     .button-wrapper{

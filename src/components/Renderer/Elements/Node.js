@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera) {
+  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion) {
     this.label = null;
     this.id = id;
     this.name = label;
@@ -19,20 +19,19 @@ class Node {
     this.shape = shape;
     this.visible = visible;
     this.labelVisible = false;
-    this.buildGeometry(x, y, z, shape);
-    if (label) {
-      this.label = new Label(this.name, this.instance, camera);
-    }
+    this.nodeInstances = undefined;
+    this.performanceVersion = performanceVersion;
+    this.position = new THREE.Vector3(x, y, z);
+    if (!this.performanceVersion) this.buildGeometry();
+    if (label) this.label = new Label(this.name, this.position, camera);
   }
 
-  buildGeometry(x, y, z) {
+  buildGeometry() {
     const geometry = new THREE.SphereGeometry(this.size, 8, 8);
     const material = new THREE.MeshLambertMaterial({color: this.color});
     this.instance = new THREE.Mesh(geometry, material);
     this.instance.name = 'Node';
-    this.instance.position.x = x;
-    this.instance.position.y = y;
-    this.instance.position.z = z;
+    this.instance.position.set(this.position.x, this.position.y, this.position.z);
     if (this.shape && this.shape !== 'Sphere') this.setShape(this.shape);
   }
 
@@ -42,14 +41,22 @@ class Node {
 
   setColor(color) {
     if (color && !this.colorLocked) {
+      if (this.performanceVersion) {
+        this.nodeInstances.setColorFor(this.id, color);
+      } else {
+        this.instance.material.color.set(color);
+      }
       this.color = color;
-      this.instance.material.color.set(color);
     }
   }
 
   setVisibility(visibility) {
     this.visible = visibility;
-    this.instance.visible = visibility;
+    if (this.performanceVersion) {
+      this.nodeInstances.setVisibilityFor(this.id, visibility);
+    } else {
+      this.instance.visible = visibility;
+    }
     this.targetForEdges.forEach((edge) => {
       if (visibility) {
         if (edge.sourceNode.visible) edge.setVisibility(true);
@@ -88,7 +95,11 @@ class Node {
   setSize(size) {
     const newSize = parseFloat(size);
     if (newSize && newSize !== this.size) {
-      this.instance.scale.set(newSize, newSize, newSize);
+      if (this.performanceVersion) {
+        this.nodeInstances.setSizeFor(this.id, newSize);
+      } else {
+        this.instance.scale.set(newSize, newSize, newSize);
+      }
       this.size = newSize;
       this.targetForEdges.forEach((edge) => edge.updatePosition());
       this.sourceForEdges.forEach((edge) => edge.updatePosition());
@@ -96,6 +107,7 @@ class Node {
   }
 
   setShape(shape) {
+    if (this.performanceVersion) return;
     this.instance.geometry.dispose();
     this.shape = shape;
     switch (shape) {
@@ -156,19 +168,21 @@ class Node {
   }
 
   setPositionRelative(position, checkBoundaries = false, boundarySize) {
-    const {x, y, z} = this.instance.position;
-    this.instance.position.set(x + position.x, y + position.y, z + position.z);
-    if (checkBoundaries) {
-      this.instance.position.clampScalar(-boundarySize / 2, boundarySize / 2);
-    }
-    this.updateAssociatedEdgePosition();
-    this.label.updatePosition();
+    const newPosition = this.position.clone();
+    newPosition.add(position);
+    if (checkBoundaries) newPosition.clampScalar(-boundarySize / 2, boundarySize / 2);
+    this.setPositionAbsolute(newPosition);
   }
 
   setPositionAbsolute(position) {
-    this.instance.position.set(position.x, position.y, position.z);
+    this.position.set(position.x, position.y, position.z);
+    if (this.performanceVersion) {
+      this.nodeInstances.setPositionFor(this.id, this.position, this.size);
+    } else {
+      this.instance.position.set(this.position.x, this.position.y, this.position.z);
+    }
     this.updateAssociatedEdgePosition();
-    this.label.updatePosition();
+    this.label.updatePosition(this.position.clone());
   }
 
   addTargetEdge(edge) {
@@ -185,6 +199,10 @@ class Node {
 
   setEdges(edges) {
     this.edges = edges;
+  }
+
+  setNodeInstances(nodeInstances) {
+    this.nodeInstances = nodeInstances;
   }
 
   unserializePathMap(nodes) {
@@ -219,7 +237,7 @@ class Node {
       id: this.id,
       name: this.name,
       data: this.data,
-      position: this.instance.position,
+      position: this.position,
       color: this.color,
       size: this.size,
       pathMap: serializedPathMap,

@@ -12,6 +12,7 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
   const {
     selectedNodes, selectedEdges, sortEdgesBy, edgesReversed
   } = useSelector((state) => state.network);
+  const {performanceMode} = useSelector((state) => state.settings);
   const dispatch = useDispatch();
 
   const selectNodes = (e, node) => {
@@ -50,7 +51,7 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
           <tr className={`${selectedEdges.includes(edge) ? 'selected' : ''}${!edge.visible ? ' gray-out' : ''}`} key={edge.id}>
             <td
               onClick={(e) => {
-                if (!edge.visible) return;
+                if (!edge.visible || performanceMode) return;
                 let newSelectedEdges = [edge];
                 if (e.ctrlKey) {
                   if (selectedEdges.includes(edge)) {

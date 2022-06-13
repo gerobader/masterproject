@@ -5,12 +5,20 @@ import {
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
-  SET_SHOW_SAVE_NETWORK_MODAL, SET_SHOW_LABEL, RESET_ACTION_HISTORY
+  SET_SHOW_SAVE_NETWORK_MODAL,
+  SET_SHOW_LABEL,
+  RESET_ACTION_HISTORY,
+  SET_PERFORMANCE_MODE
 } from '../actionTypes';
 
 export const setOrbitPreview = (state) => ({
   type: SET_ORBIT_PREVIEW,
   payload: state
+});
+
+export const setPerformanceMode = (active) => ({
+  type: SET_PERFORMANCE_MODE,
+  payload: active
 });
 
 export const setCamera = (camera) => ({

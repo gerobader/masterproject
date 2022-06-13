@@ -5,13 +5,14 @@ class Edge {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
+    this.performanceVersion = Boolean(edgeInstances);
     this.edgeInstances = edgeInstances;
     this.instance = null;
     this.size = size;
     this.color = color;
     this.visible = visible;
     this.rotation = Math.PI / 2;
-    // this.buildGeometry();
+    if (!this.performanceVersion) this.buildGeometry();
   }
 
   buildGeometry() {
@@ -43,23 +44,26 @@ class Edge {
 
   updatePosition() {
     if (this.visible) {
-      const targetVector = this.targetNode.instance.position.clone();
-      const sourceVector = this.sourceNode.instance.position.clone();
-      this.edgeInstances.updatePositionFor(this.id, sourceVector, targetVector);
+      const targetVector = this.targetNode.position.clone();
+      const sourceVector = this.sourceNode.position.clone();
+      if (this.performanceVersion) {
+        this.edgeInstances.updatePositionFor(this.id, sourceVector, targetVector);
+      } else {
+        const lineVector = targetVector.clone().sub(sourceVector);
+        const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
+        this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
+        // edge position
+        this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
+        // arrow position
+        this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
+        this.instance.position.set(
+          (sourceVector.x + targetVector.x) / 2,
+          (sourceVector.y + targetVector.y) / 2,
+          (sourceVector.z + targetVector.z) / 2
+        );
+        this.setRotation();
+      }
     }
-    // const lineVector = targetVector.clone().sub(sourceVector);
-    // const arrowLength = this.instance.children[1].geometry.parameters.height * this.size;
-    // this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size - arrowLength;
-    // // edge position
-    // this.instance.children[0].position.y = -(this.targetNode.size - this.sourceNode.size + arrowLength) / 2;
-    // // arrow position
-    // this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
-    // this.instance.position.set(
-    //   (sourceVector.x + targetVector.x) / 2,
-    //   (sourceVector.y + targetVector.y) / 2,
-    //   (sourceVector.z + targetVector.z) / 2
-    // );
-    // this.setRotation();
   }
 
   setRotation() {
@@ -71,30 +75,39 @@ class Edge {
 
   setColor(color) {
     if (color) {
-      this.edgeInstances.setColorFor(this.id, color);
-      // this.instance.children[0].material.color.set(color);
-      // this.instance.children[1].material.color.set(color);
+      if (this.performanceVersion) {
+        this.edgeInstances.setColorFor(this.id, color);
+      } else {
+        this.instance.children[0].material.color.set(color);
+        this.instance.children[1].material.color.set(color);
+      }
       this.color = color;
     }
   }
 
   setVisibility(visibility) {
-    const targetVector = this.targetNode.instance.position.clone();
-    const sourceVector = this.sourceNode.instance.position.clone();
-    this.edgeInstances.setVisibilityFor(this.id, visibility, sourceVector, targetVector);
+    if (this.performanceVersion) {
+      const targetVector = this.targetNode.position.clone();
+      const sourceVector = this.sourceNode.position.clone();
+      this.edgeInstances.setVisibilityFor(this.id, visibility, sourceVector, targetVector);
+    } else {
+      this.instance.visible = visibility;
+      this.instance.children[0].visible = visibility;
+      this.instance.children[1].visible = visibility;
+    }
     this.visible = visibility;
-    // this.instance.visible = visibility;
-    // this.instance.children[0].visible = visibility;
-    // this.instance.children[1].visible = visibility;
   }
 
   setSize(size, skipCheck) {
     if (size !== this.size || skipCheck) {
-      this.edgeInstances.setSizeFor(this.id, size);
-      // this.instance.children[0].scale.set(size, 1, size);
-      // this.instance.children[1].scale.set(size, size, size);
       this.size = size;
-      // this.updatePosition();
+      if (this.performanceVersion) {
+        this.edgeInstances.setSizeFor(this.id, size);
+      } else {
+        this.instance.children[0].scale.set(size, 1, size);
+        this.instance.children[1].scale.set(size, size, size);
+        this.updatePosition();
+      }
     }
   }
 

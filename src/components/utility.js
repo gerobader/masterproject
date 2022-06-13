@@ -61,12 +61,10 @@ export const sortArray = (a, b, reverse = false) => {
   return compareFunction ? -1 : 1;
 };
 
-export const calculateAveragePosition = (elements, useWorldPosition = true) => {
+export const calculateAveragePosition = (elements) => {
   const averagePosition = new THREE.Vector3(0, 0, 0);
   elements.forEach((element) => {
-    const elementPosition = useWorldPosition ? new THREE.Vector3() : element.instance.position.clone();
-    if (useWorldPosition) element.instance.getWorldPosition(elementPosition);
-    averagePosition.add(elementPosition);
+    averagePosition.add(element.position);
   });
   return averagePosition.divideScalar(elements.length);
 };

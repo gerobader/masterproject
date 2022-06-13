@@ -1,18 +1,22 @@
 import React, {useState} from 'react';
+import {useSelector, useDispatch} from 'react-redux';
 import * as neo4j from 'neo4j-driver';
 import MenuElement from '../Overlay/MenuElement/MenuElement';
 import Select from '../Overlay/UI/Select/Select';
 import Button from '../Overlay/UI/Button/Button';
 import Loader from '../Overlay/UI/Loader/Loader';
 import Checkbox from '../Overlay/UI/Checkbox/Checkbox';
+import {setPerformanceMode} from '../../redux/settings/settings.actions';
 
 import './StartScreen.scss';
 
 const networks = ['gameofthrones', 'movies', 'twitter'];
 
 const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
+  const {performanceMode} = useSelector((state) => state.settings);
   const [selectedNetwork, setSelectedNetwork] = useState();
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const getNetworkData = async () => {
     if (selectedNetwork && !isLoading) {
@@ -66,7 +70,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
           return {source, target};
         });
       } else if (selectedNetwork === 'twitter') {
-        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 2500');
+        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 20000');
         await session.close();
         edges = res.records.map((r) => {
           const path = r.get('p');
@@ -102,7 +106,6 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
       });
     }
   };
-
   return (
     <div className="start-screen">
       <MenuElement headline="SettingsMenu" simpleHeader>
@@ -113,9 +116,22 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setElements}) => {
           defaultOption="- Select Network -"
           className="extra-wide"
         />
-        <Checkbox text="Layout in 2 Dimensions" checked={use2Dimensions} setChecked={setUse2Dimensions} name="dimension"/>
+        <Checkbox
+          text="Layout in 2 Dimensions"
+          checked={use2Dimensions}
+          setChecked={setUse2Dimensions}
+          name="dimension"
+          className="dimension-check"
+        />
+        <Checkbox
+          text="Performance Mode"
+          checked={performanceMode}
+          setChecked={() => dispatch(setPerformanceMode(!performanceMode))}
+          name="performance"
+          title="This will improve editor performance at the cost of some functionality. Recommended for large networks."
+        />
         <div className="button-wrapper">
-          <Button text="Create Graph" onClick={getNetworkData}/>
+          <Button text="Create Graph" onClick={getNetworkData} disabled={!selectedNetwork}/>
           {isLoading && <Loader/>}
         </div>
       </MenuElement>

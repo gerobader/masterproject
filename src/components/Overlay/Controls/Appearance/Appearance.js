@@ -19,12 +19,12 @@ import './Appearance.scss';
 const shapes = [
   'Box', 'Cone', 'Cylinder', 'Dodecahedron', 'Icosahedron', 'Octahedron', 'Sphere', 'Tetrahedron', 'Torus', 'Torus Knot'
 ];
-const rangeMappingValues = ['degree', 'closeness', 'betweenness', 'lcc'];
 
 const Appearance = () => {
   const {
     nodes, selectedNodes, edges, selectedEdges
   } = useSelector((state) => state.network);
+  const {performanceMode} = useSelector((state) => state.settings);
   const dispatch = useDispatch();
   const [activeMenu, setActiveMenu] = useState('left');
   const [fillColor, setFillColor] = useState();
@@ -57,8 +57,9 @@ const Appearance = () => {
         }
       });
     });
-    rangeMappingValues.forEach((mappingValue) => {
-      if (mappingValue in data) {
+    const mappingValues = Object.keys(data);
+    mappingValues.forEach((mappingValue) => {
+      if (typeof data[mappingValue][0] === 'number') {
         data[mappingValue].sort((a, b) => sortArray(a, b));
       }
     });
@@ -71,9 +72,16 @@ const Appearance = () => {
     }
   }, [selectedNodes]);
 
+  useEffect(() => {
+    if (selectedEdges.length + selectedNodes.length === 0) {
+      setApplyOnlyToSelected(false);
+    }
+  }, [selectedEdges, selectedNodes]);
+
   const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
+    if (!mappingValue) return;
     const changes = [];
-    if (rangeMappingValues.includes(mappingValue)) {
+    if (typeof nodeDataPoints[mappingValue][0] === 'number') {
       const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
       const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
@@ -103,7 +111,7 @@ const Appearance = () => {
       });
       dispatch(addToActionHistory(changes));
       dispatch(setNodes(nodes));
-    } else if (mappingValue) {
+    } else {
       nodes.forEach((node) => {
         const elementChanges = {element: node, type: 'graphElement'};
         if (targetElement === 'node') {
@@ -122,9 +130,10 @@ const Appearance = () => {
   };
 
   const applySizeMapping = (mappingValue, sizeMapping, targetElement) => {
+    if (!mappingValue) return;
     const changes = [];
     const elementsToUse = applyOnlyToSelected ? selectedNodes : nodes;
-    if (rangeMappingValues.includes(mappingValue)) {
+    if (typeof nodeDataPoints[mappingValue][0] === 'number') {
       if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
         const sortedElements = sortElements(elementsToUse, mappingValue);
         const min = parseFloat(sizeMapping[0]);
@@ -145,7 +154,7 @@ const Appearance = () => {
         dispatch(addToActionHistory(changes));
         dispatch(setNodes(nodes));
       }
-    } else if (mappingValue) {
+    } else {
       elementsToUse.forEach((node) => {
         const elementChanges = {element: node, type: 'graphElement'};
         if (targetElement === 'node') {
@@ -233,7 +242,7 @@ const Appearance = () => {
   };
 
   const createMappingInputs = (mappingType, mappingValue, rangeMapping, rangeMappingSetter) => {
-    if (rangeMappingValues.includes(mappingValue) && mappingType !== 'shape') {
+    if (mappingValue && typeof nodeDataPoints[mappingValue][0] === 'number' && mappingType !== 'shape') {
       return (
         <Setting name="Range">
           {mappingType === 'color' ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)
@@ -305,16 +314,18 @@ const Appearance = () => {
               <Button text="reset" className="reset" onClick={() => setElementSize(undefined)}/>
             )}
           </Setting>
-          <Setting name="Node Shape">
-            <Select
-              options={shapes}
-              value={nodeShape}
-              setSelected={setNodeShape}
-              className="no-margin"
-              defaultOption="- Shape -"
-            />
-            {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
-          </Setting>
+          {!performanceMode && (
+            <Setting name="Node Shape">
+              <Select
+                options={shapes}
+                value={nodeShape}
+                setSelected={setNodeShape}
+                className="no-margin"
+                defaultOption="- Shape -"
+              />
+              {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
+            </Setting>
+          )}
           <Setting name="Label Color">
             <ColorPicker color={labelColor} setColor={setLabelColor}/>
             {labelColor && (<Button text="reset" className="reset" onClick={() => setLabelColor(undefined)}/>)}
@@ -348,14 +359,16 @@ const Appearance = () => {
           >
             {createMappingInputs('size', elementSizeMappingValue, elementSizeMapping, setElementSizeMapping)}
           </ExpandableSetting>
-          <ExpandableSetting
-            name="Node Shape"
-            mappingValue={nodeShapeMappingValue}
-            setMappingValue={setNodeShapeMappingValue}
-            mappingOptions={Object.keys(nodeDataPoints)}
-          >
-            {createMappingInputs('shape', nodeShapeMappingValue, nodeShapeMapping, setNodeShapeMapping)}
-          </ExpandableSetting>
+          {!performanceMode && (
+            <ExpandableSetting
+              name="Node Shape"
+              mappingValue={nodeShapeMappingValue}
+              setMappingValue={setNodeShapeMappingValue}
+              mappingOptions={Object.keys(nodeDataPoints)}
+            >
+              {createMappingInputs('shape', nodeShapeMappingValue, nodeShapeMapping, setNodeShapeMapping)}
+            </ExpandableSetting>
+          )}
           <ExpandableSetting
             name="Label Color"
             mappingValue={labelColorMappingValue}

@@ -32,7 +32,7 @@ const Layout = () => {
     interval = undefined;
     setRunning(false);
     nodes.forEach((node, index) => {
-      changes[index].setPositionAbsolute.after = node.instance.position.clone();
+      changes[index].setPositionAbsolute.after = node.position.clone();
     });
     dispatch(addToActionHistory(changes));
     changes = [];
@@ -57,7 +57,7 @@ const Layout = () => {
         v.disp.set(0, 0, 0);
         nodes.forEach((u) => {
           if (v !== u && u.visible) {
-            const distance = v.instance.position.clone().sub(u.instance.position);
+            const distance = v.position.clone().sub(u.position);
             const length = distance.length() || 0.01;
             const normalizedDistance = distance.clone().normalize();
             v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
@@ -67,7 +67,7 @@ const Layout = () => {
       edges.forEach((edge) => {
         if (!edge.visible) return;
         // attractive forces
-        const distance = edge.sourceNode.instance.position.clone().sub(edge.targetNode.instance.position);
+        const distance = edge.sourceNode.position.clone().sub(edge.targetNode.position);
         const length = distance.length();
         const normalizedDistance = distance.clone().normalize();
         const attractiveForceStrength = attractiveForce({
@@ -95,7 +95,7 @@ const Layout = () => {
   const startCalculation = () => {
     nodes.forEach((node) => {
       const elementChanges = {element: node, type: 'graphElement'};
-      elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
+      elementChanges.setPositionAbsolute = {before: node.position.clone()};
       changes.push(elementChanges);
     });
     if (layoutAlgorithm === 'Fruchterman and Reingold') {

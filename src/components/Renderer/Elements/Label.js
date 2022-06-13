@@ -2,10 +2,9 @@ import * as THREE from 'three';
 import {between} from '../../utility';
 
 class Label {
-  constructor(text, parent, camera) {
+  constructor(text, position, camera) {
     this.text = text;
-    this.parent = parent;
-    this.position = null;
+    this.position = position;
     this.label = null;
     this.isHidden = true;
     this.container = document.getElementById('network-view');
@@ -29,22 +28,23 @@ class Label {
     this.label.remove();
   }
 
-  updatePosition() {
+  updatePosition(newParentPosition) {
     if (!this.isHidden) {
-      const position = new THREE.Vector3();
-      this.parent.getWorldPosition(position);
+      if (newParentPosition) {
+        this.position = newParentPosition;
+      }
+      const currentPosition = this.position.clone();
       this.camera.updateMatrixWorld();
-      position.project(this.camera);
-      if (position.z >= 1 || !between(position.x, -1, 1) || !between(position.y, -1, 1)) {
+      currentPosition.project(this.camera);
+      if (currentPosition.z >= 1 || !between(currentPosition.x, -1, 1) || !between(currentPosition.y, -1, 1)) {
         this.label.style.display = 'none';
         return;
       }
       this.label.style.display = 'block';
-      position.x = (position.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.label.offsetWidth / 2;
-      position.y = -(position.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
-      this.label.style.left = `${position.x}px`;
-      this.label.style.top = `${position.y}px`;
-      this.position = position;
+      currentPosition.x = (currentPosition.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.label.offsetWidth / 2;
+      currentPosition.y = -(currentPosition.y * (window.innerHeight / 2)) + window.innerHeight / 2 - this.label.offsetHeight / 2;
+      this.label.style.left = `${currentPosition.x}px`;
+      this.label.style.top = `${currentPosition.y}px`;
     }
   }
 

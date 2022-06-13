@@ -7,6 +7,7 @@ import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
 import Node from './Elements/Node';
+import Nodes from './Elements/Nodes';
 import Edge from './Elements/Edge';
 import Edges from './Elements/Edges';
 import {
@@ -81,7 +82,7 @@ class Renderer extends Component {
 
   handleClickOnElement(e, connectedSelect = false) {
     const {
-      nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder, _setAveragePositionPlaceholder
+      nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder, _setAveragePositionPlaceholder, performanceMode
     } = this.props;
     const {hoveredElement, controls, scene} = this.state;
     let newSelectedEdges = [...selectedEdges];
@@ -100,10 +101,15 @@ class Renderer extends Component {
           newSelectedEdges = [newSelectedEdge];
         }
       } else {
-        const newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
+        let newSelectedNode;
+        if (performanceMode) {
+          newSelectedNode = hoveredElement;
+        } else {
+          newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
+        }
         if (e.ctrlKey && !connectedSelect) {
           if (selectedNodes.includes(newSelectedNode)) {
-            newSelectedNodes = selectedNodes.filter((edge) => edge !== newSelectedNode);
+            newSelectedNodes = selectedNodes.filter((node) => node !== newSelectedNode);
           } else {
             newSelectedNodes = [...selectedNodes, newSelectedNode];
           }
@@ -137,7 +143,7 @@ class Renderer extends Component {
     cameraControls.enabled = true;
     if (nodePositionChanges.length > 0 && nodePositionChanges.length === currentlySelectedNodes.length) {
       currentlySelectedNodes.forEach((node, index) => {
-        nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
+        nodePositionChanges[index].setPositionAbsolute.after = node.position.clone();
       });
       _addToActionHistory(nodePositionChanges);
       nodePositionChanges = [];
@@ -191,17 +197,15 @@ class Renderer extends Component {
       if (nodePositionChanges.length === 0) {
         selectedNodes.forEach((node) => {
           const elementChanges = {element: node, type: 'graphElement'};
-          elementChanges.setPositionAbsolute = {before: node.instance.position.clone()};
+          elementChanges.setPositionAbsolute = {before: node.position.clone()};
           nodePositionChanges.push(elementChanges);
         });
       }
-      if (selectedNodes.length > 1) {
+      if (selectedNodes.length) {
         selectedNodes.forEach((node) => {
           const newPosition = averagePositionPlaceholder.position.clone().sub(averagePositionPlaceholder.userData[node.id]);
           node.setPositionAbsolute(newPosition);
         });
-      } else {
-        selectedNodes[0].updateAssociatedEdgePosition();
       }
     }
   }
@@ -222,7 +226,7 @@ class Renderer extends Component {
           case 'escape':
             if (nodePositionChanges.length > 0) {
               selectedNodes.forEach((node, index) => {
-                nodePositionChanges[index].setPositionAbsolute.after = node.instance.position.clone();
+                nodePositionChanges[index].setPositionAbsolute.after = node.position.clone();
               });
               _addToActionHistory(nodePositionChanges);
               nodePositionChanges = [];
@@ -241,13 +245,13 @@ class Renderer extends Component {
 
   handleOutline() {
     const {hoveredElement} = this.state;
-    const {selectedNodes, selectedEdges} = this.props;
+    const {selectedNodes, selectedEdges, performanceMode} = this.props;
     if (hoveredElement) {
       hoveredElementOutline.selectedObjects = hoveredElement.type === 'Group' ? hoveredElement.children : [hoveredElement.object];
     } else {
       hoveredElementOutline.selectedObjects = [];
     }
-    if (selectedNodes.length || selectedEdges.length) {
+    if ((selectedNodes.length || selectedEdges.length) && !performanceMode) {
       const selectedElements = [...selectedNodes, ...selectedEdges];
       selectedElementOutline.selectedObjects = selectedElements.map((selectedElement) => selectedElement.instance);
     } else {
@@ -260,19 +264,23 @@ class Renderer extends Component {
     const {controls, scene} = this.state;
     if (newSelectedEdges.length || newSelectedNodes.length === 0) {
       controls.detach();
-    } else if (newSelectedNodes.length === 1) {
-      controls.attach(newSelectedNodes[0].instance);
     } else if (
-      newSelectedNodes.length > 1
+      newSelectedNodes.length
       && (!averagePositionPlaceholder || Object.keys(averagePositionPlaceholder.userData).length !== newSelectedNodes.length)
     ) {
       scene.remove(averagePositionPlaceholder);
       const newPlaceholder = new THREE.Object3D();
-      const averagePosition = calculateAveragePosition(newSelectedNodes, false);
-      newPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
-      newSelectedNodes.forEach((node) => {
-        newPlaceholder.userData[node.id] = averagePosition.clone().sub(node.instance.position);
-      });
+      if (newSelectedNodes.length === 1) {
+        const {x, y, z} = newSelectedNodes[0].position;
+        newPlaceholder.position.set(x, y, z);
+        newPlaceholder.userData[newSelectedNodes[0].id] = new THREE.Vector3();
+      } else {
+        const averagePosition = calculateAveragePosition(newSelectedNodes, false);
+        newPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
+        newSelectedNodes.forEach((node) => {
+          newPlaceholder.userData[node.id] = averagePosition.clone().sub(node.position);
+        });
+      }
       networkElements.add(newPlaceholder);
       controls.attach(newPlaceholder);
       _setAveragePositionPlaceholder(newPlaceholder);
@@ -351,6 +359,7 @@ class Renderer extends Component {
 
   checkIntersect(e) {
     const {scene, hoveredElement} = this.state;
+    const {nodes, performanceMode} = this.props;
     const {camera} = this.props;
     const {clientX, clientY} = e;
     mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
@@ -359,17 +368,18 @@ class Renderer extends Component {
     let newHoveredElement;
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length) {
-      newHoveredElement = intersects.filter(
-        (intersectedElement) => (
+      if (performanceMode) {
+        const nodeInstanceElement = intersects.find((intersectedElement) => intersectedElement?.object.name === 'NodeInstances');
+        if (nodeInstanceElement) newHoveredElement = nodes[nodeInstanceElement.instanceId];
+      } else {
+        newHoveredElement = intersects.find((intersectedElement) => (
           (intersectedElement?.object.name === 'Node'
             || intersectedElement?.object.name === 'Edge'
-            || intersectedElement?.object.name === 'Arrow')
-          && intersectedElement?.object.visible
-        )
-      );
-      newHoveredElement = newHoveredElement.length ? newHoveredElement[0] : undefined;
-      if (newHoveredElement && (newHoveredElement.object.name === 'Edge' || newHoveredElement.object.name === 'Arrow')) {
-        newHoveredElement = newHoveredElement.object.parent;
+            || intersectedElement?.object.name === 'Arrow'
+          ) && intersectedElement?.object.visible));
+        if (newHoveredElement && (newHoveredElement.object.name === 'Edge' || newHoveredElement.object.name === 'Arrow')) {
+          newHoveredElement = newHoveredElement.object.parent;
+        }
       }
     }
     if (newHoveredElement !== hoveredElement) {
@@ -382,7 +392,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions
+      _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, performanceMode
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -417,6 +427,7 @@ class Renderer extends Component {
 
     networkElements.name = 'Network';
     let nodes = [];
+    let nodeInstances;
     let edges;
     let edgeInstances;
     if (useTestNetwork) {
@@ -469,37 +480,54 @@ class Renderer extends Component {
           'Sphere',
           undefined,
           true,
-          camera
+          camera,
+          performanceMode
         );
-        networkElements.add(nodeClass.instance);
+        if (!performanceMode) networkElements.add(nodeClass.instance);
         return nodeClass;
       });
-      edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
+      if (performanceMode) {
+        nodeInstances = new Nodes(nodes, '#008799');
+        edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
+        nodes.forEach((node) => {
+          node.setEdges(edgeInstances);
+          node.setNodeInstances(nodeInstances);
+        });
+      }
       edges = remoteEdges.map((edge, index) => {
-        const sourceNode = nodes.filter((node) => node.name === edge.source)[0];
-        const targetNode = nodes.filter((node) => node.name === edge.target)[0];
+        const sourceNode = nodes.find((node) => {
+          if (typeof edge.source === 'string') return node.name === edge.source;
+          return node.id === edge.source;
+        });
+        const targetNode = nodes.find((node) => {
+          if (typeof edge.source === 'string') return node.name === edge.target;
+          return node.id === edge.target;
+        });
         const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, edgeInstances);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
-        // networkElements.add(edgeClass.instance);
+        if (!performanceMode) networkElements.add(edgeClass.instance);
         return edgeClass;
       });
-      nodes.forEach((node) => {
-        node.setEdges(edgeInstances);
-      });
     }
-    networkElements.add(edgeInstances.instances);
+    if (performanceMode) {
+      networkElements.add(nodeInstances.instances);
+      networkElements.add(edgeInstances.instances);
+    }
     nodes.forEach((node) => node.calculateDegree());
     scene.add(networkElements);
-    const composer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
-    composer.addPass(renderPass);
-    hoveredElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-    hoveredElementOutline.visibleEdgeColor.set(hoverElementOutlineColor);
-    composer.addPass(hoveredElementOutline);
-    selectedElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
-    selectedElementOutline.visibleEdgeColor.set(selectedElementOutlineColor);
-    composer.addPass(selectedElementOutline);
+    let composer;
+    if (!performanceMode) {
+      composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+      hoveredElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+      hoveredElementOutline.visibleEdgeColor.set(hoverElementOutlineColor);
+      composer.addPass(hoveredElementOutline);
+      selectedElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+      selectedElementOutline.visibleEdgeColor.set(selectedElementOutlineColor);
+      composer.addPass(selectedElementOutline);
+    }
 
     const controls = new TransformControls(camera, renderer.domElement);
     controls.setSize(0.5);
@@ -517,14 +545,20 @@ class Renderer extends Component {
   }
 
   animate() {
-    const {composer} = this.state;
-    const {orbitPreview, nodes} = this.props;
+    const {composer, renderer, scene} = this.state;
+    const {
+      orbitPreview, nodes, performanceMode, camera
+    } = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
-    this.handleOutline();
     nodes.forEach((node) => node.label.updatePosition());
-    composer.render();
+    if (!performanceMode) {
+      this.handleOutline();
+      composer.render();
+    } else {
+      renderer.render(scene, camera);
+    }
   }
 
   render() {
@@ -548,6 +582,7 @@ class Renderer extends Component {
 
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
+  performanceMode: state.settings.performanceMode,
   camera: state.settings.camera,
   nodes: state.network.nodes,
   edges: state.network.edges,

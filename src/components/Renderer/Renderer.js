@@ -11,7 +11,7 @@ import Nodes from './Elements/Nodes';
 import Edge from './Elements/Edge';
 import Edges from './Elements/Edges';
 import {
-  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder
+  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected
 } from '../../redux/network/network.actions';
 import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
@@ -392,7 +392,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, performanceMode
+     _setDirected, _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, isDirected, performanceMode
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -503,7 +503,7 @@ class Renderer extends Component {
           if (typeof edge.source === 'string') return node.name === edge.target;
           return node.id === edge.target;
         });
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, edgeInstances);
+        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, isDirected, edgeInstances);
         sourceNode.addSourceEdge(edgeClass);
         targetNode.addTargetEdge(edgeClass);
         if (!performanceMode) networkElements.add(edgeClass.instance);
@@ -534,6 +534,7 @@ class Renderer extends Component {
     scene.add(controls);
 
     _setCamera(camera);
+    _setDirected(isDirected);
     _setNodesAndEdges(nodes, edges, false);
     this.setState((state) => ({
       ...state,
@@ -596,6 +597,7 @@ const mapStateToPros = (state) => ({
 const mapDispatchToProps = (dispatch) => ({
   _setCamera: (camera) => dispatch(setCamera(camera)),
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
+  _setDirected: (directed) => dispatch(setDirected(directed)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),

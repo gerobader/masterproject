@@ -7,12 +7,17 @@ import {
   SET_SORT_EDGES_BY,
   SET_NODES_AND_EDGES,
   SET_AVERAGE_POSITION_PLACEHOLDER,
-  SET_NETWORK_NAME, SET_NETWORK_STATISTICS
+  SET_NETWORK_NAME, SET_NETWORK_STATISTICS, SET_DIRECTED
 } from '../actionTypes';
 
 export const setNetworkName = (name) => ({
   type: SET_NETWORK_NAME,
   payload: name
+});
+
+export const setDirected = (directed) => ({
+  type: SET_DIRECTED,
+  payload: directed
 });
 
 export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density) => ({

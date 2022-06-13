@@ -93,7 +93,7 @@ const InfoTable = ({setProgressInfo}) => {
 
   const calculateStatisticalMeasures = (nodeClones) => {
     const statisticalMeasuresWorker = new Worker('calculateStatisticalMeasures.js');
-    statisticalMeasuresWorker.postMessage(nodeClones);
+    statisticalMeasuresWorker.postMessage({nodeClones, directed});
     resetTimeVars();
     statisticalMeasuresWorker.addEventListener('message', (e) => {
       if (e.data.type === 'finished') {
@@ -196,7 +196,7 @@ const InfoTable = ({setProgressInfo}) => {
           alwaysShowArrow
         />
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
-        <Button text="Calculate Statistical Measures" onClick={calculateShortestPathBetweenNodes}/>
+        <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>
       </div>
       <div className="table-wrapper">
         {tableType === 'Node Table' ? (

@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {halfPi} from '../../utility';
 
 class Edges {
   constructor(edges, nodes, color) {
@@ -22,32 +23,19 @@ class Edges {
         if (typeof edge.source === 'string') return node.name === edge.target;
         return node.id === edge.target;
       });
-      const targetVector = targetNode.position.clone();
-      const sourceVector = sourceNode.position.clone();
-      const lineVector = targetVector.clone().sub(sourceVector);
-      const position = new THREE.Vector3(
-        (sourceVector.x + targetVector.x) / 2,
-        (sourceVector.y + targetVector.y) / 2,
-        (sourceVector.z + targetVector.z) / 2
-      );
-
-      const rotationObject = new THREE.Object3D();
-      rotationObject.position.set(position.x, position.y, position.z);
-      rotationObject.lookAt(targetVector);
-      rotationObject.rotateX(Math.PI / 2);
-      const rotation = new THREE.Quaternion();
-      rotation.setFromAxisAngle(rotationObject.rotation, Math.PI / 2);
-
-      const scale = new THREE.Vector3(1, lineVector.length(), 1);
-      const edgeMatrix = new THREE.Matrix4().compose(position, rotationObject.quaternion.clone(), scale);
-      instances.setMatrixAt(index, edgeMatrix);
+      instances.setMatrixAt(index, this.getTransformMatrix(sourceNode.position.clone(), targetNode.position.clone()));
       instances.setColorAt(index, threeColor);
     });
     this.instances = instances;
   }
 
   updatePositionFor(index, sourceVector, targetVector) {
-    const lineVector = targetVector.clone().sub(sourceVector);
+    this.instances.setMatrixAt(index, this.getTransformMatrix(sourceVector, targetVector));
+    this.instances.instanceMatrix.needsUpdate = true;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  getTransformMatrix(sourceVector, targetVector) {
     const position = new THREE.Vector3(
       (sourceVector.x + targetVector.x) / 2,
       (sourceVector.y + targetVector.y) / 2,
@@ -56,13 +44,12 @@ class Edges {
     const rotationObject = new THREE.Object3D();
     rotationObject.position.set(position.x, position.y, position.z);
     rotationObject.lookAt(targetVector);
-    rotationObject.rotateX(Math.PI / 2);
+    rotationObject.rotateX(halfPi);
     const rotation = new THREE.Quaternion();
-    rotation.setFromAxisAngle(rotationObject.rotation, Math.PI / 2);
+    rotation.setFromAxisAngle(rotationObject.rotation, halfPi);
+    const lineVector = targetVector.clone().sub(sourceVector);
     const scale = new THREE.Vector3(1, lineVector.length(), 1);
-    const edgeMatrix = new THREE.Matrix4().compose(position, rotationObject.quaternion.clone(), scale);
-    this.instances.setMatrixAt(index, edgeMatrix);
-    this.instances.instanceMatrix.needsUpdate = true;
+    return new THREE.Matrix4().compose(position, rotationObject.quaternion.clone(), scale);
   }
 
   setColorFor(index, color) {

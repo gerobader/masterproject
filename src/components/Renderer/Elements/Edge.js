@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {halfPi} from '../../utility';
 
 class Edge {
   constructor(id, sourceNode, targetNode, size, color, visible, isDirected, edgeInstances) {
@@ -12,7 +13,6 @@ class Edge {
     this.color = color;
     this.visible = visible;
     this.isDirected = isDirected;
-    this.rotation = Math.PI / 2;
     if (!this.performanceVersion) this.buildGeometry();
   }
 
@@ -77,7 +77,7 @@ class Edge {
     const targetVector = new THREE.Vector3();
     this.targetNode.instance.getWorldPosition(targetVector);
     this.instance.lookAt(targetVector);
-    this.instance.rotateX(this.rotation); // rotate by 90 degrees
+    this.instance.rotateX(halfPi); // rotate by 90 degrees
   }
 
   setColor(color) {

@@ -74,7 +74,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
           return {source, target};
         });
       } else if (selectedNetwork === 'twitter') {
-        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 2500');
+        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 20000');
         isDirected = true;
         await session.close();
         edges = res.records.map((r) => {

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion) {
+  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion, networkBoundarySize) {
     this.label = null;
     this.id = id;
     this.name = label;
@@ -22,6 +22,7 @@ class Node {
     this.nodeInstances = undefined;
     this.performanceVersion = performanceVersion;
     this.position = new THREE.Vector3(x, y, z);
+    this.networkBoundarySize = networkBoundarySize;
     if (!this.performanceVersion) this.buildGeometry();
     if (label) this.label = new Label(this.name, this.position, camera);
   }
@@ -167,14 +168,14 @@ class Node {
     });
   }
 
-  setPositionRelative(position, checkBoundaries = false, boundarySize) {
+  setPositionRelative(position) {
     const newPosition = this.position.clone();
     newPosition.add(position);
-    if (checkBoundaries) newPosition.clampScalar(-boundarySize / 2, boundarySize / 2);
     this.setPositionAbsolute(newPosition);
   }
 
   setPositionAbsolute(position) {
+    position.clampScalar(-this.networkBoundarySize / 2, this.networkBoundarySize / 2);
     this.position.set(position.x, position.y, position.z);
     if (this.performanceVersion) {
       this.nodeInstances.setPositionFor(this.id, this.position, this.size);
@@ -203,6 +204,10 @@ class Node {
 
   setNodeInstances(nodeInstances) {
     this.nodeInstances = nodeInstances;
+  }
+
+  setNetworkBoundarySize(size) {
+    this.networkBoundarySize = size;
   }
 
   unserializePathMap(nodes) {

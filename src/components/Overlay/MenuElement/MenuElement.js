@@ -6,7 +6,7 @@ import menuIcon from '../../../assets/menu-icon.svg';
 const MenuElement = ({
   children, headline, icon, simpleHeader, rightSide, className
 }) => {
-  const [minimized, setMinimized] = useState(false);
+  const [minimized, setMinimized] = useState(true);
   return (
     <div className={`menu-element${minimized ? ' minimized' : ''}${className ? ` ${className}` : ''}`}>
       <div className={`header${rightSide ? ' reverse' : ''}`}>

@@ -5,7 +5,7 @@ import {setShowLabel} from '../../../../redux/settings/settings.actions';
 import './LabelSwitch.scss';
 
 const LabelSwitch = () => {
-  const {showLabel} = useSelector((state) => state.settings);
+  const {showLabel, performanceMode} = useSelector((state) => state.settings);
   const {nodes, selectedNodes} = useSelector((state) => state.network);
   const dispatch = useDispatch();
   const getLabel = () => {
@@ -15,7 +15,8 @@ const LabelSwitch = () => {
   };
 
   const updateShowLabelState = () => {
-    const newState = (showLabel + 1) % 3;
+    const modeCount = performanceMode ? 2 : 3;
+    const newState = (showLabel + 1) % modeCount;
     if (newState === 0 || newState === 1) nodes.forEach((node) => node.hideLabel(true));
     else nodes.forEach((node) => node.showLabel(true));
     if (newState === 1) {
@@ -28,7 +29,7 @@ const LabelSwitch = () => {
     <div className="three-state-switch-wrapper">
       <span className="label">{getLabel()}</span>
       <div className="three-state-switch" onClick={updateShowLabelState}>
-        <div className={`state-indicator  state-${showLabel}`}/>
+        <div className={`state-indicator state-${showLabel}${performanceMode ? ' two-mode' : ''}`}/>
       </div>
     </div>
   );

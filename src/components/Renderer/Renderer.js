@@ -10,6 +10,8 @@ import Node from './Elements/Node';
 import Nodes from './Elements/Nodes';
 import Edge from './Elements/Edge';
 import Edges from './Elements/Edges';
+import BoundaryRect from './Elements/BoundaryRect';
+import Octree from '../Overlay/Controls/Layout/Octree';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected
 } from '../../redux/network/network.actions';
@@ -22,11 +24,13 @@ import './Renderer.scss';
 
 let networkElements = new THREE.Group();
 let animationRunning = false;
+let boundaryRect;
 const controlKeys = ['f', 'escape'];
 const initialCameraZ = 200;
 const hoverElementOutlineColor = '#aaaaaa';
 const selectedElementOutlineColor = '#ff0000';
 let cameraControls;
+const octGroup = new THREE.Group();
 
 const raycaster = new THREE.Raycaster();
 const mousePosition = new THREE.Vector2(0, 0);
@@ -70,9 +74,17 @@ class Renderer extends Component {
 
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
-    const {updateScene, selectedNodes, selectedEdges} = this.props;
+    const {
+      updateScene, nodes, selectedNodes, selectedEdges, networkBoundarySize, showBoundary, boundaryOpacity
+    } = this.props;
     const {scene} = this.state;
     this.handleControls(selectedNodes, selectedEdges);
+    if (networkBoundarySize !== prevProps.networkBoundarySize && showBoundary) {
+      boundaryRect.setSize(networkBoundarySize);
+      nodes.forEach((node) => node.setNetworkBoundarySize(networkBoundarySize));
+    }
+    if (showBoundary !== prevProps.showBoundary) boundaryRect.setVisibility(showBoundary);
+    if (boundaryOpacity !== prevProps.boundaryOpacity) boundaryRect.setOpacity(boundaryOpacity);
     if (updateScene) {
       const network = scene.children.find((child) => child.name === 'Network');
       scene.remove(network);
@@ -392,7 +404,8 @@ class Renderer extends Component {
 
   createScene() {
     const {
-     _setDirected, _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, isDirected, performanceMode
+      _setDirected, _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, isDirected, performanceMode,
+      networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -468,9 +481,12 @@ class Renderer extends Component {
     } else {
       nodes = remoteNodes.map((node, index) => {
         const nodeClass = new Node(
-          Math.random() * 50 - 25,
-          Math.random() * 50 - 25,
-          use2Dimensions ? 0 : Math.random() * 50 - 25,
+          Math.random() * networkBoundarySize - networkBoundarySize / 2,
+          Math.random() * networkBoundarySize - networkBoundarySize / 2,
+          use2Dimensions ? 0 : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+          // Math.random() * 50 - 50,
+          // Math.random() * 50 - 50,
+          // Math.random() * 50 - 50,
           1,
           '#008799',
           index,
@@ -481,7 +497,8 @@ class Renderer extends Component {
           undefined,
           true,
           camera,
-          performanceMode
+          performanceMode,
+          networkBoundarySize
         );
         if (!performanceMode) networkElements.add(nodeClass.instance);
         return nodeClass;
@@ -514,8 +531,13 @@ class Renderer extends Component {
       networkElements.add(nodeInstances.instances);
       networkElements.add(edgeInstances.instances);
     }
+
+    boundaryRect = new BoundaryRect(networkBoundarySize, showBoundary, boundaryOpacity);
     nodes.forEach((node) => node.calculateDegree());
+    networkElements.add(boundaryRect.instance);
+    scene.add(octGroup);
     scene.add(networkElements);
+
     let composer;
     if (!performanceMode) {
       composer = new EffectComposer(renderer);
@@ -545,6 +567,35 @@ class Renderer extends Component {
     }));
   }
 
+  updateOctree() {
+    const {networkBoundarySize, nodes} = this.props;
+    for (let i = octGroup.children.length - 1; i >= 0; i--) {
+      octGroup.remove(octGroup.children[i]);
+    }
+    const octree = new Octree(
+      new THREE.Box3(
+        new THREE.Vector3(-networkBoundarySize / 2, -networkBoundarySize / 2, -networkBoundarySize / 2),
+        new THREE.Vector3(networkBoundarySize / 2, networkBoundarySize / 2, networkBoundarySize / 2)
+      ),
+      4
+    );
+    nodes.forEach((node) => {
+      octree.insert({id: node.id, position: node.position.clone()});
+    });
+    const addToGroup = (currentTree) => {
+      octGroup.add(currentTree.getBox());
+      if (currentTree.bottomBackLeft) addToGroup(currentTree.bottomBackLeft);
+      if (currentTree.topBackLeft) addToGroup(currentTree.topBackLeft);
+      if (currentTree.topFrontLeft) addToGroup(currentTree.topFrontLeft);
+      if (currentTree.bottomFrontLeft) addToGroup(currentTree.bottomFrontLeft);
+      if (currentTree.bottomBackRight) addToGroup(currentTree.bottomBackRight);
+      if (currentTree.topBackRight) addToGroup(currentTree.topBackRight);
+      if (currentTree.topFrontRight) addToGroup(currentTree.topFrontRight);
+      if (currentTree.bottomFrontRight) addToGroup(currentTree.bottomFrontRight);
+    };
+    addToGroup(octree);
+  }
+
   animate() {
     const {composer, renderer, scene} = this.state;
     const {
@@ -554,6 +605,7 @@ class Renderer extends Component {
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     nodes.forEach((node) => node.label.updatePosition());
+    // this.updateOctree();
     if (!performanceMode) {
       this.handleOutline();
       composer.render();
@@ -585,13 +637,16 @@ const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   performanceMode: state.settings.performanceMode,
   camera: state.settings.camera,
+  keyboardInputsBlocked: state.settings.keyboardInputsBlocked,
+  networkBoundarySize: state.settings.networkBoundarySize,
+  showBoundary: state.settings.showBoundary,
+  boundaryOpacity: state.settings.boundaryOpacity,
   nodes: state.network.nodes,
   edges: state.network.edges,
   updateScene: state.network.updateScene,
   selectedNodes: state.network.selectedNodes,
   selectedEdges: state.network.selectedEdges,
-  averagePositionPlaceholder: state.network.averagePositionPlaceholder,
-  keyboardInputsBlocked: state.settings.keyboardInputsBlocked
+  averagePositionPlaceholder: state.network.averagePositionPlaceholder
 });
 
 const mapDispatchToProps = (dispatch) => ({

@@ -25,7 +25,7 @@
       width: 12px;
       height: 12px;
       border: 1px solid $menuWindowBorderColor;
-      background: $uiElementBackgroundNotTransparent;
+      background: $buttonBackgroundColor;
       border-radius: 50%;
       position: absolute;
       top: -3px;
@@ -35,6 +35,9 @@
       }
       &.state-1{
         left: 5px;
+        &.two-mode{
+          left: 12px;
+        }
       }
       &.state-2{
         left: 12px;

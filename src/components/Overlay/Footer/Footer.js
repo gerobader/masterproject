@@ -10,6 +10,7 @@ import {setFilterCollection} from '../../../redux/filter/filter.action';
 import {calculateAveragePosition} from '../../utility';
 
 import './Footer.scss';
+import QuickAccess from "./QuickAccess/QuickAccess";
 
 const Footer = () => {
   const {
@@ -91,6 +92,7 @@ const Footer = () => {
       {showSettings && (
         <SettingsMenu hideSettings={() => setShowSettings(false)} undoAction={undoAction} redoAction={redoAction}/>
       )}
+      <QuickAccess showInfoTable={showInfoTable}/>
       <div className="footer">
         <div className="left-info">
           <p className="margin-right">

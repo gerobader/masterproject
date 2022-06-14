@@ -8,7 +8,8 @@ import {
   SET_SHOW_SAVE_NETWORK_MODAL,
   SET_SHOW_LABEL,
   RESET_ACTION_HISTORY,
-  SET_PERFORMANCE_MODE
+  SET_PERFORMANCE_MODE,
+  SET_BOUNDARY, SHOW_BOUNDARY, SET_BOUNDARY_OPACITY
 } from '../actionTypes';
 
 export const setOrbitPreview = (state) => ({
@@ -58,4 +59,19 @@ export const setCurrentHistoryPosition = (position) => ({
 export const setBlockKeyboardInput = (block) => ({
   type: SET_KEYBOARD_INPUTS_BLOCKED,
   payload: block
+});
+
+export const setNetworkBoundarySize = (boundarySize) => ({
+  type: SET_BOUNDARY,
+  payload: boundarySize
+});
+
+export const setShowBoundary = (showBoundary) => ({
+  type: SHOW_BOUNDARY,
+  payload: showBoundary
+});
+
+export const setBoundaryOpacity = (opacity) => ({
+  type: SET_BOUNDARY_OPACITY,
+  payload: opacity
 });

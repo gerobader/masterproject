@@ -1,0 +1,50 @@
+@import '../../../../../assets/settings';
+.quick-menu.boundary{
+  background: url('../../../../../assets/cube.svg') center no-repeat;
+  position: relative;
+  opacity: 0.7;
+  .click-tracker{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25px;
+    height: 25px;
+  }
+  &.show-settings{
+    opacity: 1;
+    .quick-settings{
+      max-height: 50px;
+    }
+  }
+  .quick-settings{
+    position: absolute;
+    bottom: 35px;
+    right: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    .quick-setting{
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      span{
+        margin-right: 5px;
+      }
+      &:not(:last-child){
+        margin-bottom: 5px;
+      }
+      .opacity-range{
+        margin: 0;
+      }
+      .small-number-input-wrapper{
+        margin-right: 0;
+        .small-number-input{
+          background: $menuWindowBackgroundColor
+        }
+      }
+    }
+  }
+}

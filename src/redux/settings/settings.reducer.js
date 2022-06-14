@@ -8,19 +8,24 @@ import {
   SET_SHOW_SAVE_NETWORK_MODAL,
   SET_SHOW_LABEL,
   RESET_ACTION_HISTORY,
-  SET_PERFORMANCE_MODE
+  SET_PERFORMANCE_MODE,
+  SET_BOUNDARY,
+  SHOW_BOUNDARY, SET_BOUNDARY_OPACITY
 } from '../actionTypes';
 
 const initialState = {
   orbitPreview: false,
-  performanceMode: true,
+  performanceMode: false,
   camera: undefined,
   showLabel: 0, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
   showControlsModal: false,
   actionHistory: [],
   currentHistoryPosition: 0,
-  keyboardInputsBlocked: false
+  keyboardInputsBlocked: false,
+  networkBoundarySize: 100,
+  showBoundary: false,
+  boundaryOpacity: 0.3
 };
 
 const settingsReducer = (state = initialState, action) => {
@@ -76,6 +81,21 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         keyboardInputsBlocked: action.payload
+      };
+    case SET_BOUNDARY:
+      return {
+        ...state,
+        networkBoundarySize: action.payload
+      };
+    case SHOW_BOUNDARY:
+      return {
+        ...state,
+        showBoundary: action.payload
+      };
+    case SET_BOUNDARY_OPACITY:
+      return {
+        ...state,
+        boundaryOpacity: action.payload
       };
     default:
       return state;

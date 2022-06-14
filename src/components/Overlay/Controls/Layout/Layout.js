@@ -41,9 +41,6 @@ const Layout = () => {
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
     const maxIterationsFloat = parseFloat(maxIterations);
     if (type === 1 && !maxIterationsFloat) return;
-    // nodes.forEach((node) => {
-    //   node.instance.position.clampScalar(-size / 2, size / 2);
-    // });
     setRunning(true);
     const area = size * size;
     const k = Math.sqrt(area / nodes.length);
@@ -80,7 +77,7 @@ const Layout = () => {
         if (!node.visible) return;
         const displacement = node.disp.clone().normalize();
         if (type === 1) displacement.min(temp);
-        node.setPositionRelative(displacement, true, size);
+        node.setPositionRelative(displacement);
       });
       if (type === 1) {
         if (temp.x > 1 / maxIterationsFloat) temp.subScalar(1 / maxIterationsFloat);
@@ -136,9 +133,6 @@ const Layout = () => {
         )}
         {layoutAlgorithm === 'Eades' && (
           <>
-            <Setting name="Size">
-              <SmallNumberInput value={size} setValue={setSize}/>
-            </Setting>
             <Setting name="Attraction Multiplier">
               <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
             </Setting>

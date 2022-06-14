@@ -1,0 +1,16 @@
+.quick-access-wrapper{
+  position: absolute;
+  bottom: 45px;
+  right: 20px;
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  &.move-up{
+    bottom: 195px;
+  }
+  .quick-menu{
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+  }
+}

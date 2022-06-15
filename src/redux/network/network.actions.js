@@ -9,7 +9,7 @@ import {
   SET_AVERAGE_POSITION_PLACEHOLDER,
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
-  SET_DIRECTED
+  SET_DIRECTED, SET_OCTREE
 } from '../actionTypes';
 
 export const setNetworkName = (name) => ({
@@ -68,6 +68,11 @@ export const setSelectedNodes = (selectedNodes) => (dispatch, getState) => {
 export const setSelectedEdges = (edges) => ({
   type: SET_SELECTED_EDGES,
   payload: edges
+});
+
+export const setOctree = (octree) => ({
+  type: SET_OCTREE,
+  payload: octree
 });
 
 export const setAveragePositionPlaceholder = (placeholder) => ({

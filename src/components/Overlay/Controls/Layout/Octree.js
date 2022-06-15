@@ -37,22 +37,61 @@ class Octree {
   }
 
   insert(node) {
-    if (!this.boundary.containsPoint(node.position)) return;
+    if (!this.boundary.containsPoint(node.position)) return false;
     if (this.nodes.length < this.capacity) {
       this.nodes.push(node);
-    } else {
-      if (!this.divided) {
-        this.subdivide();
-      }
-      this.bottomBackLeft.insert(node);
-      this.topBackLeft.insert(node);
-      this.topFrontLeft.insert(node);
-      this.bottomFrontLeft.insert(node);
-      this.bottomBackRight.insert(node);
-      this.topBackRight.insert(node);
-      this.topFrontRight.insert(node);
-      this.bottomFrontRight.insert(node);
+      return true;
     }
+    if (!this.divided) this.subdivide();
+    return (
+      this.bottomBackLeft.insert(node)
+      || this.topBackLeft.insert(node)
+      || this.topFrontLeft.insert(node)
+      || this.bottomFrontLeft.insert(node)
+      || this.bottomBackRight.insert(node)
+      || this.topBackRight.insert(node)
+      || this.topFrontRight.insert(node)
+      || this.bottomFrontRight.insert(node)
+    );
+  }
+
+  query(searchArea, found) {
+    // eslint-disable-next-line no-param-reassign
+    if (!found) found = [];
+    if (!this.boundary.intersectsBox(searchArea)) return found;
+    if (searchArea.containsBox(this.boundary)) {
+      // all points of this octree are within the search area
+      this.nodes.forEach((node) => found.push(node));
+    } else {
+      // only part of this octree is contained in the search area
+      this.nodes.forEach((node) => {
+        if (searchArea.containsPoint(node.position)) found.push(node);
+      });
+    }
+    if (this.divided) {
+      this.bottomBackLeft.query(searchArea, found);
+      this.topBackLeft.query(searchArea, found);
+      this.topFrontLeft.query(searchArea, found);
+      this.bottomFrontLeft.query(searchArea, found);
+      this.bottomBackRight.query(searchArea, found);
+      this.topBackRight.query(searchArea, found);
+      this.topFrontRight.query(searchArea, found);
+      this.bottomFrontRight.query(searchArea, found);
+    }
+    return found;
+  }
+
+  empty() {
+    this.nodes = [];
+    this.divided = false;
+    this.bottomBackLeft = undefined;
+    this.topBackLeft = undefined;
+    this.topFrontLeft = undefined;
+    this.bottomFrontLeft = undefined;
+    this.bottomBackRight = undefined;
+    this.topBackRight = undefined;
+    this.topFrontRight = undefined;
+    this.bottomFrontRight = undefined;
   }
 
   getBox() {

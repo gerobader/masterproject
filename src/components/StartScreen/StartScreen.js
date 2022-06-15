@@ -9,15 +9,40 @@ import Checkbox from '../Overlay/UI/Checkbox/Checkbox';
 import {setPerformanceMode} from '../../redux/settings/settings.actions';
 import {setNetworkName} from '../../redux/network/network.actions';
 
+import * as miserables from '../../data/performanceTest/0_miserables_klein.json';
+import * as middleSizedNetwork from '../../data/performanceTest/1_mittel.json';
+import * as bigNetwork from '../../data/performanceTest/2_groesser.json';
+
 import './StartScreen.scss';
 
-const networks = ['gameofthrones', 'movies', 'twitter'];
+const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize'];
 
 const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
   const {performanceMode} = useSelector((state) => state.settings);
   const [selectedNetwork, setSelectedNetwork] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
+
+  const getTestNetworkInfo = (network) => {
+    const testEdges = network.links;
+    const testNodes = network.nodes.map((node) => {
+      const newNode = {
+        label: node.name,
+        data: {
+          group: node.group,
+          component: node.component
+        }
+      };
+      if (node.attributes && typeof node.attributes === 'object') {
+        newNode.data = {
+          ...newNode.data,
+          ...node.attributes
+        };
+      }
+      return newNode;
+    });
+    return {testNodes, testEdges};
+  };
 
   const getNetworkData = async () => {
     if (selectedNetwork && !isLoading) {
@@ -74,14 +99,14 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
           return {source, target};
         });
       } else if (selectedNetwork === 'twitter') {
-        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 20000');
+        res = await session.run('MATCH p=()-[r:FOLLOWS]->() RETURN p LIMIT 15000');
         isDirected = true;
         await session.close();
         edges = res.records.map((r) => {
           const path = r.get('p');
           const source = path.start.properties.name;
           const target = path.end.properties.name;
-          if (!nodes.some((node) => node.label === source)) {
+          if (!nodes.find((node) => node.label === source)) {
             nodes.push({
               label: source,
               data: {
@@ -91,7 +116,7 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
               }
             });
           }
-          if (!nodes.some((node) => node.label === target)) {
+          if (!nodes.find((node) => node.label === target)) {
             nodes.push({
               label: target,
               data: {
@@ -104,6 +129,18 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
           }
           return {source, target};
         });
+      } else if (selectedNetwork === 'smallSize') {
+        const {testNodes, testEdges} = getTestNetworkInfo(miserables.default);
+        edges = testEdges;
+        testNodes.forEach((node) => nodes.push(node));
+      } else if (selectedNetwork === 'midSize') {
+        const {testNodes, testEdges} = getTestNetworkInfo(middleSizedNetwork.default);
+        edges = testEdges;
+        testNodes.forEach((node) => nodes.push(node));
+      } else if (selectedNetwork === 'largeSize') {
+        const {testNodes, testEdges} = getTestNetworkInfo(bigNetwork.default);
+        edges = testEdges;
+        testNodes.forEach((node) => nodes.push(node));
       }
       setNetworkInfo({
         nodes,

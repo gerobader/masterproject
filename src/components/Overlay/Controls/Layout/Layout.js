@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import * as THREE from 'three';
+import {Vector3, Box3} from 'three';
 import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
@@ -17,7 +17,8 @@ let interval;
 let changes = [];
 
 const Layout = () => {
-  const {nodes, edges} = useSelector((state) => state.network);
+  const {nodes, edges, octree} = useSelector((state) => state.network);
+  const {networkBoundarySize} = useSelector((state) => state.settings);
   const [running, setRunning] = useState(false);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);
@@ -25,6 +26,7 @@ const Layout = () => {
   const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
   const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
   const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(70);
+  const [searchAreaSize, setSearchAreaSize] = useState(50);
   const dispatch = useDispatch();
 
   const stopCalculation = () => {
@@ -44,16 +46,29 @@ const Layout = () => {
     setRunning(true);
     const area = size * size;
     const k = Math.sqrt(area / nodes.length);
-    const temp = new THREE.Vector3(1, 1, 1);
+    const temp = new Vector3(1, 1, 1);
     let iterationCount = 0;
+    const searchArea = new Box3();
+    const useOctree = searchAreaSize < networkBoundarySize;
     const iteration = () => {
       iterationCount++;
+      if (useOctree) {
+        octree.empty();
+        nodes.forEach((node) => {
+          if (node.visible) octree.insert({id: node.id, position: node.position.clone()});
+        });
+      }
       nodes.forEach((v) => {
         if (!v.visible) return;
         // repulsive forces
         v.disp.set(0, 0, 0);
-        nodes.forEach((u) => {
-          if (v !== u && u.visible) {
+        searchArea.set(
+          new Vector3(v.position.x - searchAreaSize / 2, v.position.y - searchAreaSize / 2, v.position.z - searchAreaSize / 2),
+          new Vector3(v.position.x + searchAreaSize / 2, v.position.y + searchAreaSize / 2, v.position.z + searchAreaSize / 2)
+        );
+        const nearbyNodes = useOctree ? octree.query(searchArea) : nodes;
+        nearbyNodes.forEach((u) => {
+          if (v.id !== u.id) {
             const distance = v.position.clone().sub(u.position);
             const length = distance.length() || 0.01;
             const normalizedDistance = distance.clone().normalize();
@@ -85,7 +100,7 @@ const Layout = () => {
       }
     };
     if (!interval) {
-      interval = setInterval(() => iteration(), 30);
+      interval = setInterval(iteration, 30);
     }
   };
 
@@ -121,6 +136,11 @@ const Layout = () => {
         {running && <Loader/>}
       </div>
       <div className="settings">
+        {layoutAlgorithm && (
+          <Setting name="Max Repulsion Distance">
+            <SmallNumberInput value={searchAreaSize} setValue={setSearchAreaSize}/>
+          </Setting>
+        )}
         {layoutAlgorithm === 'Fruchterman and Reingold' && (
           <>
             <Setting name="Size">
@@ -133,14 +153,14 @@ const Layout = () => {
         )}
         {layoutAlgorithm === 'Eades' && (
           <>
+            <Setting name="Repulsion Strength">
+              <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
+            </Setting>
             <Setting name="Attraction Multiplier">
               <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
             </Setting>
             <Setting name="Attraction Distance Impact">
               <SmallNumberInput value={eadesAttractionDistanceImpact} setValue={setEadesAttractionDistanceImpact}/>
-            </Setting>
-            <Setting name="Repulsion Strength">
-              <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
             </Setting>
           </>
         )}

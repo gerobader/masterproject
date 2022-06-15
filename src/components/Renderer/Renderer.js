@@ -13,12 +13,10 @@ import Edges from './Elements/Edges';
 import BoundaryRect from './Elements/BoundaryRect';
 import Octree from '../Overlay/Controls/Layout/Octree';
 import {
-  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected
+  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected, setOctree
 } from '../../redux/network/network.actions';
 import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
-import * as testNodes from '../../data/test/nodes.json';
-import * as testEdges from '../../data/test/edges.json';
 
 import './Renderer.scss';
 
@@ -404,8 +402,8 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setDirected, _setNodesAndEdges, _setCamera, remoteNodes, remoteEdges, use2Dimensions, isDirected, performanceMode,
-      networkBoundarySize, showBoundary, boundaryOpacity
+      _setDirected, _setNodesAndEdges, _setCamera, _setOctree, remoteNodes, remoteEdges, use2Dimensions, isDirected,
+      performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
 
     const renderer = new THREE.WebGLRenderer({antialias: true});
@@ -439,101 +437,85 @@ class Renderer extends Component {
     window.addEventListener('keyup', this.handleKeyUp);
 
     networkElements.name = 'Network';
-    let nodes = [];
     let nodeInstances;
-    let edges;
     let edgeInstances;
-    if (useTestNetwork) {
-      nodes = testNodes.default.map((node, index) => {
-        const nodeClass = new Node(
-          Math.random() * 50 - 25,
-          Math.random() * 50 - 25,
-          use2Dimensions ? 0 : Math.random() * 50 - 25,
-          1,
-          '#008799',
-          node.id || index,
-          node.label,
-          node.data || {},
-          false,
-          'Sphere',
-          undefined,
-          true,
-          camera
-        );
-        networkElements.add(nodeClass.instance);
-        return nodeClass;
-      });
-      edges = testEdges.default.map((edge, index) => {
-        const sourceNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.name === edge.source;
-          return node.id === edge.source;
-        });
-        const targetNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.name === edge.target;
-          return node.id === edge.target;
-        });
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true);
-        sourceNode.addSourceEdge(edgeClass);
-        targetNode.addTargetEdge(edgeClass);
-        networkElements.add(edgeClass.instance);
-        return edgeClass;
-      });
-    } else {
-      nodes = remoteNodes.map((node, index) => {
-        const nodeClass = new Node(
-          Math.random() * networkBoundarySize - networkBoundarySize / 2,
-          Math.random() * networkBoundarySize - networkBoundarySize / 2,
-          use2Dimensions ? 0 : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-          // Math.random() * 50 - 50,
-          // Math.random() * 50 - 50,
-          // Math.random() * 50 - 50,
-          1,
-          '#008799',
-          index,
-          node.label,
-          node.data,
-          false,
-          'Sphere',
-          undefined,
-          true,
-          camera,
-          performanceMode,
-          networkBoundarySize
-        );
-        if (!performanceMode) networkElements.add(nodeClass.instance);
-        return nodeClass;
-      });
-      if (performanceMode) {
-        nodeInstances = new Nodes(nodes, '#008799');
-        edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
-        nodes.forEach((node) => {
-          node.setEdges(edgeInstances);
-          node.setNodeInstances(nodeInstances);
-        });
-      }
-      edges = remoteEdges.map((edge, index) => {
-        const sourceNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.name === edge.source;
-          return node.id === edge.source;
-        });
-        const targetNode = nodes.find((node) => {
-          if (typeof edge.source === 'string') return node.name === edge.target;
-          return node.id === edge.target;
-        });
-        const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, isDirected, edgeInstances);
-        sourceNode.addSourceEdge(edgeClass);
-        targetNode.addTargetEdge(edgeClass);
-        if (!performanceMode) networkElements.add(edgeClass.instance);
-        return edgeClass;
+    const nodes = remoteNodes.map((node, index) => {
+      const nodeClass = new Node(
+        Math.random() * networkBoundarySize - networkBoundarySize / 2,
+        Math.random() * networkBoundarySize - networkBoundarySize / 2,
+        use2Dimensions ? 0 : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+        1,
+        '#008799',
+        index,
+        node.label,
+        node.data,
+        false,
+        'Sphere',
+        undefined,
+        true,
+        camera,
+        performanceMode,
+        networkBoundarySize
+      );
+      if (!performanceMode) networkElements.add(nodeClass.instance);
+      return nodeClass;
+    });
+    if (performanceMode) {
+      nodeInstances = new Nodes(nodes, '#008799');
+      edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
+      nodes.forEach((node) => {
+        node.setEdges(edgeInstances);
+        node.setNodeInstances(nodeInstances);
       });
     }
+    const edges = remoteEdges.map((edge, index) => {
+      const sourceNode = nodes.find((node) => {
+        if (typeof edge.source === 'string') return node.name === edge.source;
+        return node.id === edge.source;
+      });
+      const targetNode = nodes.find((node) => {
+        if (typeof edge.source === 'string') return node.name === edge.target;
+        return node.id === edge.target;
+      });
+      const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, isDirected, edgeInstances);
+      sourceNode.addSourceEdge(edgeClass);
+      targetNode.addTargetEdge(edgeClass);
+      if (!performanceMode) networkElements.add(edgeClass.instance);
+      return edgeClass;
+    });
     if (performanceMode) {
       networkElements.add(nodeInstances.instances);
       networkElements.add(edgeInstances.instances);
     }
 
     boundaryRect = new BoundaryRect(networkBoundarySize, showBoundary, boundaryOpacity);
+    const octree = new Octree(
+      new THREE.Box3(
+        new THREE.Vector3(-networkBoundarySize / 2, -networkBoundarySize / 2, -networkBoundarySize / 2),
+        new THREE.Vector3(networkBoundarySize / 2, networkBoundarySize / 2, networkBoundarySize / 2)
+      ),
+      4
+    );
     nodes.forEach((node) => node.calculateDegree());
+
+    // Octree TEST
+    // nodes.forEach((node) => {
+    //   if (node.visible) octree.insert({id: node.id, position: node.position.clone()});
+    // });
+    // const searchArea = new THREE.Box3(
+    //   new Vector3(0, 0, 0),
+    //   new Vector3(50, 50, 50)
+    // );
+    // const nearbyNodes = octree.query(searchArea);
+    // nearbyNodes.forEach((nearbyNode) => nodes[nearbyNode.id].setColor('#ff0000'));
+    //
+    // const searchArea2 = new THREE.Box3(
+    //   new Vector3(-50, -50, -50),
+    //   new Vector3(0, 0, 0)
+    // );
+    // const nearbyNodes2 = octree.query(searchArea2);
+    // nearbyNodes2.forEach((nearbyNode) => nodes[nearbyNode.id].setColor('#00ff00'));
+
     networkElements.add(boundaryRect.instance);
     scene.add(octGroup);
     scene.add(networkElements);
@@ -558,6 +540,7 @@ class Renderer extends Component {
     _setCamera(camera);
     _setDirected(isDirected);
     _setNodesAndEdges(nodes, edges, false);
+    _setOctree(octree);
     this.setState((state) => ({
       ...state,
       renderer,
@@ -567,21 +550,11 @@ class Renderer extends Component {
     }));
   }
 
-  updateOctree() {
-    const {networkBoundarySize, nodes} = this.props;
+  drawOctree() {
+    const {octree} = this.props;
     for (let i = octGroup.children.length - 1; i >= 0; i--) {
       octGroup.remove(octGroup.children[i]);
     }
-    const octree = new Octree(
-      new THREE.Box3(
-        new THREE.Vector3(-networkBoundarySize / 2, -networkBoundarySize / 2, -networkBoundarySize / 2),
-        new THREE.Vector3(networkBoundarySize / 2, networkBoundarySize / 2, networkBoundarySize / 2)
-      ),
-      4
-    );
-    nodes.forEach((node) => {
-      octree.insert({id: node.id, position: node.position.clone()});
-    });
     const addToGroup = (currentTree) => {
       octGroup.add(currentTree.getBox());
       if (currentTree.bottomBackLeft) addToGroup(currentTree.bottomBackLeft);
@@ -605,7 +578,7 @@ class Renderer extends Component {
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     nodes.forEach((node) => node.label.updatePosition());
-    // this.updateOctree();
+    // this.drawOctree();
     if (!performanceMode) {
       this.handleOutline();
       composer.render();
@@ -646,6 +619,7 @@ const mapStateToPros = (state) => ({
   updateScene: state.network.updateScene,
   selectedNodes: state.network.selectedNodes,
   selectedEdges: state.network.selectedEdges,
+  octree: state.network.octree,
   averagePositionPlaceholder: state.network.averagePositionPlaceholder
 });
 
@@ -656,6 +630,7 @@ const mapDispatchToProps = (dispatch) => ({
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),
+  _setOctree: (octree) => dispatch(setOctree(octree)),
   _setAveragePositionPlaceholder: (placeholder) => dispatch(setAveragePositionPlaceholder(placeholder))
 });
 

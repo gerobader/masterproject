@@ -4,13 +4,13 @@ import InfoTable from './InfoTable/InfoTable';
 import ProgressBar from './ProgressBar/ProgressBar';
 import SettingsMenu from './SettingsMenu/SettingsMenu';
 import LabelSwitch from './LabelSwitch/LabelSwitch';
+import QuickAccess from './QuickAccess/QuickAccess';
 import {setCurrentHistoryPosition} from '../../../redux/settings/settings.actions';
 import {setNodes} from '../../../redux/network/network.actions';
 import {setFilterCollection} from '../../../redux/filter/filter.action';
 import {calculateAveragePosition} from '../../utility';
 
 import './Footer.scss';
-import QuickAccess from "./QuickAccess/QuickAccess";
 
 const Footer = () => {
   const {

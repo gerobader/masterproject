@@ -1,14 +1,29 @@
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+import {Box3, Vector3} from 'three';
 import SmallNumberInput from '../../../UI/SmallNumberInput/SmallNumberInput';
 import RangeSlider from '../../../UI/RangeSlider/RangeSlider';
+import Octree from '../../../Controls/Layout/Octree';
 import {setNetworkBoundarySize, setShowBoundary, setBoundaryOpacity} from '../../../../../redux/settings/settings.actions';
+import {setOctree} from '../../../../../redux/network/network.actions';
 
 import './BoundaryMenu.scss';
 
 const BoundaryMenu = () => {
   const {networkBoundarySize, showBoundary, boundaryOpacity} = useSelector((state) => state.settings);
   const dispatch = useDispatch();
+
+  const updateNetworkBoundarySize = (size) => {
+    const octree = new Octree(
+      new Box3(
+        new Vector3(-size / 2, -size / 2, -size / 2),
+        new Vector3(size / 2, size / 2, size / 2)
+      ),
+      4
+    );
+    dispatch(setOctree(octree));
+    dispatch(setNetworkBoundarySize(size));
+  };
 
   return (
     <div
@@ -23,7 +38,7 @@ const BoundaryMenu = () => {
         </div>
         <div className="quick-setting">
           <span>Size:</span>
-          <SmallNumberInput value={networkBoundarySize} setValue={(val) => dispatch(setNetworkBoundarySize(val))}/>
+          <SmallNumberInput value={networkBoundarySize} setValue={updateNetworkBoundarySize}/>
         </div>
       </div>
     </div>

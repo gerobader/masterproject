@@ -9,7 +9,7 @@ import {
   SET_AVERAGE_POSITION_PLACEHOLDER,
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
-  SET_DIRECTED
+  SET_DIRECTED, SET_OCTREE
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -26,6 +26,7 @@ const initialState = {
   edges: [],
   selectedNodes: [],
   selectedEdges: [],
+  octree: undefined,
   averagePositionPlaceholder: undefined,
   sortNodesBy: 'id',
   sortEdgesBy: 'id',
@@ -101,6 +102,11 @@ const networkReducer = (state = initialState, action) => {
       return {
         ...state,
         selectedEdges: action.payload
+      };
+    case SET_OCTREE:
+      return {
+        ...state,
+        octree: action.payload
       };
     case SET_AVERAGE_POSITION_PLACEHOLDER:
       return {

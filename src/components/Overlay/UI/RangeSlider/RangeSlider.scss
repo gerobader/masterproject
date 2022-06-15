@@ -1,5 +1,5 @@
 @import '../../../../assets/settings';
-.range-input{
+.range-slider{
   -webkit-appearance: none;
   margin: 5px 0;
   width: 100px;
@@ -56,45 +56,12 @@
     background: #2a6495;
     border: 0.2px solid #010101;
     border-radius: 2.6px;
-    box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    box-shadow: 1px 1px 1px #000000, 0 0 1px #0d0d0d;
   }
   &::-ms-fill-upper {
     background: #3071a9;
     border: 0.2px solid #010101;
     border-radius: 2.6px;
-    box-shadow: 1px 1px 1px #000000, 0px 0px 1px #0d0d0d;
+    box-shadow: 1px 1px 1px #000000, 0 0 1px #0d0d0d;
   }
 }
-//.range-slider{
-//  width: 100px;
-//  position: relative;
-//  display: flex;
-//  align-items: center;
-//  .full-slider{
-//    width: 100px;
-//    height: 7px;
-//    background: $menuWindowBackgroundColor;
-//    position: relative;
-//    overflow: hidden;
-//    border-radius: 3px;
-//    border: 1px solid #fff;
-//    .active-area{
-//      background: $buttonBackgroundColor;
-//      position: absolute;
-//      left: 0;
-//      top: 0;
-//      width: 40px;
-//      height: 7px;
-//      z-index: 1;
-//    }
-//  }
-//  .thumb{
-//    width: 15px;
-//    height: 15px;
-//    border-radius: 50%;
-//    background: $buttonBackgroundColor;
-//    position: absolute;
-//    border: 1px solid #fff;
-//    z-index: 2;
-//  }
-//}

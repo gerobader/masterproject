@@ -1,7 +1,5 @@
 import * as THREE from 'three';
 
-export const halfPi = Math.PI / 2;
-
 export const between = (value, min, max) => value > min && value < max;
 
 // source: https://stackoverflow.com/questions/21646738/convert-hex-to-rgba

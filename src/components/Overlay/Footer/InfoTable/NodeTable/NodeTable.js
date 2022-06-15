@@ -61,7 +61,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
           >
             <td>{node.id}</td>
             <td>{node.name}</td>
-            <td>{node.size}</td>
+            <td>{Math.round(node.size * 100) / 100}</td>
             <td>
               {node.color}
               <div

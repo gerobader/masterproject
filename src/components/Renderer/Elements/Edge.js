@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {halfPi} from '../../utility';
+import {halfPi} from '../../constants';
 
 class Edge {
   constructor(id, sourceNode, targetNode, size, color, visible, data, isDirected, edgeInstances) {
@@ -13,7 +13,7 @@ class Edge {
     this.color = color;
     this.visible = visible;
     this.isDirected = isDirected;
-    this.data = data;
+    this.data = data || {};
     if (!this.performanceVersion) this.buildGeometry();
   }
 

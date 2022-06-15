@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {halfPi} from '../../utility';
+import {halfPi} from '../../constants';
 
 class Edges {
   constructor(edges, nodes, color) {

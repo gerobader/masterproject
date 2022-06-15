@@ -24,7 +24,11 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
   const dispatch = useDispatch();
 
   const getTestNetworkInfo = (network) => {
-    const testEdges = network.links;
+    const testEdges = network.links.map((link) => {
+      const edge = {source: link.source, target: link.target, data: {}};
+      if (link.value) edge.data.value = link.value;
+      return edge;
+    });
     const testNodes = network.nodes.map((node) => {
       const newNode = {
         label: node.name,

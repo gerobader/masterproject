@@ -477,7 +477,7 @@ class Renderer extends Component {
         if (typeof edge.source === 'string') return node.name === edge.target;
         return node.id === edge.target;
       });
-      const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, isDirected, edgeInstances);
+      const edgeClass = new Edge(index, sourceNode, targetNode, 1, '#ffffff', true, edge.data, isDirected, edgeInstances);
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
       if (!performanceMode) networkElements.add(edgeClass.instance);
@@ -497,24 +497,6 @@ class Renderer extends Component {
       4
     );
     nodes.forEach((node) => node.calculateDegree());
-
-    // Octree TEST
-    // nodes.forEach((node) => {
-    //   if (node.visible) octree.insert({id: node.id, position: node.position.clone()});
-    // });
-    // const searchArea = new THREE.Box3(
-    //   new Vector3(0, 0, 0),
-    //   new Vector3(50, 50, 50)
-    // );
-    // const nearbyNodes = octree.query(searchArea);
-    // nearbyNodes.forEach((nearbyNode) => nodes[nearbyNode.id].setColor('#ff0000'));
-    //
-    // const searchArea2 = new THREE.Box3(
-    //   new Vector3(-50, -50, -50),
-    //   new Vector3(0, 0, 0)
-    // );
-    // const nearbyNodes2 = octree.query(searchArea2);
-    // nearbyNodes2.forEach((nearbyNode) => nodes[nearbyNode.id].setColor('#00ff00'));
 
     networkElements.add(boundaryRect.instance);
     scene.add(octGroup);

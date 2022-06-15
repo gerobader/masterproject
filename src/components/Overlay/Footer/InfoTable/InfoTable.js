@@ -11,6 +11,8 @@ import {
 
 import './InfoTable.scss';
 
+let shortestPathWorker;
+let statisticalMeasuresWorker;
 let timeArray = [];
 let progressCount = 0;
 let startTime;
@@ -29,6 +31,13 @@ const InfoTable = ({setProgressInfo}) => {
     if (e.clientX === prevX) {
       dispatch(elementType === 'node' ? setSortNodesBy(value) : setSortEdgesBy(value));
     }
+  };
+
+  const stopCalculation = () => {
+    if (statisticalMeasuresWorker) statisticalMeasuresWorker.terminate();
+    if (shortestPathWorker) shortestPathWorker.terminate();
+    setCalculationRunning(false);
+    setProgressInfo(undefined);
   };
 
   const resetTimeVars = () => {
@@ -92,7 +101,7 @@ const InfoTable = ({setProgressInfo}) => {
   };
 
   const calculateStatisticalMeasures = (nodeClones) => {
-    const statisticalMeasuresWorker = new Worker('calculateStatisticalMeasures.js');
+    statisticalMeasuresWorker = new Worker('calculateStatisticalMeasures.js');
     statisticalMeasuresWorker.postMessage({nodeClones, directed});
     resetTimeVars();
     statisticalMeasuresWorker.addEventListener('message', (e) => {
@@ -134,10 +143,10 @@ const InfoTable = ({setProgressInfo}) => {
           sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
         };
       });
-      const worker = new Worker('calculateAllPaths.js');
-      worker.postMessage(nodeClones);
+      shortestPathWorker = new Worker('calculateAllPaths.js');
+      shortestPathWorker.postMessage(nodeClones);
       resetTimeVars();
-      worker.addEventListener('message', (event) => {
+      shortestPathWorker.addEventListener('message', (event) => {
         if (event.data.type === 'finished') {
           timeArray = [];
           progressCount = 0;
@@ -196,7 +205,9 @@ const InfoTable = ({setProgressInfo}) => {
           alwaysShowArrow
         />
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
-        <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>
+        {calculationRunning
+          ? <Button className="danger" text="Stop Calculation" onClick={stopCalculation}/>
+          : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>}
       </div>
       <div className="table-wrapper">
         {tableType === 'Node Table' ? (

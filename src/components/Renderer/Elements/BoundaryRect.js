@@ -12,12 +12,11 @@ class BoundaryRect {
   buildGeometry() {
     const group = new THREE.Group();
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const wireframeMat = new THREE.MeshBasicMaterial({color: '#008799'});
     const transparentMat = new THREE.MeshBasicMaterial({color: '#008799'});
-    wireframeMat.wireframe = true;
     transparentMat.transparent = true;
     transparentMat.opacity = this.opacity;
-    const wireframeCube = new THREE.Mesh(geometry, wireframeMat);
+    const edges = new THREE.EdgesGeometry(geometry);
+    const wireframeCube = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({color: '#008799'}));
     const transparentCube = new THREE.Mesh(geometry, transparentMat);
     group.add(wireframeCube);
     group.add(transparentCube);

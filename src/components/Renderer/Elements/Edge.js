@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import {halfPi} from '../../utility';
 
 class Edge {
-  constructor(id, sourceNode, targetNode, size, color, visible, isDirected, edgeInstances) {
+  constructor(id, sourceNode, targetNode, size, color, visible, data, isDirected, edgeInstances) {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
@@ -13,6 +13,7 @@ class Edge {
     this.color = color;
     this.visible = visible;
     this.isDirected = isDirected;
+    this.data = data;
     if (!this.performanceVersion) this.buildGeometry();
   }
 

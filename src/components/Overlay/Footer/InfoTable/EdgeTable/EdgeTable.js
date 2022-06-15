@@ -26,12 +26,12 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
     }
     dispatch(setSelectedNodes(newSelectedNodes));
   };
-
+  const additionalKeys = edgesToShow.length ? Object.keys(edgesToShow[0].data) : [];
   return (
     <table>
       <thead>
         <tr>
-          {['id', 'sourceName', 'targetName', 'color', 'size', 'visible'].map((value) => {
+          {['id', 'sourceName', 'targetName', 'color', 'size', 'visible', ...additionalKeys].map((value) => {
             const titleCaseValue = titleCase(value);
             return (
               <th
@@ -84,6 +84,9 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
             <td>{edge.color}</td>
             <td>{edge.size}</td>
             <td>{edge.visible ? 'Yes' : 'No'}</td>
+            {Object.keys(edge.data).map((dataPoint) => (
+              <td key={dataPoint}>{edge.data[dataPoint]}</td>
+            ))}
           </tr>
         ))}
       </tbody>

@@ -216,7 +216,7 @@ const Appearance = () => {
         }
         if (elementSize && typeof element.setSize === 'function' && element.size !== elementSize) {
           elementChanges.setSize = {before: element.size, after: parseFloat(elementSize)};
-          element.setSize(parseFloat(elementSize));
+          element.setSize(elementSize);
         }
         if (labelColor && typeof element.setLabelColor === 'function' && element.label && element.label.color !== labelColor) {
           elementChanges.setLabelColor = {before: element.label?.color, after: labelColor};

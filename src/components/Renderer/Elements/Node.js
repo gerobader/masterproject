@@ -94,8 +94,11 @@ class Node {
   }
 
   setSize(size) {
-    const newSize = Math.round(parseFloat(size) * 100) / 100;
-    if (newSize && newSize !== this.size) {
+    let newSize = size;
+    if (newSize === 0) newSize = 0.001;
+    if (!newSize) return;
+    newSize = Math.round(parseFloat(newSize) * 1000) / 1000;
+    if (newSize !== this.size) {
       if (this.performanceVersion) {
         this.nodeInstances.setSizeFor(this.id, newSize);
       } else {
@@ -248,7 +251,8 @@ class Node {
       pathMap: serializedPathMap,
       colorLocked: this.colorLocked,
       shape: this.shape,
-      visible: this.visible
+      visible: this.visible,
+      labelVisible: this.labelVisible
     };
   }
 }

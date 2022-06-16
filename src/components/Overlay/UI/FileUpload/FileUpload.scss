@@ -1,0 +1,28 @@
+@import '../../../../assets/settings';
+.file-upload-wrapper{
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  .file-upload {
+    display: none;
+  }
+  label{
+    background: #e3e3e3;
+    color: #000;
+    border: 1px solid #999;
+    border-radius: 3px;
+    padding: 2px 5px;
+    //font-size: 12px;
+    cursor: pointer;
+    z-index: 1;
+    margin-right: 5px;
+    &:hover{
+      background: linear-gradient(0deg, #f9f9f9, #b3b3b3);
+    }
+  }
+  .file-name{
+    margin: 0;
+  }
+}

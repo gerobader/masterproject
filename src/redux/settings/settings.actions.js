@@ -6,6 +6,7 @@ import {
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
   SET_SHOW_SAVE_NETWORK_MODAL,
+  SET_SHOW_LOAD_NETWORK_MODAL,
   SET_SHOW_LABEL,
   RESET_ACTION_HISTORY,
   SET_PERFORMANCE_MODE,
@@ -37,6 +38,11 @@ export const setShowLabel = (labelState) => ({
 
 export const setShowSaveNetworkModal = (show) => ({
   type: SET_SHOW_SAVE_NETWORK_MODAL,
+  payload: show
+});
+
+export const setShowLoadNetworkModal = (show) => ({
+  type: SET_SHOW_LOAD_NETWORK_MODAL,
   payload: show
 });
 

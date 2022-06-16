@@ -24,7 +24,7 @@ const Layout = () => {
   const [maxIterations, setMaxIterations] = useState('200');
   const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
   const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
-  const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(70);
+  const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(150);
   const [searchAreaSize, setSearchAreaSize] = useState(50);
   const dispatch = useDispatch();
 

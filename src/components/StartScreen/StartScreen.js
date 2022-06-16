@@ -153,7 +153,6 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
       });
     }
   };
-  getNetworkData();
   return (
     <div className="start-screen">
       <MenuElement headline="Load Network" simpleHeader>

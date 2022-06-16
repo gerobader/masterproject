@@ -1,24 +1,24 @@
 import * as THREE from 'three';
 
 class Nodes {
-  constructor(nodes, color) {
+  constructor(nodes) {
     this.instances = undefined;
-    this.createNodes(nodes, color);
+    this.createNodes(nodes);
   }
 
-  createNodes(nodes, color) {
+  createNodes(nodes) {
     const defaultMat = new THREE.MeshLambertMaterial();
     defaultMat.transparent = true;
     defaultMat.opacity = 1;
     const geometry = new THREE.SphereGeometry(1, 8, 8);
-    const threeColor = new THREE.Color(color);
     const instances = new THREE.InstancedMesh(geometry, defaultMat, nodes.length);
+    const color = new THREE.Color();
     instances.name = 'NodeInstances';
     nodes.forEach((node, index) => {
       const scale = new THREE.Vector3(node.size, node.size, node.size);
       const nodeMatrix = new THREE.Matrix4().compose(node.position.clone(), new THREE.Quaternion(), scale);
       instances.setMatrixAt(index, nodeMatrix);
-      instances.setColorAt(index, threeColor);
+      instances.setColorAt(index, color.set(node.color));
     });
     this.instances = instances;
   }

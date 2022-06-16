@@ -14,7 +14,9 @@ const SaveNetworkModal = () => {
     name, diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density,
     directed, nodes, edges
   } = useSelector((state) => state.network);
-  const {showSaveNetworkModal} = useSelector((state) => state.settings);
+  const {
+    showSaveNetworkModal, showLabel, networkBoundarySize
+  } = useSelector((state) => state.settings);
   const [savePathMap, setSavePathMap] = useState(false);
   const dispatch = useDispatch();
 
@@ -27,6 +29,8 @@ const SaveNetworkModal = () => {
       a.style = 'display: none';
       const json = JSON.stringify({
         name,
+        showLabel,
+        networkBoundarySize,
         diameter,
         radius,
         averageGeodesicDistance,

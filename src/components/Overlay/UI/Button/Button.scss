@@ -11,8 +11,14 @@
   min-width: 105px;
   cursor: pointer;
   user-select: none;
+  &:hover{
+    background: $buttonHoverColor;
+  }
   &.danger{
     background: $buttonBackgroundDanger;
+    &:hover{
+      background: $buttonHoverDanger;
+    }
   }
   &.reset{
     min-width: 60px;

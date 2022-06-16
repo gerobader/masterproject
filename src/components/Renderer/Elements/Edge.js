@@ -36,14 +36,6 @@ class Edge {
     this.updatePosition();
     this.setRotation();
     if (this.size !== 1) this.setSize(this.size, true);
-
-    // lines can be used for edges, which cannot be adjusted in width
-    // const material = new THREE.LineBasicMaterial({color: 0xffffff});
-    // const points = [];
-    // points.push(this.targetNode.instance.position.clone());
-    // points.push(this.sourceNode.instance.position.clone());
-    // const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    // this.instance = new THREE.Line(geometry, material);
   }
 
   updatePosition() {
@@ -107,8 +99,10 @@ class Edge {
   }
 
   setSize(size, skipCheck) {
-    if (!size) return;
-    const newSize = Math.round(parseFloat(size) * 100) / 100;
+    let newSize = size;
+    if (newSize === 0) newSize = 0.001;
+    if (!newSize) return;
+    newSize = Math.round(parseFloat(newSize) * 1000) / 1000;
     if (newSize !== this.size || skipCheck) {
       this.size = newSize;
       if (this.performanceVersion) {
@@ -124,11 +118,13 @@ class Edge {
   serialize() {
     return {
       id: this.id,
-      sourceNode: this.sourceNode.id,
-      targetNode: this.targetNode.id,
+      source: this.sourceNode.id,
+      target: this.targetNode.id,
       size: this.size,
       color: this.color,
-      visible: this.visible
+      visible: this.visible,
+      isDirected: this.isDirected,
+      data: this.data
     };
   }
 }

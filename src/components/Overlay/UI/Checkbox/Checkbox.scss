@@ -3,6 +3,7 @@
   user-select: none;
   height: $uiElementHeight;
   display: flex;
+  flex-direction: row-reverse;
   align-items: center;
   justify-content: center;
   margin-right: 10px;
@@ -11,7 +12,7 @@
     opacity: 0.1;
   }
   label{
-    margin-right: 8px;
+    margin-left: 8px;
     white-space: nowrap;
   }
   input{

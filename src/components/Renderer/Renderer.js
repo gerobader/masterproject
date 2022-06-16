@@ -300,13 +300,17 @@ class Renderer extends Component {
   }
 
   updateSceneElements() {
-    const {scene} = this.state;
-    const {camera} = this.props;
+    const {scene, renderer} = this.state;
+    const {
+      camera, performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
+    } = this.props;
     const {
       nodes: serializedNodes, edges: serializedEdges, _setNodesAndEdges
     } = this.props;
     networkElements = new THREE.Group();
     networkElements.name = 'Network';
+    let nodeInstances;
+    let edgeInstances;
     const nodes = serializedNodes.map((node) => {
       const nodeClass = new Node(
         node.position.x,
@@ -321,24 +325,59 @@ class Renderer extends Component {
         node.shape,
         node.pathMap,
         node.visible,
-        camera
+        camera,
+        performanceMode,
+        networkBoundarySize
       );
-      networkElements.add(nodeClass.instance);
+      if (!performanceMode) networkElements.add(nodeClass.instance);
       return nodeClass;
     });
+    if (performanceMode) {
+      nodeInstances = new Nodes(nodes);
+      edgeInstances = new Edges(serializedEdges, nodes);
+      nodes.forEach((node) => {
+        node.setEdges(edgeInstances);
+        node.setNodeInstances(nodeInstances);
+      });
+    }
     const edges = serializedEdges.map((edge) => {
-      const sourceNode = nodes.filter((node) => node.id === edge.sourceNode)[0];
-      const targetNode = nodes.filter((node) => node.id === edge.targetNode)[0];
-      const edgeClass = new Edge(edge.id, sourceNode, targetNode, edge.size, edge.color, edge.visible);
+      const sourceNode = nodes.find((node) => node.id === edge.source);
+      const targetNode = nodes.find((node) => node.id === edge.target);
+      const edgeClass = new Edge(
+        edge.id, sourceNode, targetNode, edge.size, edge.color, edge.visible, edge.data, edge.isDirected, edgeInstances
+      );
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
-      networkElements.add(edgeClass.instance);
+      if (!performanceMode) networkElements.add(edgeClass.instance);
       return edgeClass;
     });
+    if (performanceMode) {
+      networkElements.add(nodeInstances.instances);
+      networkElements.add(edgeInstances.instances);
+    }
     if (!nodes[0].data.degree) nodes.forEach((node) => node.calculateDegree());
+    boundaryRect = new BoundaryRect(networkBoundarySize, showBoundary, boundaryOpacity);
+    networkElements.add(boundaryRect.instance);
     scene.add(networkElements);
     nodes.forEach((node) => node.unserializePathMap(nodes));
     _setNodesAndEdges(nodes, edges, false);
+
+    let composer;
+    if (!hoveredElementOutline) {
+      composer = new EffectComposer(renderer);
+      const renderPass = new RenderPass(scene, camera);
+      composer.addPass(renderPass);
+      hoveredElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+      hoveredElementOutline.visibleEdgeColor.set(hoverElementOutlineColor);
+      composer.addPass(hoveredElementOutline);
+      selectedElementOutline = new OutlinePass(new THREE.Vector2(window.innerWidth, window.innerHeight), scene, camera);
+      selectedElementOutline.visibleEdgeColor.set(selectedElementOutlineColor);
+      composer.addPass(selectedElementOutline);
+    }
+    this.setState((state) => ({
+      ...state,
+      composer
+    }));
   }
 
   lookAt(elements) {
@@ -463,8 +502,8 @@ class Renderer extends Component {
       return nodeClass;
     });
     if (performanceMode) {
-      nodeInstances = new Nodes(nodes, '#008799');
-      edgeInstances = new Edges(remoteEdges, nodes, '#ffffff');
+      nodeInstances = new Nodes(nodes);
+      edgeInstances = new Edges(remoteEdges, nodes);
       nodes.forEach((node) => {
         node.setEdges(edgeInstances);
         node.setNodeInstances(nodeInstances);

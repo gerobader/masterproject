@@ -7,6 +7,7 @@ import Collection from './Controls/Filters/Collection/Collection';
 import Filters from './Controls/Filters/Filters';
 import Footer from './Footer/Footer';
 import SaveNetworkModal from './Modals/SaveNetworkModal/SaveNetworkModal';
+import LoadNetworkModal from './Modals/LoadNetworkModal/LoadNetworkModal';
 import ControlsModal from './Modals/ControlsModal/ControlsModal';
 
 import './Overlay.scss';
@@ -45,6 +46,7 @@ const Overlay = () => {
         </div>
       )}
       <SaveNetworkModal/>
+      <LoadNetworkModal/>
       <ControlsModal/>
       <div className="left-menu">
         <MenuElement headline="Appearance" icon={appearanceIcon}>

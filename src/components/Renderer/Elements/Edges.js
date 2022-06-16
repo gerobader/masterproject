@@ -2,17 +2,17 @@ import * as THREE from 'three';
 import {halfPi} from '../../constants';
 
 class Edges {
-  constructor(edges, nodes, color) {
+  constructor(edges, nodes) {
     this.instances = undefined;
-    this.createEdges(edges, nodes, color);
+    this.createEdges(edges, nodes);
   }
 
-  createEdges(edges, nodes, color) {
+  createEdges(edges, nodes) {
     const defaultMat = new THREE.MeshBasicMaterial();
     defaultMat.transparent = true;
     defaultMat.opacity = 0.3;
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
-    const threeColor = new THREE.Color(color);
+    const color = new THREE.Color();
     const instances = new THREE.InstancedMesh(geometry, defaultMat, edges.length);
     edges.forEach((edge, index) => {
       const sourceNode = nodes.find((node) => {
@@ -23,8 +23,10 @@ class Edges {
         if (typeof edge.source === 'string') return node.name === edge.target;
         return node.id === edge.target;
       });
-      instances.setMatrixAt(index, this.getTransformMatrix(sourceNode.position.clone(), targetNode.position.clone()));
-      instances.setColorAt(index, threeColor);
+      const edgeMatrix = this.getTransformMatrix(sourceNode.position.clone(), targetNode.position.clone());
+      if (edge.size) edgeMatrix.scale(new THREE.Vector3(edge.size, 1, edge.size));
+      instances.setMatrixAt(index, edgeMatrix);
+      instances.setColorAt(index, color.set(edge.color || '#ffffff'));
     });
     this.instances = instances;
   }

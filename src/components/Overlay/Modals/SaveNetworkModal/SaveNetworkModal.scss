@@ -2,9 +2,9 @@
 
 .save-network{
   .menu-element{
-    height: 236px;
+    height: auto;
     .header{
-      margin-bottom: 38px;
+      margin-bottom: 28px;
     }
     .controls-wrapper{
       .vis-text-input{
@@ -20,6 +20,7 @@
       }
       .button-wrapper{
         margin-top: 30px;
+        margin-bottom: 10px;
       }
     }
   }

@@ -6,8 +6,12 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import {
   setOrbitPreview,
   setShowSaveNetworkModal,
+  setShowLoadNetworkModal,
   setShowControlsModal,
-  resetActionHistory
+  resetActionHistory,
+  setPerformanceMode,
+  setShowLabel,
+  setNetworkBoundarySize
 } from '../../../../redux/settings/settings.actions';
 import {
   setSelectedEdges, setSelectedNodes, setNodesAndEdges, setNetworkName, setNetworkStatistics
@@ -24,7 +28,6 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   const {orbitPreview, camera} = useSelector((state) => state.settings);
   const {nodes} = useSelector((state) => state.network);
   const menuRef = useRef();
-  const fileInput = useRef();
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -39,24 +42,6 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
     };
   }, [menuRef]);
 
-  const loadNetwork = (e) => {
-    const fileReader = new FileReader();
-    fileReader.onload = () => {
-      nodes.forEach((node) => node.label.removeFromDom());
-      const networkData = JSON.parse(fileReader.result);
-      dispatch(setSelectedNodes([]));
-      dispatch(setSelectedEdges([]));
-      dispatch(setNodesAndEdges(networkData.nodes, networkData.edges, true));
-      if (networkData.name) dispatch(setNetworkName(networkData.name));
-      dispatch(setNetworkStatistics(
-        networkData?.diameter, networkData?.radius, networkData?.averageGeodesicDistance, networkData?.averageDegree,
-        networkData?.reciprocity, networkData?.density
-      ));
-      dispatch(resetActionHistory());
-    };
-    fileReader.readAsText(e.target.files[0]);
-  };
-
   const centerView = () => {
     const networkCenter = nodes ? calculateAveragePosition(nodes) : new THREE.Vector3();
     camera.lookAt(networkCenter);
@@ -64,7 +49,6 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
 
   return (
     <div className="settings-menu" ref={menuRef}>
-      <input type="file" ref={fileInput} onChange={loadNetwork} className="file-upload"/>
       <MenuSetting menuText="Undo" onClick={undoAction}>
         <img alt="undo-icon" src={undoIcon}/>
       </MenuSetting>
@@ -75,7 +59,7 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
       <MenuSetting menuText="Save Network" onClick={() => dispatch(setShowSaveNetworkModal(true))}>
         <img alt="save network icon" src={downloadIcon}/>
       </MenuSetting>
-      <MenuSetting menuText="Load Network" onClick={() => fileInput.current.click()}>
+      <MenuSetting menuText="Load Network" onClick={() => dispatch(setShowLoadNetworkModal(true))}>
         <img alt="load network icon" src={uploadIcon}/>
       </MenuSetting>
       <hr/>

@@ -7,15 +7,8 @@ import {
   setOrbitPreview,
   setShowSaveNetworkModal,
   setShowLoadNetworkModal,
-  setShowControlsModal,
-  resetActionHistory,
-  setPerformanceMode,
-  setShowLabel,
-  setNetworkBoundarySize
+  setShowControlsModal
 } from '../../../../redux/settings/settings.actions';
-import {
-  setSelectedEdges, setSelectedNodes, setNodesAndEdges, setNetworkName, setNetworkStatistics
-} from '../../../../redux/network/network.actions';
 import {calculateAveragePosition} from '../../../utility';
 
 import './SettingsMenu.scss';

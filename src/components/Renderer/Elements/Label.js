@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import {between} from '../../utility';
 
 class Label {

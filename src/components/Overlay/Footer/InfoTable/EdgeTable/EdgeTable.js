@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import React,{useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';

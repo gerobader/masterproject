@@ -1,11 +1,12 @@
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import Modal from '../Modal';
-import FileUpload from "../../UI/FileUpload/FileUpload";
+import FileUpload from '../../UI/FileUpload/FileUpload';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import {
-  setNetworkName, setNetworkStatistics,
+  setNetworkName,
+  setNetworkStatistics,
   setNodesAndEdges,
   setSelectedEdges,
   setSelectedNodes

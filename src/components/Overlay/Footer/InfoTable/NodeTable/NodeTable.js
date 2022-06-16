@@ -45,7 +45,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
       dispatch(setSelectedNodes(newSelectedNodes));
       dispatch(setSelectedEdges([]));
     }
-  }
+  };
 
   return (
     <table>

@@ -2,7 +2,9 @@ import * as THREE from 'three';
 import Label from './Label';
 
 class Node {
-  constructor(x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion, networkBoundarySize) {
+  constructor(
+    x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion, networkBoundarySize
+  ) {
     this.label = null;
     this.id = id;
     this.name = label;

@@ -19,7 +19,7 @@ const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 
 
 const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
   const {performanceMode} = useSelector((state) => state.settings);
-  const [selectedNetwork, setSelectedNetwork] = useState();
+  const [selectedNetwork, setSelectedNetwork] = useState('smallSize');
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
@@ -153,9 +153,10 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
       });
     }
   };
+  getNetworkData();
   return (
     <div className="start-screen">
-      <MenuElement headline="SettingsMenu" simpleHeader>
+      <MenuElement headline="Load Network" simpleHeader>
         <Select
           options={networks}
           value={selectedNetwork}

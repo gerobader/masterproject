@@ -6,14 +6,15 @@ import Button from '../../UI/Button/Button';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
-import {calculateColorForElement, sortArray, sortElements} from '../../../utility';
+import {calculateColorForElement, sortElements} from '../../../utility';
 import Setting from '../../UI/Setting/Setting';
 import NodeMappingMenu from './NodeMappingMenu/NodeMappingMenu';
-import {setNodes} from '../../../../redux/network/network.actions';
+import {setNodes, setEdges} from '../../../../redux/network/network.actions';
 import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {shapes} from '../../../constants';
 
 import './Appearance.scss';
+import EdgeMappingMenu from './EdgeMappingMenu/EdgeMappingMenu';
 
 const Appearance = () => {
   const {
@@ -29,46 +30,27 @@ const Appearance = () => {
   const [applyOnlyToSelected, setApplyOnlyToSelected] = useState(false);
   const [elementType, setElementType] = useState('Nodes');
   const [nodeShape, setNodeShape] = useState();
+
   const [elementColorMappingValue, setElementColorMappingValue] = useState();
   const [elementColorMappingType, setElementColorMappingType] = useState('absolute');
   const [elementColorMapIndicators, setElementColorMapIndicators] = useState([]);
-
   const [elementSizeMappingValue, setElementSizeMappingValue] = useState();
   const [elementSizeMappingType, setElementSizeMappingType] = useState('absolute');
   const [elementSizeMapping, setElementSizeMapping] = useState([]);
-
-  const [edgeSizeMappingValue, setEdgeSizeMappingValue] = useState();
-  const [edgeSizeMappingType, setEdgeSizeMappingType] = useState();
-  const [edgeSizeMapping, setEdgeSizeMapping] = useState([]);
-
   const [nodeShapeMappingValue, setNodeShapeMappingValue] = useState();
   const [nodeShapeMapping, setNodeShapeMapping] = useState([]);
   const [labelColorMappingValue, setLabelColorMappingValue] = useState();
+  const [labelColorMappingType, setLabelColorMappingType] = useState('absolute');
   const [labelColorMapIndicators, setLabelColorMapIndicators] = useState([]);
   const [labelSizeMappingValue, setLabelSizeMappingValue] = useState();
+  const [labelSizeMappingType, setLabelSizeMappingType] = useState('absolute');
   const [labelSizeMapping, setLabelSizeMapping] = useState([]);
-  const edgeDataPoints = useMemo(() => {
-    const data = {};
-    if (edges.length && Object.keys(edges[0].data).length === 0) return {};
-    edges.forEach((edge) => {
-      Object.keys(edge.data).forEach((dataPoint) => {
-        if (dataPoint in data) {
-          if (!data[dataPoint].includes(edge.data[dataPoint])) {
-            data[dataPoint].push(edge.data[dataPoint]);
-          }
-        } else {
-          data[dataPoint] = [edge.data[dataPoint]];
-        }
-      });
-    });
-    const mappingValues = Object.keys(data);
-    mappingValues.forEach((mappingValue) => {
-      if (typeof data[mappingValue][0] === 'number') {
-        data[mappingValue].sort((a, b) => sortArray(a, b));
-      }
-    });
-    return data;
-  }, [edges]);
+  const [edgeColorMappingValue, setEdgeColorMappingValue] = useState();
+  const [edgeColorMappingType, setEdgeColorMappingType] = useState();
+  const [edgeColorMapIndicators, setEdgeColorMapIndicators] = useState([]);
+  const [edgeSizeMappingValue, setEdgeSizeMappingValue] = useState();
+  const [edgeSizeMappingType, setEdgeSizeMappingType] = useState();
+  const [edgeSizeMapping, setEdgeSizeMapping] = useState([]);
 
   useEffect(() => {
     if (selectedNodes.length === 1) {
@@ -85,6 +67,10 @@ const Appearance = () => {
   // reset mapping values when mapping type changes
   useEffect(() => setElementSizeMapping([]), [elementSizeMappingType]);
   useEffect(() => setElementColorMapIndicators([]), [elementColorMappingType]);
+  useEffect(() => setLabelColorMapIndicators([]), [labelColorMappingType]);
+  useEffect(() => setLabelSizeMapping([]), [labelSizeMappingType]);
+  useEffect(() => setEdgeColorMapIndicators([]), [edgeColorMappingType]);
+  useEffect(() => setEdgeSizeMapping([]), [edgeSizeMappingType]);
 
   const getElementsToUse = () => {
     let elementsToUse = [];
@@ -93,17 +79,13 @@ const Appearance = () => {
     return elementsToUse;
   };
 
-  const updateElementType = (type) => {
-    console.log(type);
-
-    setElementType(type);
-  };
-
-  const applyColorMapping = (colorMapIndicators, mappingValue, targetElement) => {
+  const applyColorMapping = (colorMapIndicators, mappingValue, mappingType, targetElement) => {
     if (!mappingValue) return;
     const changes = [];
-    if (elementColorMappingType === 'relative') {
-      const sortedElements = sortElements(applyOnlyToSelected ? selectedNodes : nodes, mappingValue);
+    const elementsToUse = getElementsToUse();
+    if (mappingType === 'relative') {
+      if (elementsToUse.length < 2) return;
+      const sortedElements = sortElements(elementsToUse, mappingValue);
       const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
         if (first.position === second.position) return 0;
@@ -119,7 +101,7 @@ const Appearance = () => {
         const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
         if (color) {
           const elementChanges = {element: element.object, type: 'graphElement'};
-          if (targetElement === 'node' && typeof element.object.setColor === 'function') {
+          if ((targetElement === 'node' || targetElement === 'edge') && typeof element.object.setColor === 'function') {
             elementChanges.setColor = {before: element.object.color, after: color};
             changes.push(elementChanges);
             element.object.setColor(color);
@@ -131,18 +113,19 @@ const Appearance = () => {
         }
       });
       dispatch(addToActionHistory(changes));
-      dispatch(setNodes(nodes));
+      if (targetElement === 'edge') dispatch(setEdges(edges));
+      else dispatch(setNodes(nodes));
     } else {
-      nodes.forEach((node) => {
-        const elementChanges = {element: node, type: 'graphElement'};
-        if (targetElement === 'node') {
-          elementChanges.setColor = {before: node.color, after: colorMapIndicators[node.data[mappingValue]]};
+      elementsToUse.forEach((element) => {
+        const elementChanges = {element, type: 'graphElement'};
+        if (targetElement === 'node' || targetElement === 'edge') {
+          elementChanges.setColor = {before: element.color, after: colorMapIndicators[element.data[mappingValue]]};
           changes.push(elementChanges);
-          node.setColor(colorMapIndicators[node.data[mappingValue]]);
+          element.setColor(colorMapIndicators[element.data[mappingValue]]);
         } else {
-          elementChanges.setLabelColor = {before: node.label.color, after: colorMapIndicators[node.data[mappingValue]]};
+          elementChanges.setLabelColor = {before: element.label.color, after: colorMapIndicators[element.data[mappingValue]]};
           changes.push(elementChanges);
-          node.setLabelColor(colorMapIndicators[node.data[mappingValue]]);
+          element.setLabelColor(colorMapIndicators[element.data[mappingValue]]);
         }
       });
       dispatch(addToActionHistory(changes));
@@ -155,6 +138,7 @@ const Appearance = () => {
     const changes = [];
     const elementsToUse = getElementsToUse();
     if (mappingType === 'relative') {
+      if (elementsToUse.length < 2) return;
       if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
         const sortedElements = sortElements(elementsToUse, mappingValue);
         const min = parseFloat(sizeMapping[0]);
@@ -194,6 +178,7 @@ const Appearance = () => {
   };
 
   const applyNodeShapeMapping = (dataToMapOn, dataMapping) => {
+    if (!dataToMapOn && Object.keys(nodeShapeMapping).length === 0) return;
     const changes = [];
     nodes.forEach((node) => {
       const nodeData = node.data[dataToMapOn];
@@ -209,17 +194,16 @@ const Appearance = () => {
 
   const applyChanges = () => {
     if (activeMenu === 'right') {
-      if (elementColorMappingValue) applyColorMapping(elementColorMapIndicators, elementColorMappingValue, 'node');
-      if (labelColorMappingValue) applyColorMapping(labelColorMapIndicators, labelColorMappingValue, 'label');
       if (elementType === 'Nodes') {
+        applyColorMapping(elementColorMapIndicators, elementColorMappingValue, elementColorMappingType, 'node');
+        applyColorMapping(labelColorMapIndicators, labelColorMappingValue, labelColorMappingType, 'label');
+        applyNodeShapeMapping(nodeShapeMappingValue, nodeShapeMapping);
         applySizeMapping(elementSizeMappingValue, elementSizeMappingType, elementSizeMapping, 'node');
-        applySizeMapping(labelSizeMappingValue, labelSizeMapping, 'label');
+        applySizeMapping(labelSizeMappingValue, labelSizeMappingType, labelSizeMapping, 'label');
       }
       if (elementType === 'Edges') {
         applySizeMapping(edgeSizeMappingValue, edgeSizeMappingType, edgeSizeMapping, 'edge');
-      }
-      if (nodeShapeMappingValue && Object.keys(nodeShapeMapping).length > 0) {
-        applyNodeShapeMapping(nodeShapeMappingValue, nodeShapeMapping);
+        applyColorMapping(edgeColorMapIndicators, edgeColorMappingValue, edgeColorMappingType, 'edge');
       }
     } else {
       const elementsToUse = getElementsToUse();
@@ -253,12 +237,60 @@ const Appearance = () => {
     }
   };
 
+  const renderMappingMenu = () => (elementType === 'Nodes' ? (
+    <NodeMappingMenu
+      elementColorMappingValue={elementColorMappingValue}
+      setElementColorMappingValue={setElementColorMappingValue}
+      setElementColorMapIndicators={setElementColorMapIndicators}
+      elementColorMapIndicators={elementColorMapIndicators}
+      elementColorMappingType={elementColorMappingType}
+      setElementColorMappingType={setElementColorMappingType}
+      elementSizeMappingValue={elementSizeMappingValue}
+      setElementSizeMappingValue={setElementSizeMappingValue}
+      setElementSizeMapping={setElementSizeMapping}
+      elementSizeMappingType={elementSizeMappingType}
+      setElementSizeMappingType={setElementSizeMappingType}
+      elementSizeMapping={elementSizeMapping}
+      nodeShapeMappingValue={nodeShapeMappingValue}
+      setNodeShapeMappingValue={setNodeShapeMappingValue}
+      nodeShapeMapping={nodeShapeMapping}
+      setNodeShapeMapping={setNodeShapeMapping}
+      labelColorMappingValue={labelColorMappingValue}
+      setLabelColorMappingValue={setLabelColorMappingValue}
+      labelColorMappingType={labelColorMappingType}
+      setLabelColorMappingType={setLabelColorMappingType}
+      labelColorMapIndicators={labelColorMapIndicators}
+      setLabelColorMapIndicators={setLabelColorMapIndicators}
+      labelSizeMappingValue={labelSizeMappingValue}
+      setLabelSizeMappingValue={setLabelSizeMappingValue}
+      labelSizeMappingType={labelSizeMappingType}
+      setLabelSizeMappingType={setLabelSizeMappingType}
+      labelSizeMapping={labelSizeMapping}
+      setLabelSizeMapping={setLabelSizeMapping}
+    />
+  ) : (
+    <EdgeMappingMenu
+      edgeColorMappingValue={edgeColorMappingValue}
+      setEdgeColorMappingValue={setEdgeColorMappingValue}
+      setEdgeColorMapIndicators={setEdgeColorMapIndicators}
+      edgeColorMapIndicators={edgeColorMapIndicators}
+      edgeColorMappingType={edgeColorMappingType}
+      setEdgeColorMappingType={setEdgeColorMappingType}
+      edgeSizeMappingValue={edgeSizeMappingValue}
+      setEdgeSizeMappingValue={setEdgeSizeMappingValue}
+      setEdgeSizeMapping={setEdgeSizeMapping}
+      edgeSizeMappingType={edgeSizeMappingType}
+      setEdgeSizeMappingType={setEdgeSizeMappingType}
+      edgeSizeMapping={edgeSizeMapping}
+    />
+  ));
+
   return (
     <div className="appearance-controls">
       <MenuSwitch setActiveMenu={setActiveMenu} activeMenu={activeMenu}/>
       {activeMenu === 'left' ? (
         <div className="settings">
-          <Setting name="Element Color">
+          <Setting name={`${elementType.slice(0, -1)} Color`}>
             <ColorPicker
               color={fillColor}
               setColor={setFillColor}
@@ -275,13 +307,13 @@ const Appearance = () => {
             )}
             {fillColor && (<Button text="reset" className="reset" onClick={() => setFillColor(undefined)}/>)}
           </Setting>
-          <Setting name="Element Size">
+          <Setting name={`${elementType.slice(0, -1)} Size`}>
             <SmallNumberInput value={elementSize} setValue={setElementSize}/>
             {elementSize !== undefined && (
               <Button text="reset" className="reset" onClick={() => setElementSize(undefined)}/>
             )}
           </Setting>
-          {!performanceMode && (
+          {(!performanceMode && elementType === 'Nodes') && (
             <Setting name="Node Shape">
               <Select
                 options={shapes}
@@ -293,52 +325,29 @@ const Appearance = () => {
               {nodeShape && (<Button text="reset" className="reset" onClick={() => setNodeShape(undefined)}/>)}
             </Setting>
           )}
-          <Setting name="Label Color">
-            <ColorPicker color={labelColor} setColor={setLabelColor}/>
-            {labelColor && (<Button text="reset" className="reset" onClick={() => setLabelColor(undefined)}/>)}
-          </Setting>
-          <Setting name="Label Size">
-            <SmallNumberInput value={labelSize} setValue={setLabelSize}/>
-            {labelSize && (<Button text="reset" className="reset" onClick={() => setLabelSize(undefined)}/>)}
-          </Setting>
+          {elementType === 'Nodes' && (
+            <>
+              <Setting name="Label Color">
+                <ColorPicker color={labelColor} setColor={setLabelColor}/>
+                {labelColor && (<Button text="reset" className="reset" onClick={() => setLabelColor(undefined)}/>)}
+              </Setting>
+              <Setting name="Label Size">
+                <SmallNumberInput value={labelSize} setValue={setLabelSize}/>
+                {labelSize && (<Button text="reset" className="reset" onClick={() => setLabelSize(undefined)}/>)}
+              </Setting>
+            </>
+          )}
         </div>
-      ) : (
-        <NodeMappingMenu
-          elementColorMappingValue={elementColorMappingValue}
-          setElementColorMappingValue={setElementColorMappingValue}
-          setElementColorMapIndicators={setElementColorMapIndicators}
-          elementColorMapIndicators={elementColorMapIndicators}
-          elementColorMappingType={elementColorMappingType}
-          setElementColorMappingType={setElementColorMappingType}
-          elementSizeMappingValue={elementSizeMappingValue}
-          setElementSizeMappingValue={setElementSizeMappingValue}
-          setElementSizeMapping={setElementSizeMapping}
-          elementSizeMappingType={elementSizeMappingType}
-          setElementSizeMappingType={setElementSizeMappingType}
-          elementSizeMapping={elementSizeMapping}
-          nodeShapeMappingValue={nodeShapeMappingValue}
-          setNodeShapeMappingValue={setNodeShapeMappingValue}
-          nodeShapeMapping={nodeShapeMapping}
-          setNodeShapeMapping={setNodeShapeMapping}
-          labelColorMappingValue={labelColorMappingValue}
-          setLabelColorMappingValue={setLabelColorMappingValue}
-          labelColorMapIndicators={labelColorMapIndicators}
-          setLabelColorMapIndicators={setLabelColorMapIndicators}
-          labelSizeMappingValue={labelSizeMappingValue}
-          setLabelSizeMappingValue={setLabelSizeMappingValue}
-          labelSizeMapping={labelSizeMapping}
-          setLabelSizeMapping={setLabelSizeMapping}
-        />
-      )}
+      ) : renderMappingMenu()}
       <div className="controls">
         <Select
           options={['Nodes', 'Edges']}
           value={elementType}
-          setSelected={updateElementType}
+          setSelected={setElementType}
           opensUp
           alwaysShowArrow
         />
-        {(selectedNodes.length || selectedEdges.length) ? (
+        {((elementType === 'Nodes' && selectedNodes.length) || (elementType === 'Edges' && selectedEdges.length)) ? (
           <Checkbox
             name="use-only-selected"
             text="Only selected"

@@ -94,7 +94,7 @@ class Node {
   }
 
   setSize(size) {
-    const newSize = parseFloat(size);
+    const newSize = Math.round(parseFloat(size) * 100) / 100;
     if (newSize && newSize !== this.size) {
       if (this.performanceVersion) {
         this.nodeInstances.setSizeFor(this.id, newSize);

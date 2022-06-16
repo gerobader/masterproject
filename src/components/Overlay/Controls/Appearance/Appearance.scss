@@ -5,6 +5,9 @@
   flex-grow: 1;
   flex-direction: column;
   position: relative;
+  .message{
+    text-align: center;
+  }
   .settings {
     padding: 0 10px 15px;
     max-height: 235px;

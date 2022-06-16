@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {setNodes, setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';
@@ -6,6 +6,7 @@ import {titleCase} from '../../../../utility';
 import './NodeTable.scss';
 
 let mouseDownX = 0;
+let lastSelectedIndex;
 
 const NodeTable = ({changeSortValue, nodesToShow}) => {
   const {
@@ -13,6 +14,39 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
   } = useSelector((state) => state.network);
   const dispatch = useDispatch();
   const additionalKeys = nodesToShow.length ? Object.keys(nodesToShow[0].data) : [];
+
+  useEffect(() => {
+    if (selectedNodes.length === 0) lastSelectedIndex = undefined;
+  }, [selectedNodes]);
+
+  const selectNodes = (e, node, index) => {
+    if (e.target.classList[0] !== 'extra-button' && node.visible) {
+      let newSelectedNodes = [node];
+      if (e.ctrlKey) {
+        if (selectedNodes.includes(node)) {
+          newSelectedNodes = selectedNodes.filter((selectedNode) => selectedNode.id !== node.id);
+        } else {
+          newSelectedNodes = [...selectedNodes, node];
+        }
+      } else if (e.shiftKey && lastSelectedIndex !== undefined) {
+        newSelectedNodes = new Set(selectedNodes);
+        if (lastSelectedIndex < index) {
+          for (let i = lastSelectedIndex; i <= index; i++) {
+            newSelectedNodes.add(nodesToShow[i]);
+          }
+        } else if (lastSelectedIndex > index) {
+          for (let i = index; i <= lastSelectedIndex; i++) {
+            newSelectedNodes.add(nodesToShow[i]);
+          }
+        }
+        newSelectedNodes = Array.from(newSelectedNodes);
+      }
+      lastSelectedIndex = index;
+      dispatch(setSelectedNodes(newSelectedNodes));
+      dispatch(setSelectedEdges([]));
+    }
+  }
+
   return (
     <table>
       <thead>
@@ -40,28 +74,15 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
         </tr>
       </thead>
       <tbody>
-        {nodesToShow.map((node) => (
+        {nodesToShow.map((node, index) => (
           <tr
-            onClick={(e) => {
-              if (e.target.classList[0] !== 'extra-button' && node.visible) {
-                let newSelectedNodes = [node];
-                if (e.ctrlKey) {
-                  if (selectedNodes.includes(node)) {
-                    newSelectedNodes = selectedNodes.filter((selectedNode) => selectedNode.id !== node.id);
-                  } else {
-                    newSelectedNodes = [...selectedNodes, node];
-                  }
-                }
-                dispatch(setSelectedNodes(newSelectedNodes));
-                dispatch(setSelectedEdges([]));
-              }
-            }}
+            onClick={(e) => selectNodes(e, node, index)}
             className={`${selectedNodes.includes(node) ? 'selected' : ''}${!node.visible ? ' gray-out' : ''}`}
             key={node.id}
           >
             <td>{node.id}</td>
             <td>{node.name}</td>
-            <td>{Math.round(node.size * 100) / 100}</td>
+            <td>{node.size}</td>
             <td>
               {node.color}
               <div

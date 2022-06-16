@@ -10,7 +10,7 @@ import {
   RESET_ACTION_HISTORY,
   SET_PERFORMANCE_MODE,
   SET_BOUNDARY,
-  SHOW_BOUNDARY, SET_BOUNDARY_OPACITY
+  SHOW_BOUNDARY, SET_BOUNDARY_OPACITY, SET_LAYOUT_CALCULATION_RUNNING
 } from '../actionTypes';
 
 const initialState = {
@@ -20,6 +20,7 @@ const initialState = {
   showLabel: 0, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
   showControlsModal: false,
+  layoutCalculationRunning: false,
   actionHistory: [],
   currentHistoryPosition: 0,
   keyboardInputsBlocked: false,
@@ -59,6 +60,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         showControlsModal: action.payload
+      };
+    case SET_LAYOUT_CALCULATION_RUNNING:
+      return {
+        ...state,
+        layoutCalculationRunning: action.payload
       };
     case RESET_ACTION_HISTORY:
       return {

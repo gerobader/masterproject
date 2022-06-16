@@ -10,10 +10,13 @@ import {setOctree} from '../../../../../redux/network/network.actions';
 import './BoundaryMenu.scss';
 
 const BoundaryMenu = () => {
-  const {networkBoundarySize, showBoundary, boundaryOpacity} = useSelector((state) => state.settings);
+  const {
+    networkBoundarySize, showBoundary, boundaryOpacity, layoutCalculationRunning
+  } = useSelector((state) => state.settings);
   const dispatch = useDispatch();
 
   const updateNetworkBoundarySize = (size) => {
+    if (layoutCalculationRunning) return;
     const octree = new Octree(
       new Box3(
         new Vector3(-size / 2, -size / 2, -size / 2),

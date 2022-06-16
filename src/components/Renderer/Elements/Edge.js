@@ -107,13 +107,15 @@ class Edge {
   }
 
   setSize(size, skipCheck) {
-    if (size !== this.size || skipCheck) {
-      this.size = size;
+    if (!size) return;
+    const newSize = Math.round(parseFloat(size) * 100) / 100;
+    if (newSize !== this.size || skipCheck) {
+      this.size = newSize;
       if (this.performanceVersion) {
-        this.edgeInstances.setSizeFor(this.id, size);
+        this.edgeInstances.setSizeFor(this.id, newSize);
       } else {
-        this.instance.children[0].scale.set(size, 1, size);
-        if (this.isDirected) this.instance.children[1].scale.set(size, size, size);
+        this.instance.children[0].scale.set(newSize, 1, newSize);
+        if (this.isDirected) this.instance.children[1].scale.set(newSize, newSize, newSize);
         this.updatePosition();
       }
     }

@@ -6,7 +6,7 @@ import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
 import Loader from '../../UI/Loader/Loader';
-import {addToActionHistory} from '../../../../redux/settings/settings.actions';
+import {addToActionHistory, setLayoutCalculationRunning} from '../../../../redux/settings/settings.actions';
 import {
   fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
 } from './forceFunctions';
@@ -18,8 +18,7 @@ let changes = [];
 
 const Layout = () => {
   const {nodes, edges, octree} = useSelector((state) => state.network);
-  const {networkBoundarySize} = useSelector((state) => state.settings);
-  const [running, setRunning] = useState(false);
+  const {networkBoundarySize, layoutCalculationRunning} = useSelector((state) => state.settings);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);
   const [maxIterations, setMaxIterations] = useState('200');
@@ -32,7 +31,7 @@ const Layout = () => {
   const stopCalculation = () => {
     clearInterval(interval);
     interval = undefined;
-    setRunning(false);
+    dispatch(setLayoutCalculationRunning(false));
     nodes.forEach((node, index) => {
       changes[index].setPositionAbsolute.after = node.position.clone();
     });
@@ -43,17 +42,19 @@ const Layout = () => {
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
     const maxIterationsFloat = parseFloat(maxIterations);
     if (type === 1 && !maxIterationsFloat) return;
-    setRunning(true);
+    dispatch(setLayoutCalculationRunning(true));
     const area = size * size;
     const k = Math.sqrt(area / nodes.length);
     const temp = new Vector3(1, 1, 1);
     let iterationCount = 0;
     const searchArea = new Box3();
     const useOctree = searchAreaSize < networkBoundarySize;
+    // TODO: Check if this is possible as an asynchronous promise
     const iteration = () => {
       iterationCount++;
       if (useOctree) {
         octree.empty();
+        octree.update = true;
         nodes.forEach((node) => {
           if (node.visible) octree.insert({id: node.id, position: node.position.clone()});
         });
@@ -129,11 +130,11 @@ const Layout = () => {
           alwaysShowArrow
         />
         <Button
-          onClick={running ? stopCalculation : startCalculation}
-          text={running ? 'Stop' : 'Run'}
+          onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
+          text={layoutCalculationRunning ? 'Stop' : 'Run'}
           className="run"
         />
-        {running && <Loader/>}
+        {layoutCalculationRunning && <Loader/>}
       </div>
       <div className="settings">
         {layoutAlgorithm && (

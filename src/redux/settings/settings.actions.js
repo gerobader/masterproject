@@ -9,7 +9,10 @@ import {
   SET_SHOW_LABEL,
   RESET_ACTION_HISTORY,
   SET_PERFORMANCE_MODE,
-  SET_BOUNDARY, SHOW_BOUNDARY, SET_BOUNDARY_OPACITY
+  SET_BOUNDARY,
+  SHOW_BOUNDARY,
+  SET_BOUNDARY_OPACITY,
+  SET_LAYOUT_CALCULATION_RUNNING
 } from '../actionTypes';
 
 export const setOrbitPreview = (state) => ({
@@ -40,6 +43,11 @@ export const setShowSaveNetworkModal = (show) => ({
 export const setShowControlsModal = (show) => ({
   type: SET_SHOW_CONTROLS_MODAL,
   payload: show
+});
+
+export const setLayoutCalculationRunning = (running) => ({
+  type: SET_LAYOUT_CALCULATION_RUNNING,
+  payload: running
 });
 
 export const resetActionHistory = () => ({

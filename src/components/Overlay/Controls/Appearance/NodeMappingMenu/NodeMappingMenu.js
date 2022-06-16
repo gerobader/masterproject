@@ -16,8 +16,10 @@ const NodeMappingMenu = ({
   elementSizeMappingValue, setElementSizeMappingValue, setElementSizeMapping, elementSizeMappingType, setElementSizeMappingType,
   elementSizeMapping,
   nodeShapeMappingValue, setNodeShapeMappingValue, nodeShapeMapping, setNodeShapeMapping,
-  labelColorMappingValue, setLabelColorMappingValue, labelColorMapIndicators, setLabelColorMapIndicators,
-  labelSizeMappingValue, setLabelSizeMappingValue, labelSizeMapping, setLabelSizeMapping
+  labelColorMappingValue, setLabelColorMappingValue, labelColorMappingType, setLabelColorMappingType, labelColorMapIndicators,
+  setLabelColorMapIndicators,
+  labelSizeMappingValue, setLabelSizeMappingValue, labelSizeMappingType, setLabelSizeMappingType, labelSizeMapping,
+  setLabelSizeMapping
 }) => {
   const {nodes} = useSelector((state) => state.network);
   const {performanceMode} = useSelector((state) => state.settings);
@@ -48,7 +50,8 @@ const NodeMappingMenu = ({
     if (mappingType === 'relative' && mappingProperty !== 'shape') {
       return (
         <Setting name="Range">
-          {mappingProperty === 'color' ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)
+          {mappingProperty === 'color'
+            ? (<ColorRangePicker indicators={rangeMapping} setIndicators={rangeMappingSetter}/>)
             : (<RangeInput range={rangeMapping} setRange={rangeMappingSetter}/>)}
         </Setting>
       );
@@ -94,7 +97,7 @@ const NodeMappingMenu = ({
   return (
     <div className="settings">
       <ExpandableSetting
-        name="Element Color"
+        name="Node Color"
         mappingValue={elementColorMappingValue}
         setMappingValue={(mappingValue) => {
           setElementColorMappingValue(mappingValue);
@@ -109,7 +112,7 @@ const NodeMappingMenu = ({
         )}
       </ExpandableSetting>
       <ExpandableSetting
-        name="Element Size"
+        name="Node Size"
         mappingValue={elementSizeMappingValue}
         setMappingValue={(mappingValue) => {
           setElementSizeMappingValue(mappingValue);
@@ -135,19 +138,23 @@ const NodeMappingMenu = ({
         name="Label Color"
         mappingValue={labelColorMappingValue}
         setMappingValue={setLabelColorMappingValue}
+        mappingType={labelColorMappingType}
+        setMappingType={setLabelColorMappingType}
         dataPoints={nodeDataPoints}
       >
         {createMappingInputs(
-          'color', labelColorMappingValue, undefined, labelColorMapIndicators, setLabelColorMapIndicators
+          'color', labelColorMappingValue, labelColorMappingType, labelColorMapIndicators, setLabelColorMapIndicators
         )}
       </ExpandableSetting>
       <ExpandableSetting
         name="Label Size"
         mappingValue={labelSizeMappingValue}
         setMappingValue={setLabelSizeMappingValue}
+        mappingType={labelSizeMappingType}
+        setMappingType={setLabelSizeMappingType}
         dataPoints={nodeDataPoints}
       >
-        {createMappingInputs('size', labelSizeMappingValue, undefined, labelSizeMapping, setLabelSizeMapping)}
+        {createMappingInputs('size', labelSizeMappingValue, labelSizeMappingType, labelSizeMapping, setLabelSizeMapping)}
       </ExpandableSetting>
     </div>
   );

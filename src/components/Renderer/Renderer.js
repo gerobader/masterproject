@@ -17,6 +17,7 @@ import {
 } from '../../redux/network/network.actions';
 import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
+import {initialCameraPosition, hoverElementOutlineColor, selectedElementOutlineColor} from '../constants';
 
 import './Renderer.scss';
 
@@ -24,9 +25,6 @@ let networkElements = new THREE.Group();
 let animationRunning = false;
 let boundaryRect;
 const controlKeys = ['f', 'escape'];
-const initialCameraZ = 200;
-const hoverElementOutlineColor = '#aaaaaa';
-const selectedElementOutlineColor = '#ff0000';
 let cameraControls;
 const octGroup = new THREE.Group();
 
@@ -38,8 +36,6 @@ const clock = new THREE.Clock();
 let targetQuaternion;
 let interpolation = 0;
 let nodePositionChanges = [];
-
-const useTestNetwork = false;
 
 class Renderer extends Component {
   constructor(props) {
@@ -275,8 +271,14 @@ class Renderer extends Component {
     if (newSelectedEdges.length || newSelectedNodes.length === 0) {
       controls.detach();
     } else if (
-      newSelectedNodes.length
-      && (!averagePositionPlaceholder || Object.keys(averagePositionPlaceholder.userData).length !== newSelectedNodes.length)
+      (
+        newSelectedNodes.length === 1
+        && averagePositionPlaceholder
+        && !averagePositionPlaceholder.position.equals(newSelectedNodes[0].position)
+      ) || (
+        newSelectedNodes.length
+        && (!averagePositionPlaceholder || Object.keys(averagePositionPlaceholder.userData).length !== newSelectedNodes.length)
+      )
     ) {
       scene.remove(averagePositionPlaceholder);
       const newPlaceholder = new THREE.Object3D();
@@ -422,7 +424,7 @@ class Renderer extends Component {
     directionalLight.target = lightTarget;
     scene.add(directionalLight);
     camera.rotation.order = 'YXZ';
-    camera.position.z = initialCameraZ;
+    camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z);
 
     cameraControls = new OrbitControls(camera, renderer.domElement);
     cameraControls.enableDamping = true;
@@ -534,6 +536,8 @@ class Renderer extends Component {
 
   drawOctree() {
     const {octree} = this.props;
+    if (!octree.update) return;
+    octree.update = false;
     for (let i = octGroup.children.length - 1; i >= 0; i--) {
       octGroup.remove(octGroup.children[i]);
     }

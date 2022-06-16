@@ -13,7 +13,7 @@ const ExpandableSetting = ({
 
   const checkNewMappingValue = (value) => {
     const compatibleWithRelativeInput = dataPoints && dataPoints[value] && typeof dataPoints[value][0] !== 'string';
-    if (!compatibleWithRelativeInput) setMappingType('absolute');
+    if (!compatibleWithRelativeInput && setMappingType) setMappingType('absolute');
     setMappingValue(value);
   };
 

@@ -24,9 +24,9 @@
           justify-content: center;
           .key{
             text-align: center;
-            line-height: 24px;
-            height: 24px;
-            width: 24px;
+            line-height: 25px;
+            height: 26px;
+            width: 26px;
             border-radius: 5px;
             box-sizing: border-box;
             border: 1px solid $menuWindowBorderColor;
@@ -60,7 +60,9 @@
           }
           .middle-click{
             background-image: url('../../../../assets/mouse-middle-click.svg');
-
+          }
+          .right-click{
+            background-image: url('../../../../assets/mouse-right-click.svg');
           }
         }
         .separator{

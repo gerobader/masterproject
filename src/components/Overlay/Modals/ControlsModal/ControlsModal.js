@@ -24,14 +24,21 @@ const ControlsModal = () => {
             <div className="key">F</div>
           </div>
           <div className="separator">-</div>
-          <div className="function">Center view on selected Element</div>
+          <div className="function">Center view on selected Elements</div>
+        </div>
+        <div className="rule">
+          <div className="keys">
+            <div className="key">Esc</div>
+          </div>
+          <div className="separator">-</div>
+          <div className="function">Deselect all Elements</div>
         </div>
         <div className="rule">
           <div className="keys">
             <div className="key middle">Ctrl</div>
           </div>
           <div className="separator">-</div>
-          <div className="function">Multiple Select</div>
+          <div className="function">(Hold) Multiple Select</div>
         </div>
         <div className="rule">
           <div className="keys">
@@ -68,7 +75,14 @@ const ControlsModal = () => {
             <div className="mouse middle-click"/>
           </div>
           <div className="separator">-</div>
-          <div className="function">Select Element + all connected Elements</div>
+          <div className="function">Zoom / Select all connected Elements</div>
+        </div>
+        <div className="rule">
+          <div className="keys">
+            <div className="mouse right-click"/>
+          </div>
+          <div className="separator">-</div>
+          <div className="function">Move View</div>
         </div>
       </div>
     </Modal>

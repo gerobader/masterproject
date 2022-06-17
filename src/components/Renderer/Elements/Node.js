@@ -56,7 +56,7 @@ class Node {
   setVisibility(visibility) {
     this.visible = visibility;
     if (this.performanceVersion) {
-      this.nodeInstances.setVisibilityFor(this.id, visibility);
+      this.nodeInstances.setVisibilityFor(this.id, visibility, this.position, this.size);
     } else {
       this.instance.visible = visibility;
     }

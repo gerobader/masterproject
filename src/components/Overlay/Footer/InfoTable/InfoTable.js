@@ -209,13 +209,11 @@ const InfoTable = ({setProgressInfo}) => {
           ? <Button className="danger" text="Stop Calculation" onClick={stopCalculation}/>
           : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>}
       </div>
-      <div className="table-wrapper">
-        {tableType === 'Node Table' ? (
-          <NodeTable changeSortValue={changeSortValue} nodesToShow={filteredElements}/>
-        ) : (
-          <EdgeTable changeSortValue={changeSortValue} edgesToShow={filteredElements}/>
-        )}
-      </div>
+      {tableType === 'Node Table' ? (
+        <NodeTable changeSortValue={changeSortValue} nodesToShow={filteredElements}/>
+      ) : (
+        <EdgeTable changeSortValue={changeSortValue} edgesToShow={filteredElements}/>
+      )}
       <div className="network-info-wrapper">
         <div className="heading">Network Info</div>
         <div className="info-wrapper">

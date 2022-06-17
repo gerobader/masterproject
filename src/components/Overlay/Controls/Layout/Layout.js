@@ -49,7 +49,6 @@ const Layout = () => {
     let iterationCount = 0;
     const searchArea = new Box3();
     const useOctree = searchAreaSize < networkBoundarySize;
-    // TODO: Check if this is possible as an asynchronous promise
     const iteration = () => {
       iterationCount++;
       if (useOctree) {
@@ -133,6 +132,7 @@ const Layout = () => {
           onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
           text={layoutCalculationRunning ? 'Stop' : 'Run'}
           className="run"
+          disabled={!layoutAlgorithm}
         />
         {layoutCalculationRunning && <Loader/>}
       </div>

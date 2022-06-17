@@ -51,8 +51,6 @@ class Nodes {
     this.instances.getMatrixAt(index, matrix);
     const scale = new THREE.Vector3();
     scale.setFromMatrixScale(matrix);
-    // eslint-disable-next-line no-param-reassign
-    if (size === 0) size = 0.01;
     matrix.scale(new THREE.Vector3(size / scale.x, size / scale.y, size / scale.z));
     this.instances.setMatrixAt(index, matrix);
     this.instances.instanceMatrix.needsUpdate = true;

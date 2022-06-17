@@ -1,5 +1,6 @@
-import React, {useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import Pagination from '../Pagination/Pagination';
 import {setNodes, setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';
 
@@ -12,12 +13,19 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
   const {
     nodes, selectedNodes, sortNodesBy, nodesReversed
   } = useSelector((state) => state.network);
+  const [page, setPage] = useState(1);
   const dispatch = useDispatch();
   const additionalKeys = nodesToShow.length ? Object.keys(nodesToShow[0].data) : [];
-
+  const visibleNodes = nodesToShow.length <= 100 ? nodesToShow : nodesToShow.slice((page - 1) * 100, page * 100);
+  const tableWrapper = useRef();
   useEffect(() => {
     if (selectedNodes.length === 0) lastSelectedIndex = undefined;
   }, [selectedNodes]);
+
+  useEffect(() => {
+    tableWrapper.current.scrollTop = 0;
+    lastSelectedIndex = undefined;
+  }, [page]);
 
   const selectNodes = (e, node, index) => {
     if (e.target.classList[0] !== 'extra-button' && node.visible) {
@@ -48,72 +56,75 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
   };
 
   return (
-    <table>
-      <thead>
-        <tr>
-          {['id', 'name', 'size', 'color', 'visible', ...additionalKeys].map((value) => {
-            const titleCaseValue = titleCase(value);
-            let displayName = titleCaseValue;
-            if (titleCaseValue === 'Id') {
-              displayName = 'ID';
-            } else if (titleCaseValue === 'Lcc') {
-              displayName = 'LCC';
-            }
-            return (
-              <th
-                key={value}
-                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'node')}
-                onMouseDown={(e) => { mouseDownX = e.clientX; }}
-                className={sortNodesBy === value ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
-                title={displayName === 'LCC' ? 'Local Clustering Coefficient' : undefined}
-              >
-                {displayName}
-              </th>
-            );
-          })}
-        </tr>
-      </thead>
-      <tbody>
-        {nodesToShow.map((node, index) => (
-          <tr
-            onClick={(e) => selectNodes(e, node, index)}
-            className={`${selectedNodes.includes(node) ? 'selected' : ''}${!node.visible ? ' gray-out' : ''}`}
-            key={node.id}
-          >
-            <td>{node.id}</td>
-            <td>{node.name}</td>
-            <td>{node.size}</td>
-            <td>
-              {node.color}
-              <div
-                className={`extra-button lock${node.colorLocked ? ' show' : ''}`}
-                onClick={() => {
-                  node.setColorLock(!node.colorLocked);
-                  dispatch(setNodes(nodes));
-                }}
-              />
-            </td>
-            <td>
-              {node.visible ? 'Yes' : 'No'}
-              <div
-                className={`extra-button eye show ${node.visible ? 'open' : 'closed'}`}
-                onClick={() => {
-                  node.setVisibility(!node.visible);
-                  if (selectedNodes.includes(node)) {
-                    const newSelectedNodes = selectedNodes.filter((selectedNode) => selectedNode.id !== node.id);
-                    dispatch(setSelectedNodes(newSelectedNodes));
-                  }
-                  dispatch(setNodes(nodes));
-                }}
-              />
-            </td>
-            {Object.keys(node.data).map((dataPoint) => (
-              <td key={dataPoint}>{Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}</td>
-            ))}
+    <div className="table-wrapper" ref={tableWrapper}>
+      <table>
+        <thead>
+          <tr>
+            {['id', 'name', 'size', 'color', 'visible', ...additionalKeys].map((value) => {
+              const titleCaseValue = titleCase(value);
+              let displayName = titleCaseValue;
+              if (titleCaseValue === 'Id') {
+                displayName = 'ID';
+              } else if (titleCaseValue === 'Lcc') {
+                displayName = 'LCC';
+              }
+              return (
+                <th
+                  key={value}
+                  onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'node')}
+                  onMouseDown={(e) => { mouseDownX = e.clientX; }}
+                  className={sortNodesBy === value ? `show-arrow${nodesReversed ? ' reverse' : ''}` : null}
+                  title={displayName === 'LCC' ? 'Local Clustering Coefficient' : undefined}
+                >
+                  {displayName}
+                </th>
+              );
+            })}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {visibleNodes.map((node, index) => (
+            <tr
+              onClick={(e) => selectNodes(e, node, index)}
+              className={`${selectedNodes.includes(node) ? 'selected' : ''}${!node.visible ? ' gray-out' : ''}`}
+              key={node.id}
+            >
+              <td>{node.id}</td>
+              <td>{node.name}</td>
+              <td>{node.size}</td>
+              <td>
+                {node.color}
+                <div
+                  className={`extra-button lock${node.colorLocked ? ' show' : ''}`}
+                  onClick={() => {
+                    node.setColorLock(!node.colorLocked);
+                    dispatch(setNodes(nodes));
+                  }}
+                />
+              </td>
+              <td>
+                {node.visible ? 'Yes' : 'No'}
+                <div
+                  className={`extra-button eye show ${node.visible ? 'open' : 'closed'}`}
+                  onClick={() => {
+                    node.setVisibility(!node.visible);
+                    if (selectedNodes.includes(node)) {
+                      const newSelectedNodes = selectedNodes.filter((selectedNode) => selectedNode.id !== node.id);
+                      dispatch(setSelectedNodes(newSelectedNodes));
+                    }
+                    dispatch(setNodes(nodes));
+                  }}
+                />
+              </td>
+              {Object.keys(node.data).map((dataPoint) => (
+                <td key={dataPoint}>{Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Pagination activePage={page} pageCount={Math.ceil(nodesToShow.length / 100)} setPage={setPage}/>
+    </div>
   );
 };
 

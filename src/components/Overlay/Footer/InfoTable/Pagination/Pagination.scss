@@ -1,0 +1,38 @@
+.pagination-wrapper{
+  display: flex;
+  justify-content: center;
+  margin: 5px 0;
+  .arrow-button{
+    width: 15px;
+    cursor: pointer;
+    background-size: 10px;
+    &.prev{
+      margin-right: 3px;
+      background: url('../../../../../assets/arrow-left.svg') center no-repeat;
+    }
+    &.next{
+      margin-left: 3px;
+      background: url('../../../../../assets/arrow-right.svg') center no-repeat;
+    }
+    &.disabled{
+      pointer-events: none;
+      opacity: 0.6;
+    }
+  }
+  .page{
+    margin: 0 5px;
+    text-align: center;
+    opacity: 0.6;
+    cursor: pointer;
+    &.active{
+      text-decoration: underline;
+      opacity: 1;
+    }
+    &:hover{
+      opacity: 1;
+    }
+  }
+  .page-placeholder{
+    opacity: 0.6;
+  }
+}

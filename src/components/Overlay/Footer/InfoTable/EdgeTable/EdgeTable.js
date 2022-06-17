@@ -1,6 +1,7 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import React, {useEffect} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
+import Pagination from '../Pagination/Pagination';
 import {setSelectedEdges, setSelectedNodes} from '../../../../../redux/network/network.actions';
 import {titleCase} from '../../../../utility';
 
@@ -13,15 +14,22 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
   const {
     selectedNodes, selectedEdges, sortEdgesBy, edgesReversed
   } = useSelector((state) => state.network);
-  const {performanceMode} = useSelector((state) => state.settings);
+  const [page, setPage] = useState(1);
   const dispatch = useDispatch();
+  const visibleEdges = edgesToShow.length <= 100 ? edgesToShow : edgesToShow.slice((page - 1) * 100, page * 100);
+  const tableWrapper = useRef();
 
   useEffect(() => {
     if (selectedEdges.length === 0) lastSelectedIndex = undefined;
   }, [selectedEdges]);
 
+  useEffect(() => {
+    tableWrapper.current.scrollTop = 0;
+    lastSelectedIndex = undefined;
+  }, [page]);
+
   const selectEdges = (e, edge, index) => {
-    if (!edge.visible || performanceMode) return;
+    if (!edge.visible) return;
     let newSelectedEdges = [edge];
     if (e.ctrlKey) {
       if (selectedEdges.includes(edge)) {
@@ -59,56 +67,59 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
   };
   const additionalKeys = edgesToShow.length ? Object.keys(edgesToShow[0].data) : [];
   return (
-    <table>
-      <thead>
-        <tr>
-          {['id', 'sourceName', 'targetName', 'color', 'size', 'visible', ...additionalKeys].map((value) => {
-            const titleCaseValue = titleCase(value);
-            return (
-              <th
-                key={value}
-                onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'edge')}
-                onMouseDown={(e) => { mouseDownX = e.clientX; }}
-                className={sortEdgesBy === value ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
-              >
-                {titleCaseValue === 'Id' ? 'ID' : titleCaseValue}
-              </th>
-            );
-          })}
-        </tr>
-      </thead>
-      <tbody>
-        {edgesToShow.map((edge, index) => (
-          <tr className={`${selectedEdges.includes(edge) ? 'selected' : ''}${!edge.visible ? ' gray-out' : ''}`} key={edge.id}>
-            <td onClick={(e) => selectEdges(e, edge, index)}>
-              {edge.id}
-            </td>
-            <td
-              onClick={(e) => { if (edge.sourceNode.visible) selectNodes(e, edge.sourceNode); }}
-              className={
-                `node${selectedNodes.includes(edge.sourceNode) ? ' selected' : ''}${edge.sourceNode.visible ? ' visible' : ''}`
-              }
-            >
-              {edge.sourceNode.name}
-            </td>
-            <td
-              onClick={(e) => { if (edge.targetNode.visible) selectNodes(e, edge.targetNode); }}
-              className={
-                `node${selectedNodes.includes(edge.targetNode) ? ' selected' : ''}${edge.targetNode.visible ? ' visible' : ''}`
-              }
-            >
-              {edge.targetNode.name}
-            </td>
-            <td onClick={(e) => selectEdges(e, edge, index)}>{edge.color}</td>
-            <td onClick={(e) => selectEdges(e, edge, index)}>{edge.size}</td>
-            <td onClick={(e) => selectEdges(e, edge, index)}>{edge.visible ? 'Yes' : 'No'}</td>
-            {Object.keys(edge.data).map((dataPoint) => (
-              <td key={dataPoint} onClick={(e) => selectEdges(e, edge, index)}>{edge.data[dataPoint]}</td>
-            ))}
+    <div className="table-wrapper" ref={tableWrapper}>
+      <table>
+        <thead>
+          <tr>
+            {['id', 'sourceName', 'targetName', 'color', 'size', 'visible', ...additionalKeys].map((value) => {
+              const titleCaseValue = titleCase(value);
+              return (
+                <th
+                  key={value}
+                  onMouseUp={(e) => changeSortValue(value, e, mouseDownX, 'edge')}
+                  onMouseDown={(e) => { mouseDownX = e.clientX; }}
+                  className={sortEdgesBy === value ? `show-arrow${edgesReversed ? ' reverse' : ''}` : null}
+                >
+                  {titleCaseValue === 'Id' ? 'ID' : titleCaseValue}
+                </th>
+              );
+            })}
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {visibleEdges.map((edge, index) => (
+            <tr className={`${selectedEdges.includes(edge) ? 'selected' : ''}${!edge.visible ? ' gray-out' : ''}`} key={edge.id}>
+              <td onClick={(e) => selectEdges(e, edge, index)}>
+                {edge.id}
+              </td>
+              <td
+                onClick={(e) => { if (edge.sourceNode.visible) selectNodes(e, edge.sourceNode); }}
+                className={
+                  `node${selectedNodes.includes(edge.sourceNode) ? ' selected' : ''}${edge.sourceNode.visible ? ' visible' : ''}`
+                }
+              >
+                {edge.sourceNode.name}
+              </td>
+              <td
+                onClick={(e) => { if (edge.targetNode.visible) selectNodes(e, edge.targetNode); }}
+                className={
+                  `node${selectedNodes.includes(edge.targetNode) ? ' selected' : ''}${edge.targetNode.visible ? ' visible' : ''}`
+                }
+              >
+                {edge.targetNode.name}
+              </td>
+              <td onClick={(e) => selectEdges(e, edge, index)}>{edge.color}</td>
+              <td onClick={(e) => selectEdges(e, edge, index)}>{edge.size}</td>
+              <td onClick={(e) => selectEdges(e, edge, index)}>{edge.visible ? 'Yes' : 'No'}</td>
+              {Object.keys(edge.data).map((dataPoint) => (
+                <td key={dataPoint} onClick={(e) => selectEdges(e, edge, index)}>{edge.data[dataPoint]}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <Pagination activePage={page} pageCount={Math.ceil(edgesToShow.length / 100)} setPage={setPage}/>
+    </div>
   );
 };
 

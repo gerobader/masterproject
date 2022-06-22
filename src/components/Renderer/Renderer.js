@@ -363,7 +363,7 @@ class Renderer extends Component {
     _setNodesAndEdges(nodes, edges, false);
 
     let composer;
-    if (!hoveredElementOutline) {
+    if (!performanceMode) {
       composer = new EffectComposer(renderer);
       const renderPass = new RenderPass(scene, camera);
       composer.addPass(renderPass);
@@ -504,10 +504,7 @@ class Renderer extends Component {
     if (performanceMode) {
       nodeInstances = new Nodes(nodes);
       edgeInstances = new Edges(remoteEdges, nodes);
-      nodes.forEach((node) => {
-        node.setEdges(edgeInstances);
-        node.setNodeInstances(nodeInstances);
-      });
+      nodes.forEach((node) => node.setNodeInstances(nodeInstances));
     }
     const edges = remoteEdges.map((edge, index) => {
       const sourceNode = nodes.find((node) => {

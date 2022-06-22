@@ -1,7 +1,7 @@
 @import '../../../../assets/settings';
 .color-picker {
   display: flex;
-  width: $uiElementHeight;
+  width: $uiElementHeight + $uiElementHeight;
   height: $uiElementHeight;
   justify-content: center;
   align-items: center;
@@ -19,7 +19,7 @@
     pointer-events: none;
   }
   input{
-    min-width: 29px;
+    min-width: $uiElementHeight + $uiElementHeight + 4px;
     min-height: 33px;
     padding: 0;
     border: none;

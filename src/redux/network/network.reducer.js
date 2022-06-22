@@ -36,6 +36,7 @@ const initialState = {
 };
 
 const sortElements = (elements, sortValue, reverse = false) => {
+  if (!elements.length) return elements;
   if (sortValue === 'sourceName') return elements.sort((a, b) => sortArray(a.sourceNode.name, b.sourceNode.name, reverse));
   if (sortValue === 'targetName') return elements.sort((a, b) => sortArray(a.targetNode.name, b.targetNode.name, reverse));
   if (sortValue === 'name') return elements.sort((a, b) => sortArray(a.name, b.name, reverse));

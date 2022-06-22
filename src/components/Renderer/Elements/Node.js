@@ -10,7 +10,6 @@ class Node {
     this.name = label;
     this.data = data;
     this.instance = null;
-    this.edges = undefined;
     this.targetForEdges = [];
     this.sourceForEdges = [];
     this.color = color;
@@ -201,10 +200,6 @@ class Node {
     if (edge) {
       this.sourceForEdges.push(edge);
     }
-  }
-
-  setEdges(edges) {
-    this.edges = edges;
   }
 
   setNodeInstances(nodeInstances) {

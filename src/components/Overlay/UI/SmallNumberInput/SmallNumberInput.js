@@ -7,7 +7,7 @@ const SmallNumberInput = ({value, setValue}) => (
     <input
       type="number"
       className={`small-number-input${value >= 99999 ? ' small' : ''}`}
-      value={value || ''}
+      value={value !== undefined ? value : ''}
       onChange={(e) => setValue(e.target.value)}
     />
     {value === undefined ? <div className="disabled"/> : ''}

@@ -6,14 +6,13 @@ import './NumberDataPointFilter.scss';
 
 const NumberDataPointFilter = ({dataPoints, filter, changeFilterConfig}) => {
   const newFilter = {...filter};
-
   return (
     <>
       <div className="row margin">
         <Select
           options={dataPoints}
           value={newFilter.filterBy}
-          setSelected={(value) => changeFilterConfig('dataPoint', value)}
+          setSelected={(value) => changeFilterConfig('filterBy', value)}
           className="datapoint-select"
           alwaysShowArrow
           titleCaseOptions

@@ -131,7 +131,7 @@ const Layout = () => {
         <Button
           onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
           text={layoutCalculationRunning ? 'Stop' : 'Run'}
-          className="run"
+          className={`run${layoutCalculationRunning ? ' danger' : ''}`}
           disabled={!layoutAlgorithm}
         />
         {layoutCalculationRunning && <Loader/>}

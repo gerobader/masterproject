@@ -1,0 +1,518 @@
+{
+  "nodes": [
+    {
+      "id": 0,
+      "name": "NetworkVisualizer"
+    },
+    {
+      "id": 1,
+      "name": "Renderer"
+    },
+    {
+      "id": 2,
+      "name": "Overlay"
+    },
+    {
+      "id": 3,
+      "name": "Filters"
+    },
+    {
+      "id": 4,
+      "name": "Layout"
+    },
+    {
+      "id": 5,
+      "name": "Appearance"
+    },
+    {
+      "id": 6,
+      "name": "SaveNetworkModal"
+    },
+    {
+      "id": 7,
+      "name": "LoadNetworkModal"
+    },
+    {
+      "id": 8,
+      "name": "ControlsModal"
+    },
+    {
+      "id": 9,
+      "name": "Modal"
+    },
+    {
+      "id": 10,
+      "name": "MenuElement"
+    },
+    {
+      "id": 11,
+      "name": "Button"
+    },
+    {
+      "id": 12,
+      "name": "Checkbox"
+    },
+    {
+      "id": 13,
+      "name": "ColorPicker"
+    },
+    {
+      "id": 14,
+      "name": "ColorRangePicker"
+    },
+    {
+      "id": 15,
+      "name": "ExpandableSetting"
+    },
+    {
+      "id": 16,
+      "name": "FileUpload"
+    },
+    {
+      "id": 17,
+      "name": "Loader"
+    },
+    {
+      "id": 18,
+      "name": "MenuSwitch"
+    },
+    {
+      "id": 19,
+      "name": "RangeInput"
+    },
+    {
+      "id": 20,
+      "name": "RangeSlider"
+    },
+    {
+      "id": 21,
+      "name": "Select"
+    },
+    {
+      "id": 22,
+      "name": "Setting"
+    },
+    {
+      "id": 23,
+      "name": "SmallNumberInput"
+    },
+    {
+      "id": 24,
+      "name": "TextInput"
+    },
+    {
+      "id": 25,
+      "name": "Collection"
+    },
+    {
+      "id": 26,
+      "name": "Filter"
+    },
+    {
+      "id": 27,
+      "name": "NumberDatapointFilter"
+    },
+    {
+      "id": 28,
+      "name": "StringDatapointFilter"
+    },
+    {
+      "id": 29,
+      "name": "EdgeMappingMenu"
+    },
+    {
+      "id": 30,
+      "name": "NodeMappingMenu"
+    },
+    {
+      "id": 31,
+      "name": "Footer"
+    },
+    {
+      "id": 32,
+      "name": "LabelSwitch"
+    },
+    {
+      "id": 33,
+      "name": "QuickAccess"
+    },
+    {
+      "id": 34,
+      "name": "ProgressBar"
+    },
+    {
+      "id": 35,
+      "name": "InfoTable"
+    },
+    {
+      "id": 36,
+      "name": "SettingsMenu"
+    },
+    {
+      "id": 37,
+      "name": "Indicator"
+    },
+    {
+      "id": 38,
+      "name": "BoundaryMenu"
+    },
+    {
+      "id": 39,
+      "name": "NodeTable"
+    },
+    {
+      "id": 40,
+      "name": "EdgeTable"
+    },
+    {
+      "id": 41,
+      "name": "Pagination"
+    },
+    {
+      "id": 42,
+      "name": "MenuSetting"
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "target": 1
+    },
+    {
+      "source": 0,
+      "target": 2
+    },
+    {
+      "source": 2,
+      "target": 3
+    },
+    {
+      "source": 2,
+      "target": 4
+    },
+    {
+      "source": 2,
+      "target": 5
+    },
+    {
+      "source": 2,
+      "target": 6
+    },
+    {
+      "source": 2,
+      "target": 7
+    },
+    {
+      "source": 2,
+      "target": 8
+    },
+    {
+      "source": 2,
+      "target": 25
+    },
+    {
+      "source": 2,
+      "target": 31
+    },
+    {
+      "source": 3,
+      "target": 25
+    },
+    {
+      "source": 3,
+      "target": 10
+    },
+    {
+      "source": 3,
+      "target": 11
+    },
+    {
+      "source": 3,
+      "target": 12
+    },
+    {
+      "source": 3,
+      "target": 21
+    },
+    {
+      "source": 4,
+      "target": 10
+    },
+    {
+      "source": 4,
+      "target": 11
+    },
+    {
+      "source": 4,
+      "target": 12
+    },
+    {
+      "source": 4,
+      "target": 17
+    },
+    {
+      "source": 4,
+      "target": 21
+    },
+    {
+      "source": 4,
+      "target": 22
+    },
+    {
+      "source": 4,
+      "target": 23
+    },
+    {
+      "source": 5,
+      "target": 29
+    },
+    {
+      "source": 5,
+      "target": 30
+    },
+    {
+      "source": 5,
+      "target": 10
+    },
+    {
+      "source": 5,
+      "target": 11
+    },
+    {
+      "source": 5,
+      "target": 12
+    },
+    {
+      "source": 5,
+      "target": 13
+    },
+    {
+      "source": 5,
+      "target": 18
+    },
+    {
+      "source": 5,
+      "target": 21
+    },
+    {
+      "source": 5,
+      "target": 22
+    },
+    {
+      "source": 6,
+      "target": 9
+    },
+    {
+      "source": 6,
+      "target": 11
+    },
+    {
+      "source": 6,
+      "target": 12
+    },
+    {
+      "source": 6,
+      "target": 24
+    },
+    {
+      "source": 7,
+      "target": 9
+    },
+    {
+      "source": 7,
+      "target": 11
+    },
+    {
+      "source": 7,
+      "target": 12
+    },
+    {
+      "source": 7,
+      "target": 16
+    },
+    {
+      "source": 8,
+      "target": 9
+    },
+    {
+      "source": 9,
+      "target": 10
+    },
+    {
+      "source": 14,
+      "target": 37
+    },
+    {
+      "source": 15,
+      "target": 11
+    },
+    {
+      "source": 15,
+      "target": 21
+    },
+    {
+      "source": 15,
+      "target": 22
+    },
+    {
+      "source": 19,
+      "target": 23
+    },
+    {
+      "source": 25,
+      "target": 26
+    },
+    {
+      "source": 25,
+      "target": 21
+    },
+    {
+      "source": 26,
+      "target": 27
+    },
+    {
+      "source": 26,
+      "target": 28
+    },
+    {
+      "source": 27,
+      "target": 21
+    },
+    {
+      "source": 27,
+      "target": 23
+    },
+    {
+      "source": 28,
+      "target": 21
+    },
+    {
+      "source": 28,
+      "target": 24
+    },
+    {
+      "source": 29,
+      "target": 13
+    },
+    {
+      "source": 29,
+      "target": 14
+    },
+    {
+      "source": 29,
+      "target": 15
+    },
+    {
+      "source": 29,
+      "target": 19
+    },
+    {
+      "source": 29,
+      "target": 22
+    },
+    {
+      "source": 29,
+      "target": 23
+    },
+    {
+      "source": 30,
+      "target": 13
+    },
+    {
+      "source": 30,
+      "target": 14
+    },
+    {
+      "source": 30,
+      "target": 15
+    },
+    {
+      "source": 30,
+      "target": 19
+    },
+    {
+      "source": 30,
+      "target": 22
+    },
+    {
+      "source": 30,
+      "target": 23
+    },
+    {
+      "source": 30,
+      "target": 21
+    },
+    {
+      "source": 31,
+      "target": 32
+    },
+    {
+      "source": 31,
+      "target": 33
+    },
+    {
+      "source": 31,
+      "target": 34
+    },
+    {
+      "source": 31,
+      "target": 35
+    },
+    {
+      "source": 31,
+      "target": 36
+    },
+    {
+      "source": 33,
+      "target": 38
+    },
+    {
+      "source": 34,
+      "target": 17
+    },
+    {
+      "source": 35,
+      "target": 39
+    },
+    {
+      "source": 35,
+      "target": 40
+    },
+    {
+      "source": 35,
+      "target": 11
+    },
+    {
+      "source": 35,
+      "target": 21
+    },
+    {
+      "source": 35,
+      "target": 24
+    },
+    {
+      "source": 36,
+      "target": 12
+    },
+    {
+      "source": 36,
+      "target": 42
+    },
+    {
+      "source": 38,
+      "target": 20
+    },
+    {
+      "source": 38,
+      "target": 23
+    },
+    {
+      "source": 39,
+      "target": 41
+    },
+    {
+      "source": 40,
+      "target": 41
+    }
+  ]
+}

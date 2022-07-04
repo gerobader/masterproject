@@ -1,20 +1,20 @@
 import React, {useMemo} from 'react';
 import {useSelector} from 'react-redux';
 import ExpandableSetting from '../../../UI/ExpandableSetting/ExpandableSetting';
-import {sortArray} from '../../../../utility';
 import Setting from '../../../UI/Setting/Setting';
 import ColorRangePicker from '../../../UI/ColorRangePicker/ColorRangePicker';
 import RangeInput from '../../../UI/RangeInput/RangeInput';
 import Select from '../../../UI/Select/Select';
 import SmallNumberInput from '../../../UI/SmallNumberInput/SmallNumberInput';
 import ColorPicker from '../../../UI/ColorPicker/ColorPicker';
+import {sortArray} from '../../../../utility';
 import {shapes} from '../../../../constants';
 
 const NodeMappingMenu = ({
-  elementColorMappingValue, setElementColorMappingValue, setElementColorMapIndicators, elementColorMapIndicators,
-  elementColorMappingType, setElementColorMappingType,
-  elementSizeMappingValue, setElementSizeMappingValue, setElementSizeMapping, elementSizeMappingType, setElementSizeMappingType,
-  elementSizeMapping,
+  nodeColorMappingValue, setNodeColorMappingValue, setNodeColorMapIndicators, nodeColorMapIndicators,
+  nodeColorMappingType, setNodeColorMappingType,
+  nodeSizeMappingValue, setNodeSizeMappingValue, setNodeSizeMapping, nodeSizeMappingType, setNodeSizeMappingType,
+  nodeSizeMapping,
   nodeShapeMappingValue, setNodeShapeMappingValue, nodeShapeMapping, setNodeShapeMapping,
   labelColorMappingValue, setLabelColorMappingValue, labelColorMappingType, setLabelColorMappingType, labelColorMapIndicators,
   setLabelColorMapIndicators,
@@ -98,31 +98,31 @@ const NodeMappingMenu = ({
     <div className="settings">
       <ExpandableSetting
         name="Node Color"
-        mappingValue={elementColorMappingValue}
+        mappingValue={nodeColorMappingValue}
         setMappingValue={(mappingValue) => {
-          setElementColorMappingValue(mappingValue);
-          setElementColorMapIndicators([]);
+          setNodeColorMappingValue(mappingValue);
+          setNodeColorMapIndicators([]);
         }}
-        mappingType={elementColorMappingType}
-        setMappingType={setElementColorMappingType}
+        mappingType={nodeColorMappingType}
+        setMappingType={setNodeColorMappingType}
         dataPoints={nodeDataPoints}
       >
         {createMappingInputs(
-          'color', elementColorMappingValue, elementColorMappingType, elementColorMapIndicators, setElementColorMapIndicators
+          'color', nodeColorMappingValue, nodeColorMappingType, nodeColorMapIndicators, setNodeColorMapIndicators
         )}
       </ExpandableSetting>
       <ExpandableSetting
         name="Node Size"
-        mappingValue={elementSizeMappingValue}
+        mappingValue={nodeSizeMappingValue}
         setMappingValue={(mappingValue) => {
-          setElementSizeMappingValue(mappingValue);
-          setElementSizeMapping([]);
+          setNodeSizeMappingValue(mappingValue);
+          setNodeSizeMapping([]);
         }}
-        mappingType={elementSizeMappingType}
-        setMappingType={setElementSizeMappingType}
+        mappingType={nodeSizeMappingType}
+        setMappingType={setNodeSizeMappingType}
         dataPoints={nodeDataPoints}
       >
-        {createMappingInputs('size', elementSizeMappingValue, elementSizeMappingType, elementSizeMapping, setElementSizeMapping)}
+        {createMappingInputs('size', nodeSizeMappingValue, nodeSizeMappingType, nodeSizeMapping, setNodeSizeMapping)}
       </ExpandableSetting>
       {!performanceMode && (
         <ExpandableSetting

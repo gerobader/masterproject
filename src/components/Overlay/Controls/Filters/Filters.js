@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useMemo} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {v4 as uuidv4} from 'uuid';
+import MenuElement from '../../UI/MenuElement/MenuElement';
 import Select from '../../UI/Select/Select';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
@@ -11,6 +12,7 @@ import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {arrayMove} from '../../../utility';
 
 import './Filters.scss';
+import filterIcon from '../../../../assets/filter-icon.svg';
 
 const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePosition}) => {
   const {nodes} = useSelector((state) => state.network);
@@ -249,39 +251,41 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   };
 
   return (
-    <div className="filters-container">
-      <div className="filters-wrapper">
-        <Collection
-          collection={filterCollection}
-          updateCollectionElement={updateCollectionElement}
-          removeElementFromCollection={removeElementFromCollection}
-          filterCloneSettings={filterCloneSettings}
-          updateNewFilterLocation={updateNewFilterLocation}
-          stringFilterTypes={stringFilterTypes}
-          numberFilterTypes={numberFilterTypes}
-          setFilterCloneSettings={setFilterCloneSettings}
-          setFilterClonePosition={setFilterClonePosition}
-          setCurrentFilterLocation={setCurrentFilterLocation}
-          addFilter={addFilter}
-        />
+    <MenuElement headline="Filters" icon={filterIcon} className="filter-menu" rightSide>
+      <div className="filters-container">
+        <div className="filters-wrapper">
+          <Collection
+            collection={filterCollection}
+            updateCollectionElement={updateCollectionElement}
+            removeElementFromCollection={removeElementFromCollection}
+            filterCloneSettings={filterCloneSettings}
+            updateNewFilterLocation={updateNewFilterLocation}
+            stringFilterTypes={stringFilterTypes}
+            numberFilterTypes={numberFilterTypes}
+            setFilterCloneSettings={setFilterCloneSettings}
+            setFilterClonePosition={setFilterClonePosition}
+            setCurrentFilterLocation={setCurrentFilterLocation}
+            addFilter={addFilter}
+          />
+        </div>
+        <div className="controls">
+          <Select
+            options={['Select', 'Show']}
+            value={filterResultType}
+            setSelected={updateFilterResultType}
+            opensUp
+            alwaysShowArrow
+          />
+          <Checkbox
+            name="auto-refresh"
+            text="Auto refresh"
+            checked={autoRefresh}
+            setChecked={updateAutoRefresh}
+          />
+          <Button text="Apply" onClick={() => applyFilters(filterCollection, filterResultType)}/>
+        </div>
       </div>
-      <div className="controls">
-        <Select
-          options={['Select', 'Show']}
-          value={filterResultType}
-          setSelected={updateFilterResultType}
-          opensUp
-          alwaysShowArrow
-        />
-        <Checkbox
-          name="auto-refresh"
-          text="Auto refresh"
-          checked={autoRefresh}
-          setChecked={updateAutoRefresh}
-        />
-        <Button text="Apply" onClick={() => applyFilters(filterCollection, filterResultType)}/>
-      </div>
-    </div>
+    </MenuElement>
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import MenuElement from '../MenuElement/MenuElement';
+import MenuElement from '../UI/MenuElement/MenuElement';
 
 import './Modal.scss';
 

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-class BoundaryRect {
+class BoundaryBox {
   constructor(size, visible, opacity) {
     this.size = size;
     this.opacity = opacity;
@@ -43,4 +43,4 @@ class BoundaryRect {
   }
 }
 
-export default BoundaryRect;
+export default BoundaryBox;

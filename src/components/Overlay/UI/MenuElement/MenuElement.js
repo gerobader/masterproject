@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 
 import './MenuElement.scss';
-import menuIcon from '../../../assets/menu-icon.svg';
+import menuIcon from '../../../../assets/menu-icon.svg';
 
 const MenuElement = ({
   children, headline, icon, simpleHeader, rightSide, className

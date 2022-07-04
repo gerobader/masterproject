@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import {Vector3, Box3} from 'three';
+import MenuElement from '../../UI/MenuElement/MenuElement';
 import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
@@ -12,6 +13,7 @@ import {
 } from './forceFunctions';
 
 import './Layout.scss';
+import layoutIcon from '../../../../assets/layout-icon.svg';
 
 let interval;
 let changes = [];
@@ -118,55 +120,57 @@ const Layout = () => {
   };
 
   return (
-    <div className="layout-controls">
-      <div className="algorithm-wrapper">
-        <Select
-          options={['Fruchterman and Reingold', 'Eades']}
-          defaultOption="- Layout Algorithm -"
-          value={layoutAlgorithm}
-          setSelected={setLayoutAlgorithm}
-          className="extra-wide"
-          alwaysShowArrow
-        />
-        <Button
-          onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
-          text={layoutCalculationRunning ? 'Stop' : 'Run'}
-          className={`run${layoutCalculationRunning ? ' danger' : ''}`}
-          disabled={!layoutAlgorithm}
-        />
-        {layoutCalculationRunning && <Loader/>}
+    <MenuElement headline="Layout" icon={layoutIcon}>
+      <div className="layout-controls">
+        <div className="algorithm-wrapper">
+          <Select
+            options={['Fruchterman and Reingold', 'Eades']}
+            defaultOption="- Layout Algorithm -"
+            value={layoutAlgorithm}
+            setSelected={setLayoutAlgorithm}
+            className="extra-wide"
+            alwaysShowArrow
+          />
+          <Button
+            onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
+            text={layoutCalculationRunning ? 'Stop' : 'Run'}
+            className={`run${layoutCalculationRunning ? ' danger' : ''}`}
+            disabled={!layoutAlgorithm}
+          />
+          {layoutCalculationRunning && <Loader/>}
+        </div>
+        <div className="settings">
+          {layoutAlgorithm && (
+            <Setting name="Max Repulsion Distance">
+              <SmallNumberInput value={searchAreaSize} setValue={setSearchAreaSize}/>
+            </Setting>
+          )}
+          {layoutAlgorithm === 'Fruchterman and Reingold' && (
+            <>
+              <Setting name="Size">
+                <SmallNumberInput value={size} setValue={setSize}/>
+              </Setting>
+              <Setting name="Iterations">
+                <SmallNumberInput value={maxIterations} setValue={setMaxIterations}/>
+              </Setting>
+            </>
+          )}
+          {layoutAlgorithm === 'Eades' && (
+            <>
+              <Setting name="Repulsion Strength">
+                <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
+              </Setting>
+              <Setting name="Attraction Multiplier">
+                <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
+              </Setting>
+              <Setting name="Attraction Distance Impact">
+                <SmallNumberInput value={eadesAttractionDistanceImpact} setValue={setEadesAttractionDistanceImpact}/>
+              </Setting>
+            </>
+          )}
+        </div>
       </div>
-      <div className="settings">
-        {layoutAlgorithm && (
-          <Setting name="Max Repulsion Distance">
-            <SmallNumberInput value={searchAreaSize} setValue={setSearchAreaSize}/>
-          </Setting>
-        )}
-        {layoutAlgorithm === 'Fruchterman and Reingold' && (
-          <>
-            <Setting name="Size">
-              <SmallNumberInput value={size} setValue={setSize}/>
-            </Setting>
-            <Setting name="Iterations">
-              <SmallNumberInput value={maxIterations} setValue={setMaxIterations}/>
-            </Setting>
-          </>
-        )}
-        {layoutAlgorithm === 'Eades' && (
-          <>
-            <Setting name="Repulsion Strength">
-              <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
-            </Setting>
-            <Setting name="Attraction Multiplier">
-              <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
-            </Setting>
-            <Setting name="Attraction Distance Impact">
-              <SmallNumberInput value={eadesAttractionDistanceImpact} setValue={setEadesAttractionDistanceImpact}/>
-            </Setting>
-          </>
-        )}
-      </div>
-    </div>
+    </MenuElement>
   );
 };
 

@@ -1,12 +1,12 @@
 import React, {useMemo} from 'react';
 import {useSelector} from 'react-redux';
 import ExpandableSetting from '../../../UI/ExpandableSetting/ExpandableSetting';
-import {sortArray} from '../../../../utility';
 import Setting from '../../../UI/Setting/Setting';
 import ColorRangePicker from '../../../UI/ColorRangePicker/ColorRangePicker';
 import RangeInput from '../../../UI/RangeInput/RangeInput';
 import SmallNumberInput from '../../../UI/SmallNumberInput/SmallNumberInput';
 import ColorPicker from '../../../UI/ColorPicker/ColorPicker';
+import {sortArray} from '../../../../utility';
 
 const EdgeMappingMenu = ({
   edgeColorMappingValue, setEdgeColorMappingValue, setEdgeColorMapIndicators, edgeColorMapIndicators, edgeColorMappingType,

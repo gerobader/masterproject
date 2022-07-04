@@ -10,7 +10,7 @@ import Node from './Elements/Node';
 import Nodes from './Elements/Nodes';
 import Edge from './Elements/Edge';
 import Edges from './Elements/Edges';
-import BoundaryRect from './Elements/BoundaryRect';
+import BoundaryBox from './Elements/BoundaryBox';
 import Octree from '../Overlay/Controls/Layout/Octree';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected, setOctree
@@ -21,9 +21,14 @@ import {initialCameraPosition, hoverElementOutlineColor, selectedElementOutlineC
 
 import './Renderer.scss';
 
+let scene;
+let renderer;
+let composer;
+let controls;
+let hoveredElement;
 let networkElements = new THREE.Group();
 let animationRunning = false;
-let boundaryRect;
+let boundaryBox;
 const controlKeys = ['f', 'escape'];
 let cameraControls;
 const octGroup = new THREE.Group();
@@ -41,11 +46,6 @@ class Renderer extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      scene: undefined,
-      renderer: undefined,
-      composer: undefined,
-      controls: undefined,
-      hoveredElement: undefined,
       mouseDown: false
     };
     this.canvasWrapper = createRef();
@@ -71,14 +71,13 @@ class Renderer extends Component {
     const {
       updateScene, nodes, selectedNodes, selectedEdges, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
-    const {scene} = this.state;
     this.handleControls(selectedNodes, selectedEdges);
     if (networkBoundarySize !== prevProps.networkBoundarySize && showBoundary) {
-      boundaryRect.setSize(networkBoundarySize);
+      boundaryBox.setSize(networkBoundarySize);
       nodes.forEach((node) => node.setNetworkBoundarySize(networkBoundarySize));
     }
-    if (showBoundary !== prevProps.showBoundary) boundaryRect.setVisibility(showBoundary);
-    if (boundaryOpacity !== prevProps.boundaryOpacity) boundaryRect.setOpacity(boundaryOpacity);
+    if (showBoundary !== prevProps.showBoundary) boundaryBox.setVisibility(showBoundary);
+    if (boundaryOpacity !== prevProps.boundaryOpacity) boundaryBox.setOpacity(boundaryOpacity);
     if (updateScene) {
       const network = scene.children.find((child) => child.name === 'Network');
       scene.remove(network);
@@ -90,7 +89,6 @@ class Renderer extends Component {
     const {
       nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder, _setAveragePositionPlaceholder, performanceMode
     } = this.props;
-    const {hoveredElement, controls, scene} = this.state;
     let newSelectedEdges = [...selectedEdges];
     let newSelectedNodes = [...selectedNodes];
     if (!controls.dragging) {
@@ -144,7 +142,6 @@ class Renderer extends Component {
     const {
       selectedNodes: currentlySelectedNodes, _addToActionHistory, _setSelectedNodes, _setSelectedEdges
     } = this.props;
-    const {hoveredElement} = this.state;
 
     cameraControls.enabled = true;
     if (nodePositionChanges.length > 0 && nodePositionChanges.length === currentlySelectedNodes.length) {
@@ -195,7 +192,6 @@ class Renderer extends Component {
   }
 
   handleMouseMove(e) {
-    const {controls} = this.state;
     const {selectedNodes, averagePositionPlaceholder} = this.props;
     this.checkIntersect(e);
     if (controls.dragging && selectedNodes.length) {
@@ -217,7 +213,6 @@ class Renderer extends Component {
   }
 
   handleKeyUp(e) {
-    const {scene} = this.state;
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
       _setAveragePositionPlaceholder, _addToActionHistory, keyboardInputsBlocked
@@ -250,7 +245,6 @@ class Renderer extends Component {
   }
 
   handleOutline() {
-    const {hoveredElement} = this.state;
     const {selectedNodes, selectedEdges, performanceMode} = this.props;
     if (hoveredElement) {
       hoveredElementOutline.selectedObjects = hoveredElement.type === 'Group' ? hoveredElement.children : [hoveredElement.object];
@@ -267,7 +261,6 @@ class Renderer extends Component {
 
   handleControls(newSelectedNodes, newSelectedEdges) {
     const {averagePositionPlaceholder, _setAveragePositionPlaceholder} = this.props;
-    const {controls, scene} = this.state;
     if (newSelectedEdges.length || newSelectedNodes.length === 0) {
       controls.detach();
     } else if (
@@ -300,7 +293,6 @@ class Renderer extends Component {
   }
 
   updateSceneElements() {
-    const {scene, renderer} = this.state;
     const {
       camera, performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
@@ -335,10 +327,9 @@ class Renderer extends Component {
     if (performanceMode) {
       nodeInstances = new Nodes(nodes);
       edgeInstances = new Edges(serializedEdges, nodes);
-      nodes.forEach((node) => {
-        node.setEdges(edgeInstances);
-        node.setNodeInstances(nodeInstances);
-      });
+      nodes.forEach((node) => node.setNodeInstances(nodeInstances));
+      networkElements.add(nodeInstances.instances);
+      networkElements.add(edgeInstances.instances);
     }
     const edges = serializedEdges.map((edge) => {
       const sourceNode = nodes.find((node) => node.id === edge.source);
@@ -351,18 +342,13 @@ class Renderer extends Component {
       if (!performanceMode) networkElements.add(edgeClass.instance);
       return edgeClass;
     });
-    if (performanceMode) {
-      networkElements.add(nodeInstances.instances);
-      networkElements.add(edgeInstances.instances);
-    }
     if (!nodes[0].data.degree) nodes.forEach((node) => node.calculateDegree());
-    boundaryRect = new BoundaryRect(networkBoundarySize, showBoundary, boundaryOpacity);
-    networkElements.add(boundaryRect.instance);
+    boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
+    networkElements.add(boundaryBox.instance);
     scene.add(networkElements);
     nodes.forEach((node) => node.unserializePathMap(nodes));
     _setNodesAndEdges(nodes, edges, false);
 
-    let composer;
     if (!performanceMode) {
       composer = new EffectComposer(renderer);
       const renderPass = new RenderPass(scene, camera);
@@ -374,10 +360,6 @@ class Renderer extends Component {
       selectedElementOutline.visibleEdgeColor.set(selectedElementOutlineColor);
       composer.addPass(selectedElementOutline);
     }
-    this.setState((state) => ({
-      ...state,
-      composer
-    }));
   }
 
   lookAt(elements) {
@@ -409,7 +391,6 @@ class Renderer extends Component {
   }
 
   checkIntersect(e) {
-    const {scene, hoveredElement} = this.state;
     const {nodes, performanceMode} = this.props;
     const {camera} = this.props;
     const {clientX, clientY} = e;
@@ -433,12 +414,7 @@ class Renderer extends Component {
         }
       }
     }
-    if (newHoveredElement !== hoveredElement) {
-      this.setState((state) => ({
-        ...state,
-        hoveredElement: newHoveredElement
-      }));
-    }
+    hoveredElement = newHoveredElement;
   }
 
   createScene() {
@@ -447,11 +423,11 @@ class Renderer extends Component {
       performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
 
-    const renderer = new THREE.WebGLRenderer({antialias: true});
+    renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     this.canvasWrapper.appendChild(renderer.domElement);
 
-    const scene = new THREE.Scene();
+    scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
@@ -466,8 +442,10 @@ class Renderer extends Component {
     camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z);
 
     cameraControls = new OrbitControls(camera, renderer.domElement);
-    cameraControls.enableDamping = true;
-    cameraControls.dampingFactor = 0.2;
+    if (!performanceMode) {
+      cameraControls.enableDamping = true;
+      cameraControls.dampingFactor = 0.2;
+    }
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -505,6 +483,8 @@ class Renderer extends Component {
       nodeInstances = new Nodes(nodes);
       edgeInstances = new Edges(remoteEdges, nodes);
       nodes.forEach((node) => node.setNodeInstances(nodeInstances));
+      networkElements.add(nodeInstances.instances);
+      networkElements.add(edgeInstances.instances);
     }
     const edges = remoteEdges.map((edge, index) => {
       const sourceNode = nodes.find((node) => {
@@ -521,12 +501,8 @@ class Renderer extends Component {
       if (!performanceMode) networkElements.add(edgeClass.instance);
       return edgeClass;
     });
-    if (performanceMode) {
-      networkElements.add(nodeInstances.instances);
-      networkElements.add(edgeInstances.instances);
-    }
 
-    boundaryRect = new BoundaryRect(networkBoundarySize, showBoundary, boundaryOpacity);
+    boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
     const octree = new Octree(
       new THREE.Box3(
         new THREE.Vector3(-networkBoundarySize / 2, -networkBoundarySize / 2, -networkBoundarySize / 2),
@@ -536,11 +512,10 @@ class Renderer extends Component {
     );
     nodes.forEach((node) => node.calculateDegree());
 
-    networkElements.add(boundaryRect.instance);
+    networkElements.add(boundaryBox.instance);
     scene.add(octGroup);
     scene.add(networkElements);
 
-    let composer;
     if (!performanceMode) {
       composer = new EffectComposer(renderer);
       const renderPass = new RenderPass(scene, camera);
@@ -553,7 +528,7 @@ class Renderer extends Component {
       composer.addPass(selectedElementOutline);
     }
 
-    const controls = new TransformControls(camera, renderer.domElement);
+    controls = new TransformControls(camera, renderer.domElement);
     controls.setSize(0.5);
     scene.add(controls);
 
@@ -561,13 +536,6 @@ class Renderer extends Component {
     _setDirected(isDirected);
     _setNodesAndEdges(nodes, edges, false);
     _setOctree(octree);
-    this.setState((state) => ({
-      ...state,
-      renderer,
-      composer,
-      scene,
-      controls
-    }));
   }
 
   drawOctree() {
@@ -592,7 +560,6 @@ class Renderer extends Component {
   }
 
   animate() {
-    const {composer, renderer, scene} = this.state;
     const {
       orbitPreview, nodes, performanceMode, camera
     } = this.props;
@@ -610,7 +577,7 @@ class Renderer extends Component {
   }
 
   render() {
-    const {renderer, mouseDown} = this.state;
+    const {mouseDown} = this.state;
     if (renderer && !animationRunning) {
       animationRunning = true;
       this.animate();

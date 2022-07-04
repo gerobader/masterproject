@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import * as neo4j from 'neo4j-driver';
-import MenuElement from '../Overlay/MenuElement/MenuElement';
+import MenuElement from '../Overlay/UI/MenuElement/MenuElement';
 import Select from '../Overlay/UI/Select/Select';
 import Button from '../Overlay/UI/Button/Button';
 import Loader from '../Overlay/UI/Loader/Loader';
@@ -9,13 +9,14 @@ import Checkbox from '../Overlay/UI/Checkbox/Checkbox';
 import {setPerformanceMode} from '../../redux/settings/settings.actions';
 import {setNetworkName} from '../../redux/network/network.actions';
 
+import * as programArchitecture from '../../data/test/test.json';
 import * as miserables from '../../data/performanceTest/0_miserables_klein.json';
 import * as middleSizedNetwork from '../../data/performanceTest/1_mittel.json';
 import * as bigNetwork from '../../data/performanceTest/2_groesser.json';
 
 import './StartScreen.scss';
 
-const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize'];
+const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'programArchitecture'];
 
 const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
   const {performanceMode} = useSelector((state) => state.settings);
@@ -143,6 +144,11 @@ const StartScreen = ({use2Dimensions, setUse2Dimensions, setNetworkInfo}) => {
         testNodes.forEach((node) => nodes.push(node));
       } else if (selectedNetwork === 'largeSize') {
         const {testNodes, testEdges} = getTestNetworkInfo(bigNetwork.default);
+        edges = testEdges;
+        testNodes.forEach((node) => nodes.push(node));
+      } else if (selectedNetwork === 'programArchitecture') {
+        isDirected = true;
+        const {testNodes, testEdges} = getTestNetworkInfo(programArchitecture.default);
         edges = testEdges;
         testNodes.forEach((node) => nodes.push(node));
       }

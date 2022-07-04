@@ -1,6 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import Filter from './Controls/Filters/Filter/Filter';
-import MenuElement from './MenuElement/MenuElement';
 import Appearance from './Controls/Appearance/Appearance';
 import Layout from './Controls/Layout/Layout';
 import Collection from './Controls/Filters/Collection/Collection';
@@ -11,9 +10,6 @@ import LoadNetworkModal from './Modals/LoadNetworkModal/LoadNetworkModal';
 import ControlsModal from './Modals/ControlsModal/ControlsModal';
 
 import './Overlay.scss';
-import appearanceIcon from '../../assets/appearance-icon.svg';
-import layoutIcon from '../../assets/layout-icon.svg';
-import filterIcon from '../../assets/filter-icon.svg';
 
 const Overlay = () => {
   const [filterCloneSettings, setFilterCloneSettings] = useState();
@@ -49,21 +45,15 @@ const Overlay = () => {
       <LoadNetworkModal/>
       <ControlsModal/>
       <div className="left-menu">
-        <MenuElement headline="Appearance" icon={appearanceIcon}>
-          <Appearance/>
-        </MenuElement>
-        <MenuElement headline="Layout" icon={layoutIcon}>
-          <Layout/>
-        </MenuElement>
+        <Appearance/>
+        <Layout/>
       </div>
       <div className="right-menu">
-        <MenuElement headline="Filters" icon={filterIcon} rightSide className="filter-menu">
-          <Filters
-            setFilterCloneSettings={setFilterCloneSettings}
-            filterCloneSettings={filterCloneSettings}
-            setFilterClonePosition={setFilterClonePosition}
-          />
-        </MenuElement>
+        <Filters
+          setFilterCloneSettings={setFilterCloneSettings}
+          filterCloneSettings={filterCloneSettings}
+          setFilterClonePosition={setFilterClonePosition}
+        />
       </div>
       <Footer/>
     </div>

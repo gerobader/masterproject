@@ -7,7 +7,9 @@ import {
   setOrbitPreview,
   setShowSaveNetworkModal,
   setShowLoadNetworkModal,
-  setShowControlsModal
+  setShowControlsModal,
+  undoAction,
+  redoAction
 } from '../../../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../../../utility';
 
@@ -17,8 +19,8 @@ import redoIcon from '../../../../assets/redo-icon.svg';
 import downloadIcon from '../../../../assets/download-icon.svg';
 import uploadIcon from '../../../../assets/upload-icon.svg';
 
-const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
-  const {orbitPreview, camera} = useSelector((state) => state.settings);
+const SettingsMenu = ({hideSettings}) => {
+  const {orbitPreview, cameraControls} = useSelector((state) => state.settings);
   const {nodes} = useSelector((state) => state.network);
   const menuRef = useRef();
   const dispatch = useDispatch();
@@ -36,16 +38,15 @@ const SettingsMenu = ({hideSettings, undoAction, redoAction}) => {
   }, [menuRef]);
 
   const centerView = () => {
-    const networkCenter = nodes ? calculateAveragePosition(nodes) : new THREE.Vector3();
-    camera.lookAt(networkCenter);
+    cameraControls.target = nodes ? calculateAveragePosition(nodes) : new THREE.Vector3();
   };
 
   return (
     <div className="settings-menu" ref={menuRef}>
-      <MenuSetting menuText="Undo" onClick={undoAction}>
+      <MenuSetting menuText="Undo" onClick={() => dispatch(undoAction())}>
         <img alt="undo-icon" src={undoIcon}/>
       </MenuSetting>
-      <MenuSetting menuText="Redo" onClick={redoAction}>
+      <MenuSetting menuText="Redo" onClick={() => dispatch(redoAction())}>
         <img alt="redo-icon" src={redoIcon}/>
       </MenuSetting>
       <hr/>

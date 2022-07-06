@@ -15,7 +15,9 @@ import Octree from '../Overlay/Controls/Layout/Octree';
 import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected, setOctree
 } from '../../redux/network/network.actions';
-import {addToActionHistory, setCamera} from '../../redux/settings/settings.actions';
+import {
+  addToActionHistory, undoAction, redoAction, setCameraControls
+} from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
 import {initialCameraPosition, hoverElementOutlineColor, selectedElementOutlineColor} from '../constants';
 
@@ -25,12 +27,12 @@ let scene;
 let renderer;
 let composer;
 let controls;
+let camera;
 let hoveredElement;
 let networkElements = new THREE.Group();
 let animationRunning = false;
 let boundaryBox;
-const controlKeys = ['f', 'escape'];
-let cameraControls;
+const controlKeys = ['f', 'escape', 'z'];
 const octGroup = new THREE.Group();
 
 const raycaster = new THREE.Raycaster();
@@ -140,7 +142,7 @@ class Renderer extends Component {
 
   handleMouseUp(e) {
     const {
-      selectedNodes: currentlySelectedNodes, _addToActionHistory, _setSelectedNodes, _setSelectedEdges
+      selectedNodes: currentlySelectedNodes, _addToActionHistory, _setSelectedNodes, _setSelectedEdges, cameraControls
     } = this.props;
 
     cameraControls.enabled = true;
@@ -192,7 +194,7 @@ class Renderer extends Component {
   }
 
   handleMouseMove(e) {
-    const {selectedNodes, averagePositionPlaceholder} = this.props;
+    const {selectedNodes, averagePositionPlaceholder, cameraControls} = this.props;
     this.checkIntersect(e);
     if (controls.dragging && selectedNodes.length) {
       cameraControls.enabled = false;
@@ -215,32 +217,30 @@ class Renderer extends Component {
   handleKeyUp(e) {
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
-      _setAveragePositionPlaceholder, _addToActionHistory, keyboardInputsBlocked
+      _setAveragePositionPlaceholder, _addToActionHistory, keyboardInputsBlocked, _undoAction, _redoAction
     } = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key) && !keyboardInputsBlocked) {
-      this.setState((prevState) => {
-        switch (key) {
-          case 'f':
-            this.lookAt([...selectedNodes, ...selectedEdges]);
-            return prevState;
-          case 'escape':
-            if (nodePositionChanges.length > 0) {
-              selectedNodes.forEach((node, index) => {
-                nodePositionChanges[index].setPositionAbsolute.after = node.position.clone();
-              });
-              _addToActionHistory(nodePositionChanges);
-              nodePositionChanges = [];
-            }
-            scene.remove(averagePositionPlaceholder);
-            _setAveragePositionPlaceholder(undefined);
-            _setSelectedNodes([]);
-            _setSelectedEdges([]);
-            return prevState;
-          default:
-            return prevState;
+      if (key === 'f') {
+        this.lookAt([...selectedNodes, ...selectedEdges]);
+      } else if (key === 'escape') {
+        if (nodePositionChanges.length > 0) {
+          selectedNodes.forEach((node, index) => {
+            nodePositionChanges[index].setPositionAbsolute.after = node.position.clone();
+          });
+          _addToActionHistory(nodePositionChanges);
+          nodePositionChanges = [];
         }
-      });
+        scene.remove(averagePositionPlaceholder);
+        _setAveragePositionPlaceholder(undefined);
+        _setSelectedNodes([]);
+        _setSelectedEdges([]);
+      } else if (key === 'z') {
+        if (e.ctrlKey) {
+          if (e.shiftKey) _redoAction();
+          else _undoAction();
+        }
+      }
     }
   }
 
@@ -294,7 +294,7 @@ class Renderer extends Component {
 
   updateSceneElements() {
     const {
-      camera, performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
+      performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
     const {
       nodes: serializedNodes, edges: serializedEdges, _setNodesAndEdges
@@ -363,7 +363,7 @@ class Renderer extends Component {
   }
 
   lookAt(elements) {
-    const {camera} = this.props;
+    const {cameraControls} = this.props;
     if (elements.length) {
       interpolation = 0;
       const position = calculateAveragePosition(elements);
@@ -375,7 +375,7 @@ class Renderer extends Component {
   }
 
   cameraControls() {
-    const {camera} = this.props;
+    const {cameraControls} = this.props;
     const delta = clock.getDelta();
     if (targetQuaternion) {
       camera.quaternion.slerp(targetQuaternion, delta * 5);
@@ -392,7 +392,6 @@ class Renderer extends Component {
 
   checkIntersect(e) {
     const {nodes, performanceMode} = this.props;
-    const {camera} = this.props;
     const {clientX, clientY} = e;
     mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -419,7 +418,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setDirected, _setNodesAndEdges, _setCamera, _setOctree, remoteNodes, remoteEdges, use2Dimensions, isDirected,
+      _setDirected, _setNodesAndEdges, _setCameraControls, _setOctree, remoteNodes, remoteEdges, use2Dimensions, isDirected,
       performanceMode, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
 
@@ -428,7 +427,7 @@ class Renderer extends Component {
     this.canvasWrapper.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -441,7 +440,7 @@ class Renderer extends Component {
     camera.rotation.order = 'YXZ';
     camera.position.set(initialCameraPosition.x, initialCameraPosition.y, initialCameraPosition.z);
 
-    cameraControls = new OrbitControls(camera, renderer.domElement);
+    const cameraControls = new OrbitControls(camera, renderer.domElement);
     if (!performanceMode) {
       cameraControls.enableDamping = true;
       cameraControls.dampingFactor = 0.2;
@@ -532,7 +531,7 @@ class Renderer extends Component {
     controls.setSize(0.5);
     scene.add(controls);
 
-    _setCamera(camera);
+    _setCameraControls(cameraControls);
     _setDirected(isDirected);
     _setNodesAndEdges(nodes, edges, false);
     _setOctree(octree);
@@ -561,7 +560,7 @@ class Renderer extends Component {
 
   animate() {
     const {
-      orbitPreview, nodes, performanceMode, camera
+      orbitPreview, nodes, performanceMode
     } = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) networkElements.rotateY(0.003);
@@ -598,7 +597,7 @@ class Renderer extends Component {
 const mapStateToPros = (state) => ({
   orbitPreview: state.settings.orbitPreview,
   performanceMode: state.settings.performanceMode,
-  camera: state.settings.camera,
+  cameraControls: state.settings.cameraControls,
   keyboardInputsBlocked: state.settings.keyboardInputsBlocked,
   networkBoundarySize: state.settings.networkBoundarySize,
   showBoundary: state.settings.showBoundary,
@@ -613,14 +612,16 @@ const mapStateToPros = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  _setCamera: (camera) => dispatch(setCamera(camera)),
+  _setCameraControls: (cameraControls) => dispatch(setCameraControls(cameraControls)),
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setDirected: (directed) => dispatch(setDirected(directed)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),
   _setOctree: (octree) => dispatch(setOctree(octree)),
-  _setAveragePositionPlaceholder: (placeholder) => dispatch(setAveragePositionPlaceholder(placeholder))
+  _setAveragePositionPlaceholder: (placeholder) => dispatch(setAveragePositionPlaceholder(placeholder)),
+  _undoAction: () => dispatch(undoAction()),
+  _redoAction: () => dispatch(redoAction())
 });
 
 export default connect(mapStateToPros, mapDispatchToProps)(memo(Renderer));

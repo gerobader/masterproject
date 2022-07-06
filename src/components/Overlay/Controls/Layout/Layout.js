@@ -23,7 +23,7 @@ const Layout = () => {
   const {networkBoundarySize, layoutCalculationRunning} = useSelector((state) => state.settings);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [size, setSize] = useState(150);
-  const [maxIterations, setMaxIterations] = useState('200');
+  const [maxIterations, setMaxIterations] = useState(200);
   const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
   const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
   const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(150);

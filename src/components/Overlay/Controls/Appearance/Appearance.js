@@ -53,7 +53,6 @@ const Appearance = () => {
   const [edgeSizeMappingValue, setEdgeSizeMappingValue] = useState();
   const [edgeSizeMappingType, setEdgeSizeMappingType] = useState();
   const [edgeSizeMapping, setEdgeSizeMapping] = useState([]);
-  console.log(nodeColorMappingValue);
 
   useEffect(() => {
     if (selectedNodes.length === 1) {

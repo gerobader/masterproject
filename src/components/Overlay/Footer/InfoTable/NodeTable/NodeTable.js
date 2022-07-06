@@ -18,6 +18,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
   const additionalKeys = nodesToShow.length ? Object.keys(nodesToShow[0].data) : [];
   const visibleNodes = nodesToShow.length <= 100 ? nodesToShow : nodesToShow.slice((page - 1) * 100, page * 100);
   const tableWrapper = useRef();
+
   useEffect(() => {
     if (selectedNodes.length === 0) lastSelectedIndex = undefined;
   }, [selectedNodes]);

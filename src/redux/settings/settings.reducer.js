@@ -1,7 +1,7 @@
 import {
   ADD_TO_ACTION_HISTORY,
   SET_KEYBOARD_INPUTS_BLOCKED,
-  SET_CAMERA,
+  SET_CAMERA_CONTROLS,
   SET_CURRENT_HISTORY_POSITION,
   SET_ORBIT_PREVIEW,
   SET_SHOW_CONTROLS_MODAL,
@@ -19,7 +19,7 @@ import {
 const initialState = {
   orbitPreview: false,
   performanceMode: false,
-  camera: undefined,
+  cameraControls: undefined,
   showLabel: 0, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
   showLoadNetworkModal: false,
@@ -45,10 +45,10 @@ const settingsReducer = (state = initialState, action) => {
         ...state,
         performanceMode: action.payload
       };
-    case SET_CAMERA:
+    case SET_CAMERA_CONTROLS:
       return {
         ...state,
-        camera: action.payload
+        cameraControls: action.payload
       };
     case SET_SHOW_LABEL:
       return {

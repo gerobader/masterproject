@@ -3,7 +3,8 @@ import Label from './Label';
 
 class Node {
   constructor(
-    x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion, networkBoundarySize
+    x, y, z, size, color, id, label, data, colorLocked, shape, pathMap, visible, camera, performanceVersion, networkBoundarySize,
+    hideLabel
   ) {
     this.label = null;
     this.id = id;
@@ -25,7 +26,7 @@ class Node {
     this.position = new THREE.Vector3(x, y, z);
     this.networkBoundarySize = networkBoundarySize;
     if (!this.performanceVersion) this.buildGeometry();
-    if (label) this.label = new Label(this.name, this.position, camera);
+    if (label) this.label = new Label(this.name, this.position, camera, hideLabel);
   }
 
   buildGeometry() {

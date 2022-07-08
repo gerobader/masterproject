@@ -22,7 +22,7 @@ const initialState = {
   cameraControls: undefined,
   showLabel: 0, // 0 = hide, 1 = show for selected, 2 = show for all
   showSaveNetworkModal: false,
-  showLoadNetworkModal: false,
+  showLoadNetworkModal: true,
   showControlsModal: false,
   layoutCalculationRunning: false,
   actionHistory: [],

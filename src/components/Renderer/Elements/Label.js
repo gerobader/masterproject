@@ -1,25 +1,25 @@
 import {between} from '../../utility';
 
 class Label {
-  constructor(text, position, camera) {
+  constructor(text, position, camera, hidden) {
     this.text = text;
     this.position = position;
     this.instance = null;
-    this.isHidden = true;
+    this.isHidden = hidden;
     this.container = document.getElementById('network-view');
     this.color = '#ffffff';
     this.size = 12;
     this.camera = camera;
-    this.createLabel(camera);
+    this.createLabel();
   }
 
-  createLabel(camera) {
+  createLabel() {
     const label = document.createElement('div');
     label.className = 'scene-label';
     label.innerHTML = this.text;
-    label.style.display = 'none';
+    if (this.isHidden) label.style.display = 'none';
     this.instance = label;
-    this.updatePosition(camera);
+    this.updatePosition();
     this.container.appendChild(this.instance);
   }
 

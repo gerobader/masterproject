@@ -94,9 +94,9 @@ const Appearance = () => {
         return first.position > second.position ? 1 : -1;
       });
       sortedElements.forEach((element) => {
-        const upperColorBoundIndicator = sortedColorMapIndicators.filter(
+        const upperColorBoundIndicator = sortedColorMapIndicators.find(
           (colorIndicator) => colorIndicator.positionPercent > element.percentage
-        )[0];
+        );
         const lowerColorBoundIndicator = sortedColorMapIndicators.filter(
           (colorIndicator) => colorIndicator.positionPercent <= element.percentage
         ).pop();

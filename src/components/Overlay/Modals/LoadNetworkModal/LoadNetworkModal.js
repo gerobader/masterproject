@@ -65,7 +65,7 @@ const LoadNetworkModal = () => {
     }, 500);
   };
 
-  const getTestNetworkInfo = (network) => {
+  const getTestNetworkData = (network) => {
     const testEdges = network.links.map((link) => {
       const edge = {source: link.source, target: link.target, data: {}};
       if (link.value) edge.data.value = link.value;
@@ -175,20 +175,20 @@ const LoadNetworkModal = () => {
           return {source, target};
         });
       } else if (selectedNetwork === 'smallSize') {
-        const {testNodes, testEdges} = getTestNetworkInfo(miserables.default);
+        const {testNodes, testEdges} = getTestNetworkData(miserables.default);
         edges = testEdges;
         testNodes.forEach((node) => newNodes.push(node));
       } else if (selectedNetwork === 'midSize') {
-        const {testNodes, testEdges} = getTestNetworkInfo(middleSizedNetwork.default);
+        const {testNodes, testEdges} = getTestNetworkData(middleSizedNetwork.default);
         edges = testEdges;
         testNodes.forEach((node) => newNodes.push(node));
       } else if (selectedNetwork === 'largeSize') {
-        const {testNodes, testEdges} = getTestNetworkInfo(bigNetwork.default);
+        const {testNodes, testEdges} = getTestNetworkData(bigNetwork.default);
         edges = testEdges;
         testNodes.forEach((node) => newNodes.push(node));
       } else if (selectedNetwork === 'programArchitecture') {
         isDirected = true;
-        const {testNodes, testEdges} = getTestNetworkInfo(programArchitecture.default);
+        const {testNodes, testEdges} = getTestNetworkData(programArchitecture.default);
         edges = testEdges;
         testNodes.forEach((node) => newNodes.push(node));
       }
@@ -208,8 +208,6 @@ const LoadNetworkModal = () => {
         if (networkData) loadNetworkData(networkData);
         else getNetworkData();
       }, 10);
-      // if (networkData) loadNetworkData(networkData);
-      // else getNetworkData();
     }
   };
 

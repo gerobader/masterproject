@@ -45,16 +45,6 @@ export const calculateColorForElement = (lowerColorBoundIndicator, upperColorBou
   return color;
 };
 
-export const sortElements = (elements, sortValue) => {
-  elements.sort((a, b) => {
-    if (a.data[sortValue] === b.data[sortValue]) return 0;
-    return a.data[sortValue] < b.data[sortValue] ? -1 : 1;
-  });
-  const min = elements[0].data[sortValue];
-  const max = elements[elements.length - 1].data[sortValue] - min;
-  return elements.map((element) => ({object: element, percentage: Math.ceil(((element.data[sortValue] - min) / max) * 100)}));
-};
-
 export const sortArray = (a, b, reverse = false) => {
   if (a === b) return 0;
   const compareFunction = reverse ? b < a : a < b;

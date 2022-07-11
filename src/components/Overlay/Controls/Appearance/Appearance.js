@@ -10,7 +10,7 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
-import {calculateColorForElement, sortElements} from '../../../utility';
+import {calculateColorForElement} from '../../../utility';
 import {setNodes, setEdges} from '../../../../redux/network/network.actions';
 import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {shapes} from '../../../constants';
@@ -82,35 +82,38 @@ const Appearance = () => {
   };
 
   const applyColorMapping = (colorMapIndicators, mappingValue, mappingType, targetElement) => {
-    if (!mappingValue) return;
+    if (!mappingValue || colorMapIndicators.length === 0) return;
     const changes = [];
     const elementsToUse = getElementsToUse();
     if (mappingType === 'relative') {
-      if (elementsToUse.length < 2) return;
-      const sortedElements = sortElements(elementsToUse, mappingValue);
+      const allValues = elementType === 'Nodes'
+        ? nodes.map((node) => node.data[mappingValue]) : edges.map((edge) => edge.data[mappingValue]);
+      const minValue = Math.min(...allValues);
+      const maxValue = Math.max(...allValues);
       const sortedColorMapIndicators = [...colorMapIndicators];
       sortedColorMapIndicators.sort((first, second) => {
         if (first.position === second.position) return 0;
         return first.position > second.position ? 1 : -1;
       });
-      sortedElements.forEach((element) => {
+      elementsToUse.forEach((element) => {
+        const elementPercentage = Math.ceil(((element.data[mappingValue] - minValue) / (maxValue - minValue)) * 100);
         const upperColorBoundIndicator = sortedColorMapIndicators.find(
-          (colorIndicator) => colorIndicator.positionPercent > element.percentage
+          (colorIndicator) => colorIndicator.positionPercent > elementPercentage
         );
         const lowerColorBoundIndicator = sortedColorMapIndicators.filter(
-          (colorIndicator) => colorIndicator.positionPercent <= element.percentage
+          (colorIndicator) => colorIndicator.positionPercent <= elementPercentage
         ).pop();
-        const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, element.percentage);
+        const color = calculateColorForElement(lowerColorBoundIndicator, upperColorBoundIndicator, elementPercentage);
         if (color) {
-          const elementChanges = {element: element.object, type: 'graphElement'};
-          if ((targetElement === 'node' || targetElement === 'edge') && typeof element.object.setColor === 'function') {
-            elementChanges.setColor = {before: element.object.color, after: color};
+          const elementChanges = {element, type: 'graphElement'};
+          if ((targetElement === 'node' || targetElement === 'edge') && typeof element.setColor === 'function') {
+            elementChanges.setColor = {before: element.color, after: color};
             changes.push(elementChanges);
-            element.object.setColor(color);
-          } else if (targetElement === 'label' && typeof element.object.setLabelColor === 'function') {
-            elementChanges.setLabelColor = {before: element.object.label.color, after: color};
+            element.setColor(color);
+          } else if (targetElement === 'label' && typeof element.setLabelColor === 'function') {
+            elementChanges.setLabelColor = {before: element.label.color, after: color};
             changes.push(elementChanges);
-            element.object.setLabelColor(color);
+            element.setLabelColor(color);
           }
         }
       });
@@ -140,22 +143,25 @@ const Appearance = () => {
     const changes = [];
     const elementsToUse = getElementsToUse();
     if (mappingType === 'relative') {
-      if (elementsToUse.length < 2) return;
       if (sizeMapping.length === 2 && !sizeMapping.includes(NaN)) {
-        const sortedElements = sortElements(elementsToUse, mappingValue);
+        const allValues = elementType === 'Nodes'
+          ? nodes.map((node) => node.data[mappingValue]) : edges.map((edge) => edge.data[mappingValue]);
+        const minValue = Math.min(...allValues);
+        const maxValue = Math.max(...allValues);
         const min = parseFloat(sizeMapping[0]);
         const max = parseFloat(sizeMapping[1]);
-        sortedElements.forEach((element) => {
-          const elementChanges = {element: element.object, type: 'graphElement'};
-          const newSize = min + ((max - min) * (element.percentage / 100));
-          if (targetElement === 'label' && typeof element.object.setLabelSize === 'function') {
-            elementChanges.setLabelSize = {before: element.object.label.size, after: newSize};
+        elementsToUse.forEach((element) => {
+          const elementPercentage = (element.data[mappingValue] - minValue) / (maxValue - minValue);
+          const elementChanges = {element, type: 'graphElement'};
+          const newSize = min + ((max - min) * elementPercentage);
+          if (targetElement === 'label' && typeof element.setLabelSize === 'function') {
+            elementChanges.setLabelSize = {before: element.label.size, after: newSize};
             changes.push(elementChanges);
-            element.object.setLabelSize(newSize);
+            element.setLabelSize(newSize);
           } else {
-            elementChanges.setSize = {before: element.object.size, after: newSize};
+            elementChanges.setSize = {before: element.size, after: newSize};
             changes.push(elementChanges);
-            element.object.setSize(newSize);
+            element.setSize(newSize);
           }
         });
         dispatch(addToActionHistory(changes));

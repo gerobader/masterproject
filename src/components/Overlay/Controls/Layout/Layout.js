@@ -22,10 +22,11 @@ const Layout = () => {
   const {nodes, edges, octree} = useSelector((state) => state.network);
   const {networkBoundarySize, layoutCalculationRunning} = useSelector((state) => state.settings);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
+  const [c, setC] = useState(1);
   const [size, setSize] = useState(150);
-  const [maxIterations, setMaxIterations] = useState(200);
-  const [eadesAttractionMultiplier, setEadesAttractionMultiplier] = useState(1);
-  const [eadesAttractionDistanceImpact, setEadesAttractionDistanceImpact] = useState(1);
+  const [startTemp, setStartTemp] = useState(5);
+  const [eadesAttractionStrength, setEadesAttractionStrength] = useState(1);
+  const [idealSpringLength, setIdealSpringLength] = useState(1);
   const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(150);
   const [searchAreaSize, setSearchAreaSize] = useState(50);
   const dispatch = useDispatch();
@@ -41,64 +42,68 @@ const Layout = () => {
     changes = [];
   };
 
+  const calculateRepulsiveForces = (repulsiveForce, k, searchArea, type, useOctree) => {
+    nodes.forEach((v) => {
+      if (!v.visible) return;
+      v.disp.set(0, 0, 0);
+      searchArea.set(
+        new Vector3(v.position.x - searchAreaSize / 2, v.position.y - searchAreaSize / 2, v.position.z - searchAreaSize / 2),
+        new Vector3(v.position.x + searchAreaSize / 2, v.position.y + searchAreaSize / 2, v.position.z + searchAreaSize / 2)
+      );
+      const nearbyNodes = useOctree ? octree.query(searchArea) : nodes;
+      nearbyNodes.forEach((u) => {
+        if (v.id !== u.id || (type === 'eades' && !u.isNeighborOf(v))) {
+          const distance = v.position.clone().sub(u.position);
+          const length = distance.length() || 0.01;
+          const normalizedDistance = distance.clone().normalize();
+          v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
+        }
+      });
+    });
+  };
+
+  const calculateAttractiveForces = (attractiveForceFunction, k) => {
+    edges.forEach((edge) => {
+      if (!edge.visible) return;
+      const distance = edge.sourceNode.position.clone().sub(edge.targetNode.position);
+      const length = distance.length();
+      const normalizedDistance = distance.clone().normalize();
+      const attractiveForceStrength = attractiveForceFunction({
+        d: length, k, k1: eadesAttractionStrength, k2: idealSpringLength
+      });
+      edge.sourceNode.disp.sub(normalizedDistance.multiplyScalar(attractiveForceStrength));
+      edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForceStrength));
+    });
+  };
+
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
-    const maxIterationsFloat = parseFloat(maxIterations);
-    if (type === 1 && !maxIterationsFloat) return;
+    const startTempFloat = parseFloat(startTemp);
+    if (type === 'frucht' && !startTempFloat) return;
     dispatch(setLayoutCalculationRunning(true));
     const area = size * size;
-    const k = Math.sqrt(area / nodes.length);
-    const temp = new Vector3(1, 1, 1);
-    let iterationCount = 0;
+    const k = c * Math.sqrt(area / nodes.length);
+    const temp = new Vector3(startTempFloat, startTempFloat, startTempFloat);
     const searchArea = new Box3();
     const useOctree = searchAreaSize < networkBoundarySize;
     const iteration = () => {
-      iterationCount++;
       if (useOctree) {
         octree.empty();
         octree.update = true;
         nodes.forEach((node) => {
-          if (node.visible) octree.insert({id: node.id, position: node.position.clone()});
+          if (node.visible) octree.insert(node);
         });
       }
-      nodes.forEach((v) => {
-        if (!v.visible) return;
-        // repulsive forces
-        v.disp.set(0, 0, 0);
-        searchArea.set(
-          new Vector3(v.position.x - searchAreaSize / 2, v.position.y - searchAreaSize / 2, v.position.z - searchAreaSize / 2),
-          new Vector3(v.position.x + searchAreaSize / 2, v.position.y + searchAreaSize / 2, v.position.z + searchAreaSize / 2)
-        );
-        const nearbyNodes = useOctree ? octree.query(searchArea) : nodes;
-        nearbyNodes.forEach((u) => {
-          if (v.id !== u.id) {
-            const distance = v.position.clone().sub(u.position);
-            const length = distance.length() || 0.01;
-            const normalizedDistance = distance.clone().normalize();
-            v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
-          }
-        });
-      });
-      edges.forEach((edge) => {
-        if (!edge.visible) return;
-        // attractive forces
-        const distance = edge.sourceNode.position.clone().sub(edge.targetNode.position);
-        const length = distance.length();
-        const normalizedDistance = distance.clone().normalize();
-        const attractiveForceStrength = attractiveForce({
-          d: length, k, k1: eadesAttractionMultiplier, k2: eadesAttractionDistanceImpact
-        });
-        edge.sourceNode.disp.sub(normalizedDistance.multiplyScalar(attractiveForceStrength));
-        edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForceStrength));
-      });
+      calculateRepulsiveForces(repulsiveForce, k, searchArea, type, useOctree);
+      calculateAttractiveForces(attractiveForce, k);
       nodes.forEach((node) => {
         if (!node.visible) return;
         const displacement = node.disp.clone().normalize();
-        if (type === 1) displacement.min(temp);
+        if (type === 'frucht') displacement.multiply(temp);
         node.setPositionRelative(displacement);
       });
-      if (type === 1) {
-        if (temp.x > 1 / maxIterationsFloat) temp.subScalar(1 / maxIterationsFloat);
-        if (iterationCount === maxIterationsFloat) stopCalculation();
+      if (type === 'frucht') {
+        temp.subScalar(startTempFloat / 100);
+        if (temp.x <= 0) stopCalculation();
       }
     };
     if (!interval) {
@@ -113,9 +118,9 @@ const Layout = () => {
       changes.push(elementChanges);
     });
     if (layoutAlgorithm === 'Fruchterman and Reingold') {
-      forceDirectedPlacement(1, fruchtAndReinAttraction, fruchtAndReinRepulsion);
+      forceDirectedPlacement('frucht', fruchtAndReinAttraction, fruchtAndReinRepulsion);
     } else if (layoutAlgorithm === 'Eades') {
-      forceDirectedPlacement(2, eadesAttraction, eadesRepulsion);
+      forceDirectedPlacement('eades', eadesAttraction, eadesRepulsion);
     }
   };
 
@@ -150,8 +155,11 @@ const Layout = () => {
               <Setting name="Size">
                 <SmallNumberInput value={size} setValue={setSize}/>
               </Setting>
-              <Setting name="Iterations">
-                <SmallNumberInput value={maxIterations} setValue={setMaxIterations}/>
+              <Setting name="C">
+                <SmallNumberInput value={c} setValue={setC}/>
+              </Setting>
+              <Setting name="Temperature">
+                <SmallNumberInput value={startTemp} setValue={setStartTemp}/>
               </Setting>
             </>
           )}
@@ -160,11 +168,11 @@ const Layout = () => {
               <Setting name="Repulsion Strength">
                 <SmallNumberInput value={eadesRepulsionStrength} setValue={setEadesRepulsionStrength}/>
               </Setting>
-              <Setting name="Attraction Multiplier">
-                <SmallNumberInput value={eadesAttractionMultiplier} setValue={setEadesAttractionMultiplier}/>
+              <Setting name="Attraction Strength">
+                <SmallNumberInput value={eadesAttractionStrength} setValue={setEadesAttractionStrength}/>
               </Setting>
-              <Setting name="Attraction Distance Impact">
-                <SmallNumberInput value={eadesAttractionDistanceImpact} setValue={setEadesAttractionDistanceImpact}/>
+              <Setting name="Ideal Spring Length">
+                <SmallNumberInput value={idealSpringLength} setValue={setIdealSpringLength}/>
               </Setting>
             </>
           )}

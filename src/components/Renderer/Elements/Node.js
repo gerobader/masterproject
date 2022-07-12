@@ -211,6 +211,15 @@ class Node {
     this.networkBoundarySize = size;
   }
 
+  isNeighborOf(node) {
+    let neighbor;
+    neighbor = this.targetForEdges.find((edge) => edge.sourceNode.id === node.id);
+    if (!neighbor) {
+      neighbor = this.sourceForEdges.find((edge) => edge.targetNode.id === node.id);
+    }
+    return Boolean(neighbor);
+  }
+
   unserializePathMap(nodes) {
     if (this.pathMap) {
       const unserializedPathMap = {};

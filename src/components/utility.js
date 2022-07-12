@@ -38,8 +38,8 @@ export const calculateColorForElement = (lowerColorBoundIndicator, upperColorBou
   if (lowerColorBoundIndicator.positionPercent === position) {
     color = lowerColorBoundIndicator.color;
   } else {
-    const fraction = ((position - lowerColorBoundIndicator.positionPercent) / (
-      upperColorBoundIndicator.positionPercent - lowerColorBoundIndicator.positionPercent));
+    const fraction = ((position - lowerColorBoundIndicator.positionPercent)
+      / (upperColorBoundIndicator.positionPercent - lowerColorBoundIndicator.positionPercent));
     color = calculateColor(lowerColorBoundIndicator.color, upperColorBoundIndicator.color, fraction);
   }
   return color;

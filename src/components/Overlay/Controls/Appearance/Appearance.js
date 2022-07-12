@@ -10,7 +10,7 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Select from '../../UI/Select/Select';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
-import {calculateColorForElement} from '../../../utility';
+import {calculateColorForElement, sortArray} from '../../../utility';
 import {setNodes, setEdges} from '../../../../redux/network/network.actions';
 import {addToActionHistory} from '../../../../redux/settings/settings.actions';
 import {shapes} from '../../../constants';
@@ -91,10 +91,7 @@ const Appearance = () => {
       const minValue = Math.min(...allValues);
       const maxValue = Math.max(...allValues);
       const sortedColorMapIndicators = [...colorMapIndicators];
-      sortedColorMapIndicators.sort((first, second) => {
-        if (first.position === second.position) return 0;
-        return first.position > second.position ? 1 : -1;
-      });
+      sortedColorMapIndicators.sort((first, second) => sortArray(first.position, second.position));
       elementsToUse.forEach((element) => {
         const elementPercentage = Math.ceil(((element.data[mappingValue] - minValue) / (maxValue - minValue)) * 100);
         const upperColorBoundIndicator = sortedColorMapIndicators.find(
@@ -117,9 +114,6 @@ const Appearance = () => {
           }
         }
       });
-      dispatch(addToActionHistory(changes));
-      if (targetElement === 'edge') dispatch(setEdges(edges));
-      else dispatch(setNodes(nodes));
     } else {
       elementsToUse.forEach((element) => {
         const elementChanges = {element, type: 'graphElement'};
@@ -133,9 +127,10 @@ const Appearance = () => {
           element.setLabelColor(colorMapIndicators[element.data[mappingValue]]);
         }
       });
-      dispatch(addToActionHistory(changes));
-      dispatch(setNodes(nodes));
     }
+    dispatch(addToActionHistory(changes));
+    if (targetElement === 'edge') dispatch(setEdges(edges));
+    else dispatch(setNodes(nodes));
   };
 
   const applySizeMapping = (mappingValue, mappingType, sizeMapping, targetElement) => {

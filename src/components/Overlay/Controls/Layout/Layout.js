@@ -46,18 +46,20 @@ const Layout = () => {
     nodes.forEach((v) => {
       if (!v.visible) return;
       v.disp.set(0, 0, 0);
-      searchArea.set(
-        new Vector3(v.position.x - searchAreaSize / 2, v.position.y - searchAreaSize / 2, v.position.z - searchAreaSize / 2),
-        new Vector3(v.position.x + searchAreaSize / 2, v.position.y + searchAreaSize / 2, v.position.z + searchAreaSize / 2)
-      );
-      const nearbyNodes = useOctree ? octree.query(searchArea) : nodes;
-      nearbyNodes.forEach((u) => {
-        if (v.id !== u.id || (type === 'eades' && !u.isNeighborOf(v))) {
-          const distance = v.position.clone().sub(u.position);
-          const length = distance.length() || 0.01;
-          const normalizedDistance = distance.clone().normalize();
-          v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
-        }
+      let repulsiveNodes = nodes;
+      if (useOctree) {
+        searchArea.set(
+          new Vector3(v.position.x - searchAreaSize / 2, v.position.y - searchAreaSize / 2, v.position.z - searchAreaSize / 2),
+          new Vector3(v.position.x + searchAreaSize / 2, v.position.y + searchAreaSize / 2, v.position.z + searchAreaSize / 2)
+        );
+        repulsiveNodes = octree.query(searchArea);
+      }
+      repulsiveNodes.forEach((u) => {
+        if (!u.visible || v.id === u.id || (type === 'eades' && u.isNeighborOf(v))) return;
+        const distance = v.position.clone().sub(u.position);
+        const length = distance.length() || 0.01;
+        const normalizedDistance = distance.clone().normalize();
+        v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
       });
     });
   };
@@ -77,12 +79,11 @@ const Layout = () => {
   };
 
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
-    const startTempFloat = parseFloat(startTemp);
-    if (type === 'frucht' && !startTempFloat) return;
+    let temp = parseFloat(startTemp);
+    if (type === 'frucht' && !temp) return;
     dispatch(setLayoutCalculationRunning(true));
     const area = size * size;
     const k = c * Math.sqrt(area / nodes.length);
-    const temp = new Vector3(startTempFloat, startTempFloat, startTempFloat);
     const searchArea = new Box3();
     const useOctree = searchAreaSize < networkBoundarySize;
     const iteration = () => {
@@ -98,12 +99,12 @@ const Layout = () => {
       nodes.forEach((node) => {
         if (!node.visible) return;
         const displacement = node.disp.clone().normalize();
-        if (type === 'frucht') displacement.multiply(temp);
+        if (type === 'frucht') displacement.multiplyScalar(temp);
         node.setPositionRelative(displacement);
       });
       if (type === 'frucht') {
-        temp.subScalar(startTempFloat / 100);
-        if (temp.x <= 0) stopCalculation();
+        temp -= (parseFloat(startTemp) / 100);
+        if (temp <= 0) stopCalculation();
       }
     };
     if (!interval) {

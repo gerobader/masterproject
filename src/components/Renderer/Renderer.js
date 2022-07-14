@@ -467,7 +467,7 @@ class Renderer extends Component {
 
   drawOctree() {
     const {octree} = this.props;
-    if (!octree.update) return;
+    if (!octree || !octree.update) return;
     octree.update = false;
     for (let i = octGroup.children.length - 1; i >= 0; i--) {
       octGroup.remove(octGroup.children[i]);

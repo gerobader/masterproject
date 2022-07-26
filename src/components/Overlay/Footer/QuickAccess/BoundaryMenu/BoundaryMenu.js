@@ -11,7 +11,7 @@ import './BoundaryMenu.scss';
 
 const BoundaryMenu = () => {
   const {
-    networkBoundarySize, showBoundary, boundaryOpacity, layoutCalculationRunning
+    networkBoundarySize, showBoundary, boundaryOpacity, layoutCalculationRunning, axes
   } = useSelector((state) => state.settings);
   const dispatch = useDispatch();
 
@@ -24,13 +24,14 @@ const BoundaryMenu = () => {
       ),
       4
     );
+    axes.setPosition(size);
     dispatch(setOctree(octree));
     dispatch(setNetworkBoundarySize(size));
   };
 
   return (
     <div
-      className={`quick-menu boundary${showBoundary ? ' show-settings' : ''}`}
+      className={`quick-menu boundary${showBoundary ? ' active' : ''}`}
       title="Network Boundary Settings"
     >
       <div className="click-tracker" onClick={() => dispatch(setShowBoundary(!showBoundary))}/>

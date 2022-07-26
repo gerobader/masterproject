@@ -12,5 +12,13 @@
     width: 25px;
     height: 25px;
     cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.7;
+    &.active{
+      opacity: 1;
+    }
+    &.show-axes {
+      background: url('../../../../assets/axes-icon.svg') center no-repeat;
+    }
   }
 }

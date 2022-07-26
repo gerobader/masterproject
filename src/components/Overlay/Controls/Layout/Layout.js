@@ -6,11 +6,13 @@ import Select from '../../UI/Select/Select';
 import Button from '../../UI/Button/Button';
 import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
+import Checkbox from '../../UI/Checkbox/Checkbox';
 import Loader from '../../UI/Loader/Loader';
 import {addToActionHistory, setLayoutCalculationRunning} from '../../../../redux/settings/settings.actions';
 import {
   fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
 } from './forceFunctions';
+import {sortArray} from '../../../utility';
 
 import './Layout.scss';
 import layoutIcon from '../../../../assets/layout-icon.svg';
@@ -20,7 +22,7 @@ let changes = [];
 
 const Layout = () => {
   const {nodes, edges, octree} = useSelector((state) => state.network);
-  const {networkBoundarySize, layoutCalculationRunning} = useSelector((state) => state.settings);
+  const {networkBoundarySize, layoutCalculationRunning, axes} = useSelector((state) => state.settings);
   const [layoutAlgorithm, setLayoutAlgorithm] = useState();
   const [c, setC] = useState(1);
   const [size, setSize] = useState(150);
@@ -29,6 +31,10 @@ const Layout = () => {
   const [idealSpringLength, setIdealSpringLength] = useState(1);
   const [eadesRepulsionStrength, setEadesRepulsionStrength] = useState(150);
   const [searchAreaSize, setSearchAreaSize] = useState(50);
+  const [xSeparationValue, setXSeparationValue] = useState('none');
+  const [ySeparationValue, setYSeparationValue] = useState('none');
+  const [zSeparationValue, setZSeparationValue] = useState('none');
+  const [freezeAxisSeparation, setFreezeAxisSeparation] = useState(false);
   const dispatch = useDispatch();
 
   const stopCalculation = () => {
@@ -56,25 +62,25 @@ const Layout = () => {
       }
       repulsiveNodes.forEach((u) => {
         if (!u.visible || v.id === u.id || (type === 'eades' && u.isNeighborOf(v))) return;
-        const distance = v.position.clone().sub(u.position);
-        const length = distance.length() || 0.01;
-        const normalizedDistance = distance.clone().normalize();
-        v.disp.add(normalizedDistance.multiplyScalar(repulsiveForce({d: length, k, k3: eadesRepulsionStrength})));
+        const forceDirection = v.position.clone().sub(u.position);
+        const distance = forceDirection.length() || 0.01;
+        const normalizedDirection = forceDirection.normalize();
+        v.disp.add(normalizedDirection.multiplyScalar(repulsiveForce({d: distance, k, k3: eadesRepulsionStrength})));
       });
     });
   };
 
-  const calculateAttractiveForces = (attractiveForceFunction, k) => {
+  const calculateAttractiveForces = (attractiveForce, k) => {
     edges.forEach((edge) => {
       if (!edge.visible) return;
-      const distance = edge.sourceNode.position.clone().sub(edge.targetNode.position);
-      const length = distance.length();
-      const normalizedDistance = distance.clone().normalize();
-      const attractiveForceStrength = attractiveForceFunction({
-        d: length, k, k1: eadesAttractionStrength, k2: idealSpringLength
+      const forceDirection = edge.sourceNode.position.clone().sub(edge.targetNode.position);
+      const distance = forceDirection.length();
+      const normalizedDirection = forceDirection.normalize();
+      const attractiveForceStrength = attractiveForce({
+        d: distance, k, k1: eadesAttractionStrength, k2: idealSpringLength
       });
-      edge.sourceNode.disp.sub(normalizedDistance.multiplyScalar(attractiveForceStrength));
-      edge.targetNode.disp.add(normalizedDistance.multiplyScalar(attractiveForceStrength));
+      edge.sourceNode.disp.sub(normalizedDirection.multiplyScalar(attractiveForceStrength));
+      edge.targetNode.disp.add(normalizedDirection.multiplyScalar(attractiveForceStrength));
     });
   };
 
@@ -100,6 +106,11 @@ const Layout = () => {
         if (!node.visible) return;
         const displacement = node.disp.clone().normalize();
         if (type === 'frucht') displacement.multiplyScalar(temp);
+        if (freezeAxisSeparation) {
+          if (xSeparationValue !== 'none') displacement.setX(0);
+          if (ySeparationValue !== 'none') displacement.setY(0);
+          if (zSeparationValue !== 'none') displacement.setZ(0);
+        }
         node.setPositionRelative(displacement);
       });
       if (type === 'frucht') {
@@ -112,6 +123,31 @@ const Layout = () => {
     }
   };
 
+  const separateNodes = (axis, separationValue) => {
+    const dataValuesSet = new Set();
+    nodes.forEach((node) => dataValuesSet.add(node.data[separationValue]));
+    if (dataValuesSet.size < 2) return;
+    const positions = {};
+    const dataValues = Array.from(dataValuesSet);
+    dataValues.sort((a, b) => sortArray(a, b));
+    dataValues.forEach((dataValue, index) => {
+      positions[dataValue] = ((networkBoundarySize / (dataValues.length - 1)) * index) - (networkBoundarySize / 2);
+    });
+    const newPosition = new Vector3();
+    nodes.forEach((node) => {
+      newPosition.set(node.position.x, node.position.y, node.position.z);
+      if (axis === 'x') newPosition.setX(positions[node.data[separationValue]]);
+      if (axis === 'y') newPosition.setY(positions[node.data[separationValue]]);
+      if (axis === 'z') newPosition.setZ(positions[node.data[separationValue]]);
+      node.setPositionAbsolute(newPosition);
+    });
+    axes.setAxisLabel(axis, separationValue);
+    axes.addDivisionToAxis(axis, positions);
+    if (xSeparationValue === 'none') axes.setAxisLabel('x', 'none');
+    if (ySeparationValue === 'none') axes.setAxisLabel('y', 'none');
+    if (zSeparationValue === 'none') axes.setAxisLabel('z', 'none');
+  };
+
   const startCalculation = () => {
     nodes.forEach((node) => {
       const elementChanges = {element: node, type: 'graphElement'};
@@ -122,6 +158,15 @@ const Layout = () => {
       forceDirectedPlacement('frucht', fruchtAndReinAttraction, fruchtAndReinRepulsion);
     } else if (layoutAlgorithm === 'Eades') {
       forceDirectedPlacement('eades', eadesAttraction, eadesRepulsion);
+    } else if (layoutAlgorithm === 'Separation') {
+      if (xSeparationValue !== 'none') separateNodes('x', xSeparationValue);
+      if (ySeparationValue !== 'none') separateNodes('y', ySeparationValue);
+      if (zSeparationValue !== 'none') separateNodes('z', zSeparationValue);
+      nodes.forEach((node, index) => {
+        changes[index].setPositionAbsolute.after = node.position.clone();
+      });
+      dispatch(addToActionHistory(changes));
+      changes = [];
     }
   };
 
@@ -130,7 +175,7 @@ const Layout = () => {
       <div className="layout-controls">
         <div className="algorithm-wrapper">
           <Select
-            options={['Fruchterman and Reingold', 'Eades']}
+            options={['Fruchterman and Reingold', 'Eades', 'Separation']}
             defaultOption="- Layout Algorithm -"
             value={layoutAlgorithm}
             setSelected={setLayoutAlgorithm}
@@ -141,12 +186,17 @@ const Layout = () => {
             onClick={layoutCalculationRunning ? stopCalculation : startCalculation}
             text={layoutCalculationRunning ? 'Stop' : 'Run'}
             className={`run${layoutCalculationRunning ? ' danger' : ''}`}
-            disabled={!layoutAlgorithm}
+            disabled={(
+              !layoutAlgorithm
+              || (layoutAlgorithm === 'Separation'
+                && (xSeparationValue === 'none' && ySeparationValue === 'none' && zSeparationValue === 'none')
+              )
+            )}
           />
           {layoutCalculationRunning && <Loader/>}
         </div>
         <div className="settings">
-          {layoutAlgorithm && (
+          {layoutAlgorithm && layoutAlgorithm !== 'Separation' && (
             <Setting name="Max Repulsion Distance">
               <SmallNumberInput value={searchAreaSize} setValue={setSearchAreaSize}/>
             </Setting>
@@ -162,6 +212,9 @@ const Layout = () => {
               <Setting name="Temperature">
                 <SmallNumberInput value={startTemp} setValue={setStartTemp}/>
               </Setting>
+              <Setting name="Freeze Separation">
+                <Checkbox name="freeze-axis-separation" checked={freezeAxisSeparation} setChecked={setFreezeAxisSeparation}/>
+              </Setting>
             </>
           )}
           {layoutAlgorithm === 'Eades' && (
@@ -174,6 +227,37 @@ const Layout = () => {
               </Setting>
               <Setting name="Ideal Spring Length">
                 <SmallNumberInput value={idealSpringLength} setValue={setIdealSpringLength}/>
+              </Setting>
+              <Setting name="Freeze Separation">
+                <Checkbox name="freeze-axis-separation" checked={freezeAxisSeparation} setChecked={setFreezeAxisSeparation}/>
+              </Setting>
+            </>
+          )}
+          {layoutAlgorithm === 'Separation' && (
+            <>
+              <Setting name="X-Axis">
+                <Select
+                  options={['none', ...Object.keys(nodes[0].data)]}
+                  value={xSeparationValue}
+                  setSelected={setXSeparationValue}
+                  alwaysShowArrow
+                />
+              </Setting>
+              <Setting name="Y-Axis">
+                <Select
+                  options={['none', ...Object.keys(nodes[0].data)]}
+                  value={ySeparationValue}
+                  setSelected={setYSeparationValue}
+                  alwaysShowArrow
+                />
+              </Setting>
+              <Setting name="Z-Axis">
+                <Select
+                  options={['none', ...Object.keys(nodes[0].data)]}
+                  value={zSeparationValue}
+                  setSelected={setZSeparationValue}
+                  alwaysShowArrow
+                />
               </Setting>
             </>
           )}

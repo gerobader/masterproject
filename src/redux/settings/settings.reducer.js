@@ -13,7 +13,9 @@ import {
   SHOW_BOUNDARY,
   SET_BOUNDARY_OPACITY,
   SET_LAYOUT_CALCULATION_RUNNING,
-  SET_SHOW_LOAD_NETWORK_MODAL
+  SET_SHOW_LOAD_NETWORK_MODAL,
+  SET_AXES,
+  SET_SHOW_AXIS
 } from '../actionTypes';
 
 const initialState = {
@@ -30,7 +32,9 @@ const initialState = {
   keyboardInputsBlocked: false,
   networkBoundarySize: 100,
   showBoundary: false,
-  boundaryOpacity: 0.3
+  boundaryOpacity: 0.3,
+  showAxes: false,
+  axes: undefined
 };
 
 const settingsReducer = (state = initialState, action) => {
@@ -111,6 +115,16 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         boundaryOpacity: action.payload
+      };
+    case SET_SHOW_AXIS:
+      return {
+        ...state,
+        showAxes: action.payload
+      };
+    case SET_AXES:
+      return {
+        ...state,
+        axes: action.payload
       };
     default:
       return state;

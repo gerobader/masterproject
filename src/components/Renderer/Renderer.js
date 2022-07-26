@@ -6,6 +6,7 @@ import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import Axes from './Elements/Axes';
 import Node from './Elements/Node';
 import Nodes from './Elements/Nodes';
 import Edge from './Elements/Edge';
@@ -16,7 +17,7 @@ import {
   setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected, setOctree
 } from '../../redux/network/network.actions';
 import {
-  addToActionHistory, undoAction, redoAction, setCameraControls
+  addToActionHistory, undoAction, redoAction, setCameraControls, setAxes
 } from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
 import {initialCameraPosition, hoverElementOutlineColor, selectedElementOutlineColor} from '../constants';
@@ -428,7 +429,7 @@ class Renderer extends Component {
   }
 
   createScene() {
-    const {_setCameraControls} = this.props;
+    const {_setCameraControls, _setAxes, networkBoundarySize} = this.props;
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -452,6 +453,10 @@ class Renderer extends Component {
     cameraControls.dampingFactor = 0.2;
     controls = new TransformControls(camera, renderer.domElement);
     controls.setSize(0.5);
+
+    const axes = new Axes(networkBoundarySize, camera);
+    scene.add(axes.instance);
+
     scene.add(controls);
     scene.add(octGroup);
 
@@ -463,6 +468,7 @@ class Renderer extends Component {
     window.addEventListener('keyup', this.handleKeyUp);
 
     _setCameraControls(cameraControls);
+    _setAxes(axes);
   }
 
   drawOctree() {
@@ -488,12 +494,13 @@ class Renderer extends Component {
 
   animate() {
     const {
-      orbitPreview, nodes, performanceMode
+      orbitPreview, nodes, performanceMode, axes
     } = this.props;
     requestAnimationFrame(this.animate);
     if (orbitPreview) networkElements.rotateY(0.003);
     this.cameraControls();
     nodes.forEach((node) => node.label.updatePosition());
+    axes.updateLabelPositions();
     // this.drawOctree();
     if (!performanceMode && composer) {
       this.handleOutline();
@@ -537,11 +544,13 @@ const mapStateToPros = (state) => ({
   selectedNodes: state.network.selectedNodes,
   selectedEdges: state.network.selectedEdges,
   octree: state.network.octree,
-  averagePositionPlaceholder: state.network.averagePositionPlaceholder
+  averagePositionPlaceholder: state.network.averagePositionPlaceholder,
+  axes: state.settings.axes
 });
 
 const mapDispatchToProps = (dispatch) => ({
   _setCameraControls: (cameraControls) => dispatch(setCameraControls(cameraControls)),
+  _setAxes: (axes) => dispatch(setAxes(axes)),
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setDirected: (directed) => dispatch(setDirected(directed)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),

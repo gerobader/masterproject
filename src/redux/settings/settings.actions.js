@@ -13,7 +13,9 @@ import {
   SET_BOUNDARY,
   SHOW_BOUNDARY,
   SET_BOUNDARY_OPACITY,
-  SET_LAYOUT_CALCULATION_RUNNING
+  SET_LAYOUT_CALCULATION_RUNNING,
+  SET_AXES,
+  SET_SHOW_AXIS
 } from '../actionTypes';
 import {setNodes} from '../network/network.actions';
 import {setFilterCollection} from '../filter/filter.action';
@@ -143,4 +145,14 @@ export const setShowBoundary = (showBoundary) => ({
 export const setBoundaryOpacity = (opacity) => ({
   type: SET_BOUNDARY_OPACITY,
   payload: opacity
+});
+
+export const setShowAxes = (show) => ({
+  type: SET_SHOW_AXIS,
+  payload: show
+});
+
+export const setAxes = (axes) => ({
+  type: SET_AXES,
+  payload: axes
 });

@@ -73,8 +73,9 @@ const InfoTable = ({setProgressInfo}) => {
     });
     const diameter = Math.max(...nodeEccentricities);
     const radius = Math.min(...nodeEccentricities);
+    console.log(allDistances.length);
     const averageGeodesicDistance = Math.round(
-      (allDistances.reduce((partialSum, distance) => partialSum + distance, 0) / allDistances.length) * 1000
+      ((1 / (nodes.length * (nodes.length - 1))) * allDistances.reduce((partialSum, distance) => partialSum + distance, 0)) * 1000
     ) / 1000;
     const averageDegree = Math.round((degreeSum / nodes.length) * 1000) / 1000;
 

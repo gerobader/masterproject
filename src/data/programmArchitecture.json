@@ -171,6 +171,10 @@
     {
       "id": 42,
       "name": "MenuSetting"
+    },
+    {
+      "id": 43,
+      "name": "KeyBinding"
     }
   ],
   "links": [
@@ -513,6 +517,10 @@
     {
       "source": 40,
       "target": 41
+    },
+    {
+      "source": 43,
+      "target": 8
     }
   ]
 }

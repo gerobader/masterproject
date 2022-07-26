@@ -62,6 +62,11 @@ class Label {
     }
   }
 
+  setText(text) {
+    this.text = text;
+    this.instance.innerHTML = text;
+  }
+
   hide() {
     if (!this.isHidden) {
       this.isHidden = true;

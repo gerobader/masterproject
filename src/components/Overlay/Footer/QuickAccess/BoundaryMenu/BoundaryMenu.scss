@@ -2,7 +2,6 @@
 .quick-menu.boundary{
   background: url('../../../../../assets/cube.svg') center no-repeat;
   position: relative;
-  opacity: 0.7;
   .click-tracker{
     position: absolute;
     top: 0;
@@ -10,8 +9,7 @@
     width: 25px;
     height: 25px;
   }
-  &.show-settings{
-    opacity: 1;
+  &.active{
     .quick-settings{
       max-height: 50px;
     }

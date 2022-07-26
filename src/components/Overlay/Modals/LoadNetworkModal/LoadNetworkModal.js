@@ -25,7 +25,7 @@ import {
 import * as miserables from '../../../../data/performanceTest/0_miserables_klein.json';
 import * as middleSizedNetwork from '../../../../data/performanceTest/1_mittel.json';
 import * as bigNetwork from '../../../../data/performanceTest/2_groesser.json';
-import * as programArchitecture from '../../../../data/test/test.json';
+import * as programArchitecture from '../../../../data/programmArchitecture.json';
 
 import './LoadNetworkModal.scss';
 
@@ -74,11 +74,9 @@ const LoadNetworkModal = () => {
     const testNodes = network.nodes.map((node) => {
       const newNode = {
         label: node.name,
-        data: {
-          group: node.group,
-          component: node.component
-        }
+        data: {}
       };
+      if (node.group !== undefined) newNode.data.group = node.group;
       if (node.attributes && typeof node.attributes === 'object') {
         newNode.data = {
           ...newNode.data,

@@ -189,8 +189,7 @@ const Layout = () => {
             disabled={(
               !layoutAlgorithm
               || (layoutAlgorithm === 'Separation'
-                && (xSeparationValue === 'none' && ySeparationValue === 'none' && zSeparationValue === 'none')
-              )
+                && (xSeparationValue === 'none' && ySeparationValue === 'none' && zSeparationValue === 'none'))
             )}
           />
           {layoutCalculationRunning && <Loader/>}

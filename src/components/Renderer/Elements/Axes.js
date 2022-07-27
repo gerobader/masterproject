@@ -95,6 +95,7 @@ class Axes {
   }
 
   updateLabelPositions() {
+    if (!this.visible) return;
     this.xAxisLabel.updatePosition();
     this.yAxisLabel.updatePosition();
     this.zAxisLabel.updatePosition();

@@ -27,8 +27,8 @@ class Label {
     this.instance.remove();
   }
 
-  updatePosition(newParentPosition) {
-    if (!this.isHidden) {
+  updatePosition(newParentPosition, forceUpdate) {
+    if (!this.isHidden || forceUpdate) {
       if (newParentPosition) {
         this.position = newParentPosition;
       }
@@ -39,7 +39,7 @@ class Label {
         this.instance.style.display = 'none';
         return;
       }
-      this.instance.style.display = 'block';
+      if (!forceUpdate) this.instance.style.display = 'block';
       currentPosition.x = (currentPosition.x * (window.innerWidth / 2)) + window.innerWidth / 2 - this.instance.offsetWidth / 2;
       currentPosition.y = -(currentPosition.y * (window.innerHeight / 2))
         + window.innerHeight / 2 - this.instance.offsetHeight / 2;

@@ -123,9 +123,9 @@ class Axes {
         axisGroup.name === 'zAxis' ? newPosition + 5 : -newPosition
       );
     });
-    this.xAxisLabel.updatePosition(new THREE.Vector3(newPosition + 15, -newPosition, -newPosition));
-    this.yAxisLabel.updatePosition(new THREE.Vector3(-newPosition, newPosition + 15, -newPosition));
-    this.zAxisLabel.updatePosition(new THREE.Vector3(-newPosition, -newPosition, newPosition + 15));
+    this.xAxisLabel.updatePosition(new THREE.Vector3(newPosition + 15, -newPosition, -newPosition), true);
+    this.yAxisLabel.updatePosition(new THREE.Vector3(-newPosition, newPosition + 15, -newPosition), true);
+    this.zAxisLabel.updatePosition(new THREE.Vector3(-newPosition, -newPosition, newPosition + 15), true);
   }
 
   addDivisionToAxis(axis, divisions) {

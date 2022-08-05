@@ -1,12 +1,15 @@
 import React, {useState, useRef} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+import * as THREE from 'three';
 import * as neo4j from 'neo4j-driver';
+import Label from '../../../Renderer/Elements/Label';
 import Modal from '../Modal';
 import FileUpload from '../../UI/FileUpload/FileUpload';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import Select from '../../UI/Select/Select';
 import Loader from '../../UI/Loader/Loader';
+import {createNodes, createEdges} from '../../../utility';
 import {
   setDirected,
   setNetworkName,
@@ -18,7 +21,7 @@ import {
 import {
   resetActionHistory,
   setNetworkBoundarySize,
-  setPerformanceMode,
+  setPerformanceMode, setShowAxes,
   setShowLabel,
   setShowLoadNetworkModal
 } from '../../../../redux/settings/settings.actions';
@@ -33,35 +36,72 @@ const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 
 
 const LoadNetworkModal = () => {
   const {nodes} = useSelector((state) => state.network);
-  const {showLoadNetworkModal} = useSelector((state) => state.settings);
+  const {showLoadNetworkModal, axes, networkBoundarySize} = useSelector((state) => state.settings);
   const [networkData, setNetworkData] = useState();
   const [selectedNetwork, setSelectedNetwork] = useState();
   const [usePerformanceMode, setUsePerformanceMode] = useState(false);
+  const [fileName, setFileName] = useState();
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
-  const fileUpload = useRef();
 
   const loadNetworkData = (network) => {
     nodes.forEach((node) => node.label.removeFromDom());
     dispatch(setSelectedNodes([]));
     dispatch(setSelectedEdges([]));
     dispatch(setPerformanceMode(usePerformanceMode));
-    if (network.name) dispatch(setNetworkName(network.name));
+    dispatch(setNetworkName(network.name || fileName.split('.')[0]));
     if (network.showLabel) dispatch(setShowLabel(network.showLabel));
     if (network.networkBoundarySize) dispatch(setNetworkBoundarySize(network.networkBoundarySize));
     dispatch(setDirected(Boolean(network.directed)));
-    dispatch(setNodesAndEdges(network.nodes, network.edges, true));
+    const newNodes = createNodes(network.nodes, network.networkBoundarySize || networkBoundarySize);
+    const newEdges = createEdges(network.edges || network.links);
+    dispatch(setNodesAndEdges(newNodes, newEdges, true));
     dispatch(setNetworkStatistics(
       network?.diameter, network?.radius, network?.averageGeodesicDistance, network?.averageDegree,
       network?.reciprocity, network?.density
     ));
+    if (network.axesInfo) {
+      dispatch(setShowAxes(network.axesInfo.showAxes));
+      axes.setVisibility(network.axesInfo.showAxes);
+      axes.setPosition(network.networkBoundarySize);
+      axes.setAxisLabel('x', network.axesInfo.xAxis.text);
+      axes.setAxisLabel('y', network.axesInfo.yAxis.text);
+      axes.setAxisLabel('z', network.axesInfo.zAxis.text);
+      axes.xAxisDivisions = network.axesInfo.xAxis?.divisions.map((label) => (
+        new Label(
+          label.text,
+          new THREE.Vector3(label.position.x, label.position.y, label.position.z),
+          axes.camera,
+          !axes.visible,
+          axes.axisColor.x
+        )
+      ));
+      axes.yAxisDivisions = network.axesInfo.yAxis?.divisions.map((label) => (
+        new Label(
+          label.text,
+          new THREE.Vector3(label.position.x, label.position.y, label.position.z),
+          axes.camera,
+          !axes.visible,
+          axes.axisColor.y
+        )
+      ));
+      axes.zAxisDivisions = network.axesInfo.zAxis?.divisions.map((label) => (
+        new Label(
+          label.text,
+          new THREE.Vector3(label.position.x, label.position.y, label.position.z),
+          axes.camera,
+          !axes.visible,
+          axes.axisColor.z
+        )
+      ));
+    }
     dispatch(resetActionHistory());
     dispatch(setShowLoadNetworkModal(false));
     setIsLoading(false);
     setTimeout(() => {
       setNetworkData(undefined);
       setSelectedNetwork(undefined);
-      fileUpload.current.reset();
+      setFileName(undefined);
     }, 500);
   };
 
@@ -216,7 +256,7 @@ const LoadNetworkModal = () => {
     } else if (type === 'select') {
       setSelectedNetwork(network);
       setNetworkData(undefined);
-      fileUpload.current.reset();
+      setFileName(undefined);
     }
   };
 
@@ -228,11 +268,12 @@ const LoadNetworkModal = () => {
       closeFunction={() => dispatch(setShowLoadNetworkModal(false))}
     >
       <FileUpload
-        ref={fileUpload}
         id="network-upload"
         labelText="Choose File"
         onFileLoaded={(network) => manageNetworkInputs(network, 'upload')}
         networkData={networkData}
+        fileName={fileName}
+        setFileName={setFileName}
       />
       <div className="separator-wrapper">
         <div className="line"/>

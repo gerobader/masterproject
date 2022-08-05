@@ -8,7 +8,7 @@ onmessage = (e) => {
     postMessage({
       type: 'progress',
       progress: {
-        info: node.name,
+        nodeId: node.id,
         percentage: ((index + 1) / nodeIds.length) * 100
       }
     });
@@ -18,10 +18,12 @@ onmessage = (e) => {
           (nodePathMaps[nodeId][connectedNode.id] && nodePathMaps[nodeId][connectedNode.id].distance < distance)
           || connectedNode.id === nodeId
         ) {
+          // return if connected node is starting node or if path length is already longer than another found path
           return;
         }
         const currentPath = [...path, connectedNode];
         let allPaths = [];
+        // remove all paths to this node that are longer than the current path
         if (nodePathMaps[nodeId][connectedNode.id]) {
           allPaths = nodePathMaps[nodeId][connectedNode.id].paths.filter(
             (existingPath) => existingPath.length <= currentPath.length
@@ -33,6 +35,7 @@ onmessage = (e) => {
           distance
         };
         const nextConnectedNodes = [];
+        // add all nodes, that are connected to the current node to the next iteration array
         connectedNode.targetForEdges.forEach((incomingEdge) => {
           if (!nextConnectedNodes.includes(nodes[incomingEdge.sourceNode])) {
             nextConnectedNodes.push(nodes[incomingEdge.sourceNode]);

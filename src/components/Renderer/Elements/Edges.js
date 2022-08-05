@@ -31,9 +31,9 @@ class Edges {
     this.instances = instances;
   }
 
-  updatePositionFor(index, sourceVector, targetVector) {
+  updatePositionFor(index, size, sourceVector, targetVector) {
     this.instances.setMatrixAt(index, this.getTransformMatrix(sourceVector, targetVector));
-    this.instances.instanceMatrix.needsUpdate = true;
+    this.setSizeFor(index, size);
   }
 
   // eslint-disable-next-line class-methods-use-this

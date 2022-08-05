@@ -1,16 +1,10 @@
-import React, {useState, forwardRef, useImperativeHandle} from 'react';
+import React from 'react';
 
 import './FileUpload.scss';
 
-const FileUpload = forwardRef(({id, labelText, onFileLoaded}, ref) => {
-  const [fileName, setFileName] = useState();
-
-  useImperativeHandle(ref, () => ({
-    reset() {
-      setFileName(undefined);
-    }
-  }));
-
+const FileUpload = ({
+  id, labelText, onFileLoaded, fileName, setFileName
+}) => {
   const onFileUpload = (e) => {
     setFileName(e.target.files[0].name);
     const fileReader = new FileReader();
@@ -25,6 +19,6 @@ const FileUpload = forwardRef(({id, labelText, onFileLoaded}, ref) => {
       <p className="file-name">{fileName || 'No file selected'}</p>
     </div>
   );
-});
+};
 
 export default FileUpload;

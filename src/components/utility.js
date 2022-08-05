@@ -70,3 +70,40 @@ export const arrayMove = (array, currentIndex, newIndex) => {
   newArray.splice(newIndex, 0, newArray.splice(currentIndex, 1)[0]);
   return newArray;
 };
+
+export const createNodes = (nodes, networkBoundarySize) => nodes.map((node) => ({
+  position: new THREE.Vector3(
+    node.position ? node.position.x : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+    node.position ? node.position.y : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+    node.position ? node.position.z : Math.random() * networkBoundarySize - networkBoundarySize / 2
+  ),
+  size: node.size || 1,
+  color: node.color || '#008799',
+  id: node.id,
+  name: node.name || node.text || node.label,
+  data: node.data || node.attributes || {},
+  colorLocked: Boolean(node.colorLocked),
+  shape: node.shape || 'Sphere',
+  pathMap: node.pathMap,
+  visible: node.visible !== false
+}));
+
+export const createEdges = (edgesInfo) => {
+  const edges = [];
+  edgesInfo.forEach((edgeInfo) => {
+    const edge = {
+      id: edgeInfo.id,
+      source: edgeInfo.source,
+      target: edgeInfo.target,
+      size: edgeInfo.size || 1,
+      color: edgeInfo.color || '#ffffff',
+      visible: edgeInfo.visible !== false,
+      data: {}
+    };
+    if (edgeInfo.data) edge.data = edgeInfo.data;
+    if (edgeInfo.attributes) edge.data = {...edge.data, ...edgeInfo.attributes};
+    if (edgeInfo.value) edge.data.value = edgeInfo.value;
+    edges.push(edge);
+  });
+  return edges;
+};

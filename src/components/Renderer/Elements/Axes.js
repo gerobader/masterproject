@@ -28,7 +28,7 @@ class Axes {
     xAxisPoints.push(new THREE.Vector3((this.size / 2) + 5, -(this.size / 2), -(this.size / 2)));
     const xAxisGeometry = new THREE.BufferGeometry().setFromPoints(xAxisPoints);
     const xAxis = new THREE.Line(xAxisGeometry, xAxisMaterial);
-    const xArrowGeo = new THREE.ConeGeometry(0.5, 2, 16);
+    const xArrowGeo = new THREE.ConeGeometry(1, 4, 16);
     const xArrowMat = new THREE.MeshBasicMaterial({color: this.axisColor.x});
     const xArrow = new THREE.Mesh(xArrowGeo, xArrowMat);
     xArrow.position.set((this.size / 2) + 5, -(this.size / 2), -(this.size / 2));
@@ -43,7 +43,7 @@ class Axes {
     yAxisPoints.push(new THREE.Vector3(-(this.size / 2), (this.size / 2) + 5, -(this.size / 2)));
     const yAxisGeometry = new THREE.BufferGeometry().setFromPoints(yAxisPoints);
     const yAxis = new THREE.Line(yAxisGeometry, yAxisMaterial);
-    const yArrowGeo = new THREE.ConeGeometry(0.5, 2, 16);
+    const yArrowGeo = new THREE.ConeGeometry(1, 4, 16);
     const yArrowMat = new THREE.MeshBasicMaterial({color: this.axisColor.y});
     const yArrow = new THREE.Mesh(yArrowGeo, yArrowMat);
     yArrow.position.set(-(this.size / 2), (this.size / 2) + 5, -(this.size / 2));
@@ -57,7 +57,7 @@ class Axes {
     zAxisPoints.push(new THREE.Vector3(-(this.size / 2), -(this.size / 2), (this.size / 2) + 5));
     const zAxisGeometry = new THREE.BufferGeometry().setFromPoints(zAxisPoints);
     const zAxis = new THREE.Line(zAxisGeometry, zAxisMaterial);
-    const zArrowGeo = new THREE.ConeGeometry(0.5, 2, 16);
+    const zArrowGeo = new THREE.ConeGeometry(1, 4, 16);
     const zArrowMat = new THREE.MeshBasicMaterial({color: this.axisColor.z});
     const zArrow = new THREE.Mesh(zArrowGeo, zArrowMat);
     zArrow.position.set(-(this.size / 2), -(this.size / 2), (this.size / 2) + 5);
@@ -70,19 +70,16 @@ class Axes {
     this.instance = axisGroup;
 
     this.xAxisLabel = new Label(
-      'none', new THREE.Vector3((this.size / 2) + 15, -(this.size / 2), -(this.size / 2)), this.camera, false
+      'none', new THREE.Vector3((this.size / 2) + 15, -(this.size / 2), -(this.size / 2)), this.camera, false, this.axisColor.x
     );
-    this.xAxisLabel.setColor(this.axisColor.x);
     this.xAxisLabel.setSize(16);
     this.yAxisLabel = new Label(
-      'none', new THREE.Vector3(-(this.size / 2), (this.size / 2) + 15, -(this.size / 2)), this.camera, false
+      'none', new THREE.Vector3(-(this.size / 2), (this.size / 2) + 15, -(this.size / 2)), this.camera, false, this.axisColor.y
     );
-    this.yAxisLabel.setColor(this.axisColor.y);
     this.yAxisLabel.setSize(16);
     this.zAxisLabel = new Label(
-      'none', new THREE.Vector3(-(this.size / 2), -(this.size / 2), (this.size / 2) + 15), this.camera, false
+      'none', new THREE.Vector3(-(this.size / 2), -(this.size / 2), (this.size / 2) + 15), this.camera, false, this.axisColor.z
     );
-    this.zAxisLabel.setColor(this.axisColor.z);
     this.zAxisLabel.setSize(16);
     this.setVisibility(this.visible);
   }
@@ -105,6 +102,7 @@ class Axes {
   }
 
   setPosition(networkBoundarySize) {
+    const oldSize = this.size;
     this.size = networkBoundarySize;
     const newPosition = networkBoundarySize / 2;
     this.instance.children.forEach((axisGroup) => {
@@ -126,37 +124,77 @@ class Axes {
     this.xAxisLabel.updatePosition(new THREE.Vector3(newPosition + 15, -newPosition, -newPosition), true);
     this.yAxisLabel.updatePosition(new THREE.Vector3(-newPosition, newPosition + 15, -newPosition), true);
     this.zAxisLabel.updatePosition(new THREE.Vector3(-newPosition, -newPosition, newPosition + 15), true);
+    this.xAxisDivisions.forEach((label) => {
+      const sizeDifference = networkBoundarySize / oldSize;
+      const oldPos = label.position;
+      label.updatePosition(
+        new THREE.Vector3(oldPos.x * sizeDifference, oldPos.y * sizeDifference, oldPos.z * sizeDifference),
+        true
+      );
+    });
+    this.yAxisDivisions.forEach((label) => {
+      const sizeDifference = networkBoundarySize / oldSize;
+      const oldPos = label.position;
+      label.updatePosition(
+        new THREE.Vector3(oldPos.x * sizeDifference, oldPos.y * sizeDifference, oldPos.z * sizeDifference),
+        true
+      );
+    });
+    this.zAxisDivisions.forEach((label) => {
+      const sizeDifference = networkBoundarySize / oldSize;
+      const oldPos = label.position;
+      label.updatePosition(
+        new THREE.Vector3(oldPos.x * sizeDifference, oldPos.y * sizeDifference, oldPos.z * sizeDifference),
+        true
+      );
+    });
   }
 
-  addDivisionToAxis(axis, divisions) {
+  addDivisionToAxis(axis, positions) {
     this.removeDivisionsFromAxis(axis);
+    let divisions;
+    // eslint-disable-next-line no-restricted-globals
+    if (!isNaN(Object.keys(positions)[0])) {
+      divisions = {0: -this.size / 2};
+      const maxValue = Math.max(...Object.keys(positions));
+      const stepPerValue = this.size / maxValue;
+      let valueIncrement = 1;
+      if (maxValue <= 1) valueIncrement = 0.1;
+      if (maxValue > 40) valueIncrement = 10;
+      if (maxValue > 400) valueIncrement = 100;
+      for (let i = valueIncrement; i <= maxValue; i += valueIncrement) {
+        divisions[Math.round(i * 10) / 10] = (stepPerValue * i) - (this.size / 2);
+      }
+    } else {
+      divisions = positions;
+    }
     Object.keys(divisions).forEach((divisionName) => {
       if (axis === 'x') {
         const label = new Label(
           divisionName,
           new THREE.Vector3(divisions[divisionName], -(this.size / 2) - 3, -(this.size / 2)),
           this.camera,
-          !this.visible
+          !this.visible,
+          this.axisColor[axis]
         );
-        label.setColor(this.axisColor[axis]);
         this.xAxisDivisions.push(label);
       } else if (axis === 'y') {
         const label = new Label(
           divisionName,
           new THREE.Vector3(-(this.size / 2) - 5, divisions[divisionName], -(this.size / 2)),
           this.camera,
-          !this.visible
+          !this.visible,
+          this.axisColor[axis]
         );
-        label.setColor(this.axisColor[axis]);
         this.yAxisDivisions.push(label);
       } else {
         const label = new Label(
           divisionName,
           new THREE.Vector3(-(this.size / 2), (-this.size / 2) - 3, divisions[divisionName]),
           this.camera,
-          !this.visible
+          !this.visible,
+          this.axisColor[axis]
         );
-        label.setColor(this.axisColor[axis]);
         this.zAxisDivisions.push(label);
       }
     });

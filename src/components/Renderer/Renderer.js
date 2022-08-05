@@ -292,18 +292,18 @@ class Renderer extends Component {
     let edgeInstances;
     const nodes = serializedNodes.map((node, index) => {
       const nodeClass = new Node(
-        node.position ? node.position.x : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-        node.position ? node.position.y : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-        node.position ? node.position.z : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-        node.size || 1,
-        node.color || '#008799',
+        node.position.x,
+        node.position.y,
+        node.position.z,
+        node.size,
+        node.color,
         node.id || index,
-        node.name || node.label,
-        node.data || {},
-        node.colorLocked || false,
-        node.shape || 'Sphere',
+        node.name,
+        node.data,
+        node.colorLocked,
+        node.shape,
         node.pathMap,
-        node.visible || true,
+        node.visible,
         camera,
         performanceMode,
         networkBoundarySize,
@@ -330,11 +330,11 @@ class Renderer extends Component {
         edge.id || index,
         sourceNode,
         targetNode,
-        edge.size || 1,
-        edge.color || '#ffffff',
-        edge.visible || true,
-        edge.data || {},
-        edge.isDirected || directed,
+        edge.size,
+        edge.color,
+        edge.visible,
+        edge.data,
+        directed,
         edgeInstances
       );
       sourceNode.addSourceEdge(edgeClass);
@@ -342,7 +342,10 @@ class Renderer extends Component {
       if (!performanceMode) networkElements.add(edgeClass.instance);
       return edgeClass;
     });
-    if (!nodes[0].data.degree) nodes.forEach((node) => node.calculateDegree());
+    nodes.forEach((node) => {
+      if (!node.visible) node.setVisibility(false);
+      node.calculateDegree();
+    });
     boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
     networkElements.add(boundaryBox.instance);
     scene.add(networkElements);
@@ -429,7 +432,9 @@ class Renderer extends Component {
   }
 
   createScene() {
-    const {_setCameraControls, _setAxes, networkBoundarySize} = this.props;
+    const {
+      _setCameraControls, _setAxes, networkBoundarySize, showBoundary, boundaryOpacity
+    } = this.props;
 
     renderer = new THREE.WebGLRenderer({antialias: true});
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -454,11 +459,18 @@ class Renderer extends Component {
     controls = new TransformControls(camera, renderer.domElement);
     controls.setSize(0.5);
 
+    networkElements = new THREE.Group();
+    networkElements.name = 'Network';
+
+    boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
+    networkElements.add(boundaryBox.instance);
+
     const axes = new Axes(networkBoundarySize, camera);
     scene.add(axes.instance);
 
     scene.add(controls);
     scene.add(octGroup);
+    scene.add(networkElements);
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);

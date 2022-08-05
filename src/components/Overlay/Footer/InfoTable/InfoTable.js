@@ -138,7 +138,6 @@ const InfoTable = ({setProgressInfo}) => {
       nodes.forEach((node) => {
         nodeClones[node.id] = {
           id: node.id,
-          name: node.name,
           targetForEdges: node.targetForEdges.map((edge) => edgeClones[edge.id]),
           sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
         };
@@ -175,7 +174,8 @@ const InfoTable = ({setProgressInfo}) => {
           calculateStatisticalMeasures(nodeClones);
         } else if (event.data.type === 'progress') {
           setProgressInfo({
-            ...event.data.progress,
+            percentage: event.data.progress.percentage,
+            info: nodes[event.data.progress.nodeId].name,
             type: 'Calculating shortest Paths between Nodes',
             remainingTime: getRemainingTime(),
             step: 1

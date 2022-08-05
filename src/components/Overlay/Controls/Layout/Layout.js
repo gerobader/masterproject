@@ -130,9 +130,16 @@ const Layout = () => {
     const positions = {};
     const dataValues = Array.from(dataValuesSet);
     dataValues.sort((a, b) => sortArray(a, b));
-    dataValues.forEach((dataValue, index) => {
-      positions[dataValue] = ((networkBoundarySize / (dataValues.length - 1)) * index) - (networkBoundarySize / 2);
-    });
+    if (typeof dataValues[0] === 'number') {
+      const spacePerValue = networkBoundarySize / Math.max(...dataValues);
+      dataValues.forEach((dataValue) => {
+        positions[dataValue] = (dataValue * spacePerValue) - (networkBoundarySize / 2);
+      });
+    } else {
+      dataValues.forEach((dataValue, index) => {
+        positions[dataValue] = ((networkBoundarySize / (dataValues.length - 1)) * index) - (networkBoundarySize / 2);
+      });
+    }
     const newPosition = new Vector3();
     nodes.forEach((node) => {
       newPosition.set(node.position.x, node.position.y, node.position.z);

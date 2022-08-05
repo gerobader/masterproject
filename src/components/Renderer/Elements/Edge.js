@@ -13,6 +13,7 @@ class Edge {
     this.color = color;
     this.visible = visible;
     this.isDirected = isDirected;
+    this.position = new THREE.Vector3(0, 0, 0);
     this.data = data || {};
     if (!this.performanceVersion) this.buildGeometry();
   }
@@ -42,8 +43,13 @@ class Edge {
     if (this.visible) {
       const targetVector = this.targetNode.position.clone();
       const sourceVector = this.sourceNode.position.clone();
+      this.position.set(
+        (sourceVector.x + targetVector.x) / 2,
+        (sourceVector.y + targetVector.y) / 2,
+        (sourceVector.z + targetVector.z) / 2
+      );
       if (this.performanceVersion) {
-        this.edgeInstances.updatePositionFor(this.id, sourceVector, targetVector);
+        this.edgeInstances.updatePositionFor(this.id, this.size, sourceVector, targetVector);
       } else {
         const lineVector = targetVector.clone().sub(sourceVector);
         if (this.isDirected) {
@@ -56,11 +62,7 @@ class Edge {
         } else {
           this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size;
         }
-        this.instance.position.set(
-          (sourceVector.x + targetVector.x) / 2,
-          (sourceVector.y + targetVector.y) / 2,
-          (sourceVector.z + targetVector.z) / 2
-        );
+        this.instance.position.set(this.position.x, this.position.y, this.position.z);
         this.setRotation();
       }
     }

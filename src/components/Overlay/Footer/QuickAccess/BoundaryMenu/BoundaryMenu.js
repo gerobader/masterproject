@@ -42,7 +42,7 @@ const BoundaryMenu = () => {
         </div>
         <div className="quick-setting">
           <span>Size:</span>
-          <SmallNumberInput value={networkBoundarySize} setValue={updateNetworkBoundarySize}/>
+          <SmallNumberInput value={networkBoundarySize} setValue={updateNetworkBoundarySize} disableHistory/>
         </div>
       </div>
     </div>

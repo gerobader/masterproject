@@ -15,7 +15,7 @@ const SaveNetworkModal = () => {
     directed, nodes, edges
   } = useSelector((state) => state.network);
   const {
-    showSaveNetworkModal, showLabel, networkBoundarySize
+    showSaveNetworkModal, showLabel, networkBoundarySize, showAxes, axes
   } = useSelector((state) => state.settings);
   const [savePathMap, setSavePathMap] = useState(false);
   const dispatch = useDispatch();
@@ -27,10 +27,35 @@ const SaveNetworkModal = () => {
       const a = document.createElement('a');
       document.body.appendChild(a);
       a.style = 'display: none';
+      const axesInfo = {
+        showAxes,
+        xAxis: {
+          text: axes.xAxisLabel.text,
+          divisions: axes.xAxisDivisions.map((label) => ({
+            text: label.text,
+            position: {x: label.position.x, y: label.position.y, z: label.position.z}
+          }))
+        },
+        yAxis: {
+          text: axes.yAxisLabel.text,
+          divisions: axes.yAxisDivisions.map((label) => ({
+            text: label.text,
+            position: {x: label.position.x, y: label.position.y, z: label.position.z}
+          }))
+        },
+        zAxis: {
+          text: axes.zAxisLabel.text,
+          divisions: axes.zAxisDivisions.map((label) => ({
+            text: label.text,
+            position: {x: label.position.x, y: label.position.y, z: label.position.z}
+          }))
+        }
+      };
       const json = JSON.stringify({
         name,
         showLabel,
         networkBoundarySize,
+        axesInfo,
         diameter,
         radius,
         averageGeodesicDistance,

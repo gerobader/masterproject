@@ -50,17 +50,17 @@ onmessage = (e) => {
 
   nodeIds.forEach((nodeId) => {
     const node = nodeClones[nodeId];
-    const closeness = calculateCloseness(node);
-    const betweenness = calculateBetweenness(node);
-    const lcc = calculateLocalClusteringCoefficient(node);
+    node.data = {
+      closeness: calculateCloseness(node),
+      betweenness: calculateBetweenness(node),
+      lcc: calculateLocalClusteringCoefficient(node)
+    };
     postMessage({
       type: 'progress',
-      nodeId: parseInt(nodeId, 10),
-      statisticalMeasures: {closeness, betweenness, lcc}
+      nodeId: parseInt(nodeId, 10)
     });
   });
-  postMessage({type: 'finished'});
-
+  postMessage({type: 'finished', updatedClones: nodeClones});
   // eslint-disable-next-line no-restricted-globals
   self.close();
 };

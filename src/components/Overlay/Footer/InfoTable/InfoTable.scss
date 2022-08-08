@@ -37,10 +37,10 @@
     min-width: 435px;
     -ms-overflow-style: none;
     scrollbar-width: none;
-    border-right: 2px solid $menuWindowBorderColor;
     &::-webkit-scrollbar{
       display: none;
     }
+    border-right: 2px solid $menuWindowBorderColor;
     table{
       border-spacing: 0;
       position: relative;
@@ -101,6 +101,21 @@
             border-right: 1px solid $menuWindowBorderColor;
             position: relative;
             white-space: nowrap;
+            &.max-width{
+              min-width: 150px;
+              max-width: 150px;
+              overflow-y: auto;
+              -ms-overflow-style: none;
+              scrollbar-width: none;
+              border-right: 1px solid $menuWindowBorderColor;
+              &.big{
+                min-width: 200px;
+                max-width: 200px;
+              }
+            }
+            &::-webkit-scrollbar{
+              display: none;
+            }
             &:last-child{
               border-right: none;
             }

@@ -164,6 +164,10 @@ class Node {
     }
   }
 
+  setData(name, value) {
+    this.data[name] = value;
+  }
+
   updateAssociatedEdgePosition() {
     this.targetForEdges.forEach((edge) => {
       edge.updatePosition();

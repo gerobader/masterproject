@@ -114,6 +114,7 @@ class Axes {
       line.geometry.attributes.position.array[4] = axisGroup.name === 'yAxis' ? newPosition + 5 : -newPosition;
       line.geometry.attributes.position.array[5] = axisGroup.name === 'zAxis' ? newPosition + 5 : -newPosition;
       line.geometry.attributes.position.needsUpdate = true;
+      line.geometry.computeBoundingSphere();
       const arrow = axisGroup.children[1];
       arrow.position.set(
         axisGroup.name === 'xAxis' ? newPosition + 5 : -newPosition,
@@ -157,13 +158,8 @@ class Axes {
     if (!isNaN(Object.keys(positions)[0])) {
       divisions = {0: -this.size / 2};
       const maxValue = Math.max(...Object.keys(positions));
-      const stepPerValue = this.size / maxValue;
-      let valueIncrement = 1;
-      if (maxValue <= 1) valueIncrement = 0.1;
-      if (maxValue > 40) valueIncrement = 10;
-      if (maxValue > 400) valueIncrement = 100;
-      for (let i = valueIncrement; i <= maxValue; i += valueIncrement) {
-        divisions[Math.round(i * 10) / 10] = (stepPerValue * i) - (this.size / 2);
+      for (let i = 1; i <= 10; i++) {
+        divisions[Math.round(((maxValue / 10) * i) * 100000) / 100000] = (this.size / 10) * i - (this.size / 2);
       }
     } else {
       divisions = positions;

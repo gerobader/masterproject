@@ -60,12 +60,12 @@ class Edges {
     this.instances.instanceColor.needsUpdate = true;
   }
 
-  setVisibilityFor(index, visibility, sourceVector, targetVector) {
+  setVisibilityFor(index, visibility, size, sourceVector, targetVector) {
     if (!visibility) {
       const emptyMatrix = new THREE.Matrix4().compose(new THREE.Vector3(), 0, new THREE.Vector3());
       this.instances.setMatrixAt(index, emptyMatrix);
     } else {
-      this.updatePositionFor(index, sourceVector, targetVector);
+      this.updatePositionFor(index, size, sourceVector, targetVector);
     }
     this.instances.instanceMatrix.needsUpdate = true;
   }

@@ -91,7 +91,7 @@ class Edge {
     if (this.performanceVersion) {
       const targetVector = this.targetNode.position.clone();
       const sourceVector = this.sourceNode.position.clone();
-      this.edgeInstances.setVisibilityFor(this.id, visibility, sourceVector, targetVector);
+      this.edgeInstances.setVisibilityFor(this.id, visibility, this.size, sourceVector, targetVector);
     } else {
       this.instance.visible = visibility;
       this.instance.children[0].visible = visibility;

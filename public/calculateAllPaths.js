@@ -2,6 +2,12 @@ onmessage = (e) => {
   const nodePathMaps = {};
   const nodes = e.data;
   const nodeIds = Object.keys(nodes).map((nodeId) => parseInt(nodeId, 10));
+  const getConnectedNodes = (node) => {
+    const connectedNodes = new Set();
+    node.targetForEdges.forEach((incomingEdge) => connectedNodes.add(nodes[incomingEdge.sourceNode]));
+    node.sourceForEdges.forEach((outgoingEdge) => connectedNodes.add(nodes[outgoingEdge.targetNode]));
+    return [...connectedNodes];
+  };
   nodeIds.forEach((nodeId, index) => {
     const node = nodes[nodeId];
     nodePathMaps[nodeId] = {};
@@ -34,30 +40,11 @@ onmessage = (e) => {
           paths: [...allPaths, currentPath],
           distance
         };
-        const nextConnectedNodes = [];
-        // add all nodes, that are connected to the current node to the next iteration array
-        connectedNode.targetForEdges.forEach((incomingEdge) => {
-          if (!nextConnectedNodes.includes(nodes[incomingEdge.sourceNode])) {
-            nextConnectedNodes.push(nodes[incomingEdge.sourceNode]);
-          }
-        });
-        connectedNode.sourceForEdges.forEach((outgoingEdge) => {
-          if (!nextConnectedNodes.includes(nodes[outgoingEdge.targetNode])) {
-            nextConnectedNodes.push(nodes[outgoingEdge.targetNode]);
-          }
-        });
+        const nextConnectedNodes = getConnectedNodes(connectedNode);
         nextStep(nextConnectedNodes, currentPath, distance + 1);
       });
     };
-    const connectedNodes = [];
-    node.targetForEdges.forEach((incomingEdge) => {
-      connectedNodes.push(nodes[incomingEdge.sourceNode]);
-    });
-    node.sourceForEdges.forEach((outgoingEdge) => {
-      if (!connectedNodes.includes(nodes[outgoingEdge.targetNode])) {
-        connectedNodes.push(nodes[outgoingEdge.targetNode]);
-      }
-    });
+    const connectedNodes = getConnectedNodes(node);
     nextStep(connectedNodes, [node], 1);
   });
   postMessage({type: 'finished', nodePathMaps});

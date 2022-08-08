@@ -91,7 +91,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
               key={node.id}
             >
               <td>{node.id}</td>
-              <td>{node.name}</td>
+              <td style={{userSelect: 'all'}} className="max-width big">{node.name}</td>
               <td>{node.size}</td>
               <td>
                 {node.color}
@@ -118,7 +118,9 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
                 />
               </td>
               {Object.keys(node.data).map((dataPoint) => (
-                <td key={dataPoint}>{Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}</td>
+                <td key={dataPoint} className="max-width">
+                  {Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}
+                </td>
               ))}
             </tr>
           ))}

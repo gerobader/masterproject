@@ -82,9 +82,9 @@ const InfoTable = ({setProgressInfo}) => {
     if (directed) {
       let mutualConnectionCount = 0;
       nodes.forEach((node) => {
-        node.sourceForEdges.forEach((outgoindEdge) => {
-          outgoindEdge.targetNode.sourceForEdges.find((targetNodeOutgoingEdge) => {
-            if (targetNodeOutgoingEdge.targetNode.id === node.id) {
+        node.sourceForEdges.forEach((outgoing) => {
+          outgoing.targetNode.sourceForEdges.find((targetNodeOutgoing) => {
+            if (targetNodeOutgoing.targetNode.id === node.id) {
               mutualConnectionCount++;
               return true;
             }
@@ -105,16 +105,21 @@ const InfoTable = ({setProgressInfo}) => {
     statisticalMeasuresWorker.postMessage({nodeClones, directed});
     resetTimeVars();
     statisticalMeasuresWorker.addEventListener('message', (e) => {
-      if (e.data.type === 'finished') {
+      const {type, nodeId, updatedClones} = e.data;
+      if (type === 'finished') {
+        nodes.forEach((node) => {
+          Object.keys(updatedClones[node.id].data).forEach((dataPointName) => {
+            node.setData(dataPointName, updatedClones[node.id].data[dataPointName]);
+          });
+        });
         calculateNetworkStatistics(nodes);
         setCalculationRunning(false);
         setProgressInfo(undefined);
         dispatch(setNodes([...nodes]));
-      } else if (e.data.type === 'progress') {
-        const nodeToUpdate = nodes.find((node) => node.id === e.data.nodeId);
-        nodeToUpdate.data = {...nodeToUpdate.data, ...e.data.statisticalMeasures};
+      } else if (type === 'progress') {
+        const currentNode = nodes.find((node) => node.id === nodeId);
         setProgressInfo({
-          info: nodeToUpdate.name,
+          info: currentNode.name,
           percentage: (progressCount / nodes.length) * 100,
           remainingTime: getRemainingTime(),
           type: 'Calculating statistical measures',
@@ -125,64 +130,61 @@ const InfoTable = ({setProgressInfo}) => {
   };
 
   const calculateShortestPathBetweenNodes = () => {
-    if (!calculationRunning) {
-      setCalculationRunning(true);
-      const edgeClones = {};
-      const nodeClones = {};
-      edges.forEach((edge) => {
-        edgeClones[edge.id] = {
-          sourceNode: edge.sourceNode.id,
-          targetNode: edge.targetNode.id
-        };
-      });
-      nodes.forEach((node) => {
-        nodeClones[node.id] = {
-          id: node.id,
-          targetForEdges: node.targetForEdges.map((edge) => edgeClones[edge.id]),
-          sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
-        };
-      });
-      shortestPathWorker = new Worker('calculateAllPaths.js');
-      shortestPathWorker.postMessage(nodeClones);
-      resetTimeVars();
-      shortestPathWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'finished') {
-          timeArray = [];
-          progressCount = 0;
-          const calculatedPaths = event.data.nodePathMaps;
-          nodes.forEach((node) => {
-            const pathMap = {};
-            Object.keys(calculatedPaths[node.id]).forEach((targetNodeId) => {
-              nodeClones[node.id].pathMap = calculatedPaths[node.id];
-              const targetNodeIdInt = parseInt(targetNodeId, 10);
-              const paths = calculatedPaths[node.id][targetNodeIdInt].paths.map((path) => {
-                const newPathSet = new Set();
-                path.forEach((pathNode) => {
-                  newPathSet.add(nodes.find((nodeObject) => nodeObject.id === pathNode.id));
-                });
-                return newPathSet;
+    if (calculationRunning) return;
+    setCalculationRunning(true);
+    const edgeClones = {};
+    const nodeClones = {};
+    edges.forEach((edge) => {
+      edgeClones[edge.id] = {
+        sourceNode: edge.sourceNode.id,
+        targetNode: edge.targetNode.id
+      };
+    });
+    nodes.forEach((node) => {
+      nodeClones[node.id] = {
+        id: node.id,
+        targetForEdges: node.targetForEdges.map((edge) => edgeClones[edge.id]),
+        sourceForEdges: node.sourceForEdges.map((edge) => edgeClones[edge.id])
+      };
+    });
+    shortestPathWorker = new Worker('calculateAllPaths.js');
+    shortestPathWorker.postMessage(nodeClones);
+    resetTimeVars();
+    shortestPathWorker.addEventListener('message', (event) => {
+      if (event.data.type === 'finished') {
+        const calculatedPaths = event.data.nodePathMaps;
+        nodes.forEach((node) => {
+          const pathMap = {};
+          Object.keys(calculatedPaths[node.id]).forEach((targetNodeId) => {
+            nodeClones[node.id].pathMap = calculatedPaths[node.id];
+            const targetNodeIdInt = parseInt(targetNodeId, 10);
+            const paths = calculatedPaths[node.id][targetNodeIdInt].paths.map((path) => {
+              const newPathSet = new Set();
+              path.forEach((pathNode) => {
+                newPathSet.add(nodes.find((nodeObject) => nodeObject.id === pathNode.id));
               });
-              pathMap[targetNodeIdInt] = {
-                target: nodes.find((nodeObject) => nodeObject.id === targetNodeIdInt),
-                paths: paths,
-                distance: calculatedPaths[node.id][targetNodeIdInt].distance
-              };
+              return newPathSet;
             });
-            // eslint-disable-next-line no-param-reassign
-            node.pathMap = pathMap;
+            pathMap[targetNodeIdInt] = {
+              target: nodes.find((nodeObject) => nodeObject.id === targetNodeIdInt),
+              paths: paths,
+              distance: calculatedPaths[node.id][targetNodeIdInt].distance
+            };
           });
-          calculateStatisticalMeasures(nodeClones);
-        } else if (event.data.type === 'progress') {
-          setProgressInfo({
-            percentage: event.data.progress.percentage,
-            info: nodes[event.data.progress.nodeId].name,
-            type: 'Calculating shortest Paths between Nodes',
-            remainingTime: getRemainingTime(),
-            step: 1
-          });
-        }
-      });
-    }
+          // eslint-disable-next-line no-param-reassign
+          node.pathMap = pathMap;
+        });
+        calculateStatisticalMeasures(nodeClones);
+      } else if (event.data.type === 'progress') {
+        setProgressInfo({
+          percentage: event.data.progress.percentage,
+          info: nodes[event.data.progress.nodeId].name,
+          type: 'Calculating shortest Paths between Nodes',
+          remainingTime: getRemainingTime(),
+          step: 1
+        });
+      }
+    });
   };
 
   const adjustedSearchValue = searchValue.trim().toLowerCase();

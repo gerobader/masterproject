@@ -29,10 +29,11 @@ import * as miserables from '../../../../data/performanceTest/0_miserables_klein
 import * as middleSizedNetwork from '../../../../data/performanceTest/1_mittel.json';
 import * as bigNetwork from '../../../../data/performanceTest/2_groesser.json';
 import * as programArchitecture from '../../../../data/programmArchitecture.json';
+import * as wikiMovies from '../../../../data/wiki-movies.json';
 
 import './LoadNetworkModal.scss';
 
-const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'programArchitecture'];
+const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies', 'programArchitecture'];
 
 const LoadNetworkModal = () => {
   const {nodes} = useSelector((state) => state.network);
@@ -105,29 +106,6 @@ const LoadNetworkModal = () => {
     }, 500);
   };
 
-  const getTestNetworkData = (network) => {
-    const testEdges = network.links.map((link) => {
-      const edge = {source: link.source, target: link.target, data: {}};
-      if (link.value) edge.data.value = link.value;
-      return edge;
-    });
-    const testNodes = network.nodes.map((node) => {
-      const newNode = {
-        label: node.name,
-        data: {}
-      };
-      if (node.group !== undefined) newNode.data.group = node.group;
-      if (node.attributes && typeof node.attributes === 'object') {
-        newNode.data = {
-          ...newNode.data,
-          ...node.attributes
-        };
-      }
-      return newNode;
-    });
-    return {testNodes, testEdges};
-  };
-
   const getNetworkData = async () => {
     if (selectedNetwork && !isLoading) {
       dispatch(setNetworkName(selectedNetwork));
@@ -139,7 +117,7 @@ const LoadNetworkModal = () => {
       );
       const session = await neoDriver.session({database: selectedNetwork});
       let res;
-      const newNodes = [];
+      let newNodes = [];
       let edges = [];
       let isDirected = false;
       if (selectedNetwork === 'gameofthrones') {
@@ -213,22 +191,21 @@ const LoadNetworkModal = () => {
           return {source, target};
         });
       } else if (selectedNetwork === 'smallSize') {
-        const {testNodes, testEdges} = getTestNetworkData(miserables.default);
-        edges = testEdges;
-        testNodes.forEach((node) => newNodes.push(node));
+        edges = miserables.default.links;
+        newNodes = miserables.default.nodes;
       } else if (selectedNetwork === 'midSize') {
-        const {testNodes, testEdges} = getTestNetworkData(middleSizedNetwork.default);
-        edges = testEdges;
-        testNodes.forEach((node) => newNodes.push(node));
+        edges = middleSizedNetwork.default.links;
+        newNodes = middleSizedNetwork.default.nodes;
       } else if (selectedNetwork === 'largeSize') {
-        const {testNodes, testEdges} = getTestNetworkData(bigNetwork.default);
-        edges = testEdges;
-        testNodes.forEach((node) => newNodes.push(node));
+        edges = bigNetwork.default.links;
+        newNodes = bigNetwork.default.nodes;
       } else if (selectedNetwork === 'programArchitecture') {
         isDirected = true;
-        const {testNodes, testEdges} = getTestNetworkData(programArchitecture.default);
-        edges = testEdges;
-        testNodes.forEach((node) => newNodes.push(node));
+        edges = programArchitecture.default.links;
+        newNodes = programArchitecture.default.nodes;
+      } else if (selectedNetwork === 'wikiMovies') {
+        edges = wikiMovies.default.links;
+        newNodes = wikiMovies.default.nodes;
       }
       loadNetworkData({
         name: selectedNetwork,

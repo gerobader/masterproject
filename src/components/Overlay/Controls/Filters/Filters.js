@@ -101,37 +101,37 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   // eslint-disable-next-line no-shadow
   const applyFilters = (filterCollection, resultType) => {
     nodes.forEach((node) => node.setVisibility(true));
-    if (filterCollection.elements.length) {
-      const applyCollectionFilter = (collection, availableNodes) => {
-        let temporaryNodes = [];
-        if (collection.operator === 'and') {
-          temporaryNodes = [...availableNodes];
-          collection.elements.forEach((collectionElement) => {
-            if (collectionElement.type === 'collection' && collectionElement.elements.length) {
-              temporaryNodes = applyCollectionFilter(collectionElement, temporaryNodes);
-            } else {
-              temporaryNodes = filterNodes(temporaryNodes, collectionElement, resultType);
-            }
-          });
-        } else {
-          collection.elements.forEach((collectionElement) => {
-            if (collectionElement.type === 'collection') {
-              temporaryNodes = [...temporaryNodes, ...applyCollectionFilter(collectionElement, availableNodes)];
-            } else {
-              temporaryNodes = [...temporaryNodes, ...filterNodes(availableNodes, collectionElement, resultType)];
-            }
-          });
-          // remove duplicate nodes
-          temporaryNodes = [...new Set(temporaryNodes)];
-        }
-        return temporaryNodes;
-      };
-      const finalNodes = applyCollectionFilter(filterCollection, nodes);
-      if (resultType === 'Select') {
-        dispatch(setSelectedNodes(finalNodes));
+    if (!filterCollection.elements.length) return;
+    const applyCollectionFilter = (collection, availableNodes) => {
+      let temporaryNodes = [];
+      if (collection.operator === 'and') {
+        temporaryNodes = [...availableNodes];
+        collection.elements.forEach((collectionElement) => {
+          if (collectionElement.type === 'collection'
+            && collectionElement.elements.length) {
+            temporaryNodes = applyCollectionFilter(collectionElement, temporaryNodes);
+          } else {
+            temporaryNodes = filterNodes(temporaryNodes, collectionElement, resultType);
+          }
+        });
       } else {
-        finalNodes.forEach((node) => node.setVisibility(false));
+        collection.elements.forEach((collectionElement) => {
+          if (collectionElement.type === 'collection') {
+            temporaryNodes = [...temporaryNodes, ...applyCollectionFilter(collectionElement, availableNodes)];
+          } else {
+            temporaryNodes = [...temporaryNodes, ...filterNodes(availableNodes, collectionElement, resultType)];
+          }
+        });
+        // remove duplicate nodes
+        temporaryNodes = [...new Set(temporaryNodes)];
       }
+      return temporaryNodes;
+    };
+    const finalNodes = applyCollectionFilter(filterCollection, nodes);
+    if (resultType === 'Select') {
+      dispatch(setSelectedNodes(finalNodes));
+    } else {
+      finalNodes.forEach((node) => node.setVisibility(false));
     }
     dispatch(setNodes(nodes));
   };

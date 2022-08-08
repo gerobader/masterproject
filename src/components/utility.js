@@ -71,22 +71,54 @@ export const arrayMove = (array, currentIndex, newIndex) => {
   return newArray;
 };
 
-export const createNodes = (nodes, networkBoundarySize) => nodes.map((node) => ({
-  position: new THREE.Vector3(
-    node.position ? node.position.x : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-    node.position ? node.position.y : Math.random() * networkBoundarySize - networkBoundarySize / 2,
-    node.position ? node.position.z : Math.random() * networkBoundarySize - networkBoundarySize / 2
-  ),
-  size: node.size || 1,
-  color: node.color || '#008799',
-  id: node.id,
-  name: node.name || node.text || node.label,
-  data: node.data || node.attributes || {},
-  colorLocked: Boolean(node.colorLocked),
-  shape: node.shape || 'Sphere',
-  pathMap: node.pathMap,
-  visible: node.visible !== false
-}));
+export const createNodes = (nodes, networkBoundarySize) => {
+  const componentAlwaysZero = nodes.every((node) => node.component === 0);
+  return nodes.map((node) => {
+    let data = {};
+    if (node.data) {
+      if (node.data.centrality) {
+        if (typeof node.data.centrality === 'object') {
+          data = {...node.data.centrality};
+        } else {
+          data.centrality = node.data.centrality;
+        }
+        // eslint-disable-next-line no-param-reassign
+        delete node.data.centrality;
+      }
+      data = {...data, ...node.data};
+    }
+    if (node.attributes) {
+      if (node.attributes.centrality) {
+        if (typeof node.attributes.centrality === 'object') {
+          data = {...data, ...node.attributes.centrality};
+        } else {
+          data.centrality = node.attributes.centrality;
+        }
+        // eslint-disable-next-line no-param-reassign
+        delete node.attributes.centrality;
+      }
+      data = {...data, ...node.attributes};
+    }
+    if (node.group !== undefined) data.group = node.group;
+    if (node.component !== undefined && !componentAlwaysZero) data.component = node.component;
+    return {
+      position: new THREE.Vector3(
+        node.position ? node.position.x : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+        node.position ? node.position.y : Math.random() * networkBoundarySize - networkBoundarySize / 2,
+        node.position ? node.position.z : Math.random() * networkBoundarySize - networkBoundarySize / 2
+      ),
+      size: node.size || 1,
+      color: node.color || '#008799',
+      id: node.id,
+      name: node.name || node.text || node.label,
+      data,
+      colorLocked: Boolean(node.colorLocked),
+      shape: node.shape || 'Sphere',
+      pathMap: node.pathMap,
+      visible: node.visible !== false
+    };
+  });
+};
 
 export const createEdges = (edgesInfo) => {
   const edges = [];

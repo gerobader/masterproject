@@ -9,7 +9,8 @@ import {
   SET_AVERAGE_POSITION_PLACEHOLDER,
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
-  SET_DIRECTED, SET_OCTREE
+  SET_DIRECTED, SET_OCTREE,
+  SET_ELEMENT_GROUP
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -22,6 +23,7 @@ const initialState = {
   reciprocity: undefined,
   density: undefined,
   directed: true,
+  elementGroup: undefined,
   nodes: [],
   edges: [],
   selectedNodes: [],
@@ -76,6 +78,11 @@ const networkReducer = (state = initialState, action) => {
         averageDegree: action.averageDegree,
         reciprocity: action.reciprocity,
         density: action.density
+      };
+    case SET_ELEMENT_GROUP:
+      return {
+        ...state,
+        elementGroup: action.payload
       };
     case SET_NODES:
       return {

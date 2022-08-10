@@ -14,7 +14,13 @@ import Edges from './Elements/Edges';
 import BoundaryBox from './Elements/BoundaryBox';
 import Octree from '../Overlay/Controls/Layout/Octree';
 import {
-  setSelectedNodes, setSelectedEdges, setNodesAndEdges, setAveragePositionPlaceholder, setDirected, setOctree
+  setSelectedNodes,
+  setSelectedEdges,
+  setNodesAndEdges,
+  setAveragePositionPlaceholder,
+  setDirected,
+  setOctree,
+  setElementGroup
 } from '../../redux/network/network.actions';
 import {
   addToActionHistory, undoAction, redoAction, setCameraControls, setAxes
@@ -30,7 +36,6 @@ let composer;
 let controls;
 let camera;
 let hoveredElement;
-let networkElements = new THREE.Group();
 let animationRunning = false;
 let boundaryBox;
 const controlKeys = ['f', 'escape', 'z'];
@@ -248,9 +253,9 @@ class Renderer extends Component {
     }
   }
 
-  handleControls(newSelectedNodes, newSelectedEdges) {
-    const {averagePositionPlaceholder, _setAveragePositionPlaceholder} = this.props;
-    if (newSelectedEdges.length || newSelectedNodes.length === 0) {
+  handleControls(newSelectedNodes) {
+    const {averagePositionPlaceholder, _setAveragePositionPlaceholder, elementGroup} = this.props;
+    if (newSelectedNodes.length === 0) {
       controls.detach();
     } else if (
       (
@@ -269,13 +274,13 @@ class Renderer extends Component {
         newPlaceholder.position.set(x, y, z);
         newPlaceholder.userData[newSelectedNodes[0].id] = new THREE.Vector3();
       } else {
-        const averagePosition = calculateAveragePosition(newSelectedNodes, false);
+        const averagePosition = calculateAveragePosition(newSelectedNodes, elementGroup);
         newPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
         newSelectedNodes.forEach((node) => {
           newPlaceholder.userData[node.id] = averagePosition.clone().sub(node.position);
         });
       }
-      networkElements.add(newPlaceholder);
+      elementGroup.add(newPlaceholder);
       controls.attach(newPlaceholder);
       _setAveragePositionPlaceholder(newPlaceholder);
     }
@@ -284,10 +289,10 @@ class Renderer extends Component {
   updateSceneElements() {
     const {
       performanceMode, networkBoundarySize, showBoundary, boundaryOpacity, directed, nodes: serializedNodes,
-      edges: serializedEdges, _setNodesAndEdges, _setOctree, cameraControls, showLabel
+      edges: serializedEdges, _setNodesAndEdges, _setOctree, _setElementGroup, cameraControls, showLabel
     } = this.props;
-    networkElements = new THREE.Group();
-    networkElements.name = 'Network';
+    const elementGroup = new THREE.Group();
+    elementGroup.name = 'Network';
     let nodeInstances;
     let edgeInstances;
     const nodes = serializedNodes.map((node, index) => {
@@ -309,15 +314,15 @@ class Renderer extends Component {
         networkBoundarySize,
         showLabel !== 2
       );
-      if (!performanceMode) networkElements.add(nodeClass.instance);
+      if (!performanceMode) elementGroup.add(nodeClass.instance);
       return nodeClass;
     });
     if (performanceMode) {
       nodeInstances = new Nodes(nodes);
       edgeInstances = new Edges(serializedEdges, nodes);
       nodes.forEach((node) => node.setNodeInstances(nodeInstances));
-      networkElements.add(nodeInstances.instances);
-      networkElements.add(edgeInstances.instances);
+      elementGroup.add(nodeInstances.instances);
+      elementGroup.add(edgeInstances.instances);
     }
     const edges = serializedEdges.map((edge, index) => {
       const sourceNode = nodes.find(
@@ -339,7 +344,7 @@ class Renderer extends Component {
       );
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
-      if (!performanceMode) networkElements.add(edgeClass.instance);
+      if (!performanceMode) elementGroup.add(edgeClass.instance);
       return edgeClass;
     });
     nodes.forEach((node) => {
@@ -347,8 +352,8 @@ class Renderer extends Component {
       node.calculateDegree();
     });
     boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
-    networkElements.add(boundaryBox.instance);
-    scene.add(networkElements);
+    elementGroup.add(boundaryBox.instance);
+    scene.add(elementGroup);
     nodes.forEach((node) => node.unserializePathMap(nodes));
 
     const octree = new Octree(
@@ -375,13 +380,14 @@ class Renderer extends Component {
     }
     _setNodesAndEdges(nodes, edges, false);
     _setOctree(octree);
+    _setElementGroup(elementGroup);
   }
 
   lookAt(elements) {
-    const {cameraControls} = this.props;
+    const {cameraControls, elementGroup} = this.props;
     if (elements.length) {
       interpolation = 0;
-      const position = calculateAveragePosition(elements);
+      const position = calculateAveragePosition(elements, elementGroup);
       cameraControls.target = position;
       const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
       targetQuaternion = new THREE.Quaternion();
@@ -433,7 +439,7 @@ class Renderer extends Component {
 
   createScene() {
     const {
-      _setCameraControls, _setAxes, networkBoundarySize, showBoundary, boundaryOpacity
+      _setCameraControls, _setAxes, _setElementGroup, networkBoundarySize, showBoundary, boundaryOpacity
     } = this.props;
 
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -441,7 +447,7 @@ class Renderer extends Component {
     this.canvasWrapper.appendChild(renderer.domElement);
 
     scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20000);
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
     scene.add(ambientLight);
     const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -459,18 +465,18 @@ class Renderer extends Component {
     controls = new TransformControls(camera, renderer.domElement);
     controls.setSize(0.5);
 
-    networkElements = new THREE.Group();
-    networkElements.name = 'Network';
+    const elementGroup = new THREE.Group();
+    elementGroup.name = 'Network';
 
     boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
-    networkElements.add(boundaryBox.instance);
+    elementGroup.add(boundaryBox.instance);
 
     const axes = new Axes(networkBoundarySize, camera);
     scene.add(axes.instance);
 
     scene.add(controls);
     scene.add(octGroup);
-    scene.add(networkElements);
+    scene.add(elementGroup);
 
     window.addEventListener('resize', () => {
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -480,6 +486,7 @@ class Renderer extends Component {
     window.addEventListener('keyup', this.handleKeyUp);
 
     _setCameraControls(cameraControls);
+    _setElementGroup(elementGroup);
     _setAxes(axes);
   }
 
@@ -506,10 +513,10 @@ class Renderer extends Component {
 
   animate() {
     const {
-      orbitPreview, nodes, performanceMode, axes
+      orbitPreview, nodes, performanceMode, axes, elementGroup
     } = this.props;
     requestAnimationFrame(this.animate);
-    if (orbitPreview) networkElements.rotateY(0.003);
+    if (orbitPreview) elementGroup.rotateY(0.003);
     this.cameraControls();
     nodes.forEach((node) => node.label.updatePosition());
     axes.updateLabelPositions();
@@ -549,6 +556,7 @@ const mapStateToPros = (state) => ({
   showBoundary: state.settings.showBoundary,
   showLabel: state.settings.showLabel,
   boundaryOpacity: state.settings.boundaryOpacity,
+  elementGroup: state.network.elementGroup,
   nodes: state.network.nodes,
   edges: state.network.edges,
   directed: state.network.directed,
@@ -566,6 +574,7 @@ const mapDispatchToProps = (dispatch) => ({
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setDirected: (directed) => dispatch(setDirected(directed)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
+  _setElementGroup: (elementGroup) => dispatch(setElementGroup(elementGroup)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),
   _setOctree: (octree) => dispatch(setOctree(octree)),

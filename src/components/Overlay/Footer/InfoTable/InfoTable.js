@@ -8,6 +8,7 @@ import TextInput from '../../UI/TextInput/TextInput';
 import {
   setNetworkName, setNetworkStatistics, setNodes, setSortEdgesBy, setSortNodesBy
 } from '../../../../redux/network/network.actions';
+import {setErrorMessage} from '../../../../redux/settings/settings.actions';
 
 import './InfoTable.scss';
 
@@ -25,6 +26,7 @@ const InfoTable = ({setProgressInfo}) => {
   const [tableType, setTableType] = useState('Node Table');
   const [searchValue, setSearchValue] = useState('');
   const [calculationRunning, setCalculationRunning] = useState(false);
+  const [calcError, setCalcError] = useState(false);
   const dispatch = useDispatch();
 
   const changeSortValue = (value, e, prevX, elementType) => {
@@ -183,6 +185,10 @@ const InfoTable = ({setProgressInfo}) => {
           remainingTime: getRemainingTime(),
           step: 1
         });
+      } else if (event.data.type === 'error') {
+        stopCalculation();
+        setCalcError(true);
+        dispatch(setErrorMessage(event.data.message));
       }
     });
   };
@@ -209,7 +215,7 @@ const InfoTable = ({setProgressInfo}) => {
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
         {calculationRunning
           ? <Button className="danger" text="Stop Calculation" onClick={stopCalculation}/>
-          : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>}
+          : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes} disabled={calcError}/>}
       </div>
       {tableType === 'Node Table' ? (
         <NodeTable changeSortValue={changeSortValue} nodesToShow={filteredElements}/>

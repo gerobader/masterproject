@@ -51,10 +51,12 @@ export const sortArray = (a, b, reverse = false) => {
   return compareFunction ? -1 : 1;
 };
 
-export const calculateAveragePosition = (elements) => {
-  const averagePosition = new THREE.Vector3(0, 0, 0);
+export const calculateAveragePosition = (elements, elementGroup) => {
+  const averagePosition = new THREE.Vector3();
   elements.forEach((element) => {
-    averagePosition.add(element.position);
+    const worldPos = element.position.clone();
+    elementGroup.localToWorld(worldPos);
+    averagePosition.add(worldPos);
   });
   return averagePosition.divideScalar(elements.length);
 };

@@ -1,7 +1,6 @@
 @import '../../../../assets/settings';
 .load-network{
   .menu-element{
-    height: auto;
     .header{
       margin-bottom: 28px;
     }
@@ -9,8 +8,6 @@
       overflow: visible;
       .button-wrapper{
         position: relative;
-        margin-top: 20px;
-        margin-bottom: 10px;
         .loader{
           position: absolute;
           top: 4px;

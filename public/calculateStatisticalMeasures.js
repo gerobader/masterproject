@@ -7,7 +7,7 @@ onmessage = (e) => {
     const reachableNodeIds = Object.keys(node.pathMap);
     if (reachableNodeIds.length !== nodeIds.length - 1) return 0;
     const distanceSum = reachableNodeIds.reduce((prevVal, targetNodeId) => prevVal + node.pathMap[targetNodeId].distance, 0);
-    return Math.round((reachableNodeIds.length / distanceSum) * 1000) / 1000;
+    return reachableNodeIds.length / distanceSum;
   };
 
   const calculateBetweenness = (currentNode) => {
@@ -26,7 +26,7 @@ onmessage = (e) => {
       });
     });
     if (allShortestPathsCount === 0) return 0;
-    return Math.round(((shortestPathPassThroughCount / allShortestPathsCount) * 100) * 1000) / 1000;
+    return (shortestPathPassThroughCount / allShortestPathsCount) * 100;
   };
 
   const calculateLocalClusteringCoefficient = (node) => {
@@ -45,7 +45,7 @@ onmessage = (e) => {
         if (connectedNodes.has(connectedNodeV2)) existingLinks++;
       });
     });
-    return Math.round((existingLinks / maxPossibleLinks) * 1000) / 1000;
+    return existingLinks / maxPossibleLinks;
   };
 
   nodeIds.forEach((nodeId) => {

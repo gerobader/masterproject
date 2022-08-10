@@ -45,7 +45,11 @@ onmessage = (e) => {
       });
     };
     const connectedNodes = getConnectedNodes(node);
-    nextStep(connectedNodes, [node], 1);
+    try {
+      nextStep(connectedNodes, [node], 1);
+    } catch (err) {
+      postMessage({type: 'error', message: 'Network is too big for statistical calculation!'});
+    }
   });
   postMessage({type: 'finished', nodePathMaps});
   // eslint-disable-next-line no-restricted-globals

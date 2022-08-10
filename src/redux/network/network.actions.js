@@ -9,7 +9,8 @@ import {
   SET_AVERAGE_POSITION_PLACEHOLDER,
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
-  SET_DIRECTED, SET_OCTREE
+  SET_DIRECTED, SET_OCTREE,
+  SET_ELEMENT_GROUP
 } from '../actionTypes';
 
 export const setNetworkName = (name) => ({
@@ -30,6 +31,11 @@ export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, 
   averageDegree,
   reciprocity,
   density
+});
+
+export const setElementGroup = (elementGroup) => ({
+  type: SET_ELEMENT_GROUP,
+  payload: elementGroup
 });
 
 export const setNodes = (nodes) => ({

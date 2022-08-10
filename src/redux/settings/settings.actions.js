@@ -15,7 +15,7 @@ import {
   SET_BOUNDARY_OPACITY,
   SET_LAYOUT_CALCULATION_RUNNING,
   SET_AXES,
-  SET_SHOW_AXIS
+  SET_SHOW_AXIS, SET_ERROR_MESSAGE
 } from '../actionTypes';
 import {setNodes} from '../network/network.actions';
 import {setFilterCollection} from '../filter/filter.action';
@@ -56,6 +56,11 @@ export const setShowControlsModal = (show) => ({
   payload: show
 });
 
+export const setErrorMessage = (errorMessage) => ({
+  type: SET_ERROR_MESSAGE,
+  payload: errorMessage
+});
+
 export const setLayoutCalculationRunning = (running) => ({
   type: SET_LAYOUT_CALCULATION_RUNNING,
   payload: running
@@ -77,7 +82,9 @@ export const setCurrentHistoryPosition = (position) => ({
 
 export const undoAction = () => (dispatch, getState) => {
   const {actionHistory, currentHistoryPosition} = getState().settings;
-  const {averagePositionPlaceholder, nodes, selectedNodes} = getState().network;
+  const {
+    averagePositionPlaceholder, nodes, selectedNodes, elementGroup
+  } = getState().network;
   if (currentHistoryPosition > 0) {
     const actionsToUndo = actionHistory[currentHistoryPosition - 1];
     actionsToUndo.forEach((action) => {
@@ -93,7 +100,7 @@ export const undoAction = () => (dispatch, getState) => {
       }
     });
     if (averagePositionPlaceholder) {
-      const averagePosition = calculateAveragePosition(selectedNodes);
+      const averagePosition = calculateAveragePosition(selectedNodes, elementGroup);
       averagePositionPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
     }
     dispatch(setCurrentHistoryPosition(currentHistoryPosition - 1));
@@ -103,7 +110,9 @@ export const undoAction = () => (dispatch, getState) => {
 
 export const redoAction = () => (dispatch, getState) => {
   const {actionHistory, currentHistoryPosition} = getState().settings;
-  const {averagePositionPlaceholder, nodes, selectedNodes} = getState().network;
+  const {
+    averagePositionPlaceholder, nodes, selectedNodes, elementGroup
+  } = getState().network;
   if (currentHistoryPosition < actionHistory.length) {
     const actionsToRedo = actionHistory[currentHistoryPosition];
     actionsToRedo.forEach((action) => {
@@ -119,7 +128,7 @@ export const redoAction = () => (dispatch, getState) => {
       }
     });
     if (averagePositionPlaceholder) {
-      const averagePosition = calculateAveragePosition(selectedNodes);
+      const averagePosition = calculateAveragePosition(selectedNodes, elementGroup);
       averagePositionPlaceholder.position.set(averagePosition.x, averagePosition.y, averagePosition.z);
     }
     dispatch(setCurrentHistoryPosition(currentHistoryPosition + 1));

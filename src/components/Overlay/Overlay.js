@@ -8,6 +8,7 @@ import Footer from './Footer/Footer';
 import SaveNetworkModal from './Modals/SaveNetworkModal/SaveNetworkModal';
 import LoadNetworkModal from './Modals/LoadNetworkModal/LoadNetworkModal';
 import ControlsModal from './Modals/ControlsModal/ControlsModal';
+import ErrorModal from './Modals/ErrorModal/ErrorModal';
 
 import './Overlay.scss';
 
@@ -44,6 +45,7 @@ const Overlay = () => {
       <SaveNetworkModal/>
       <LoadNetworkModal/>
       <ControlsModal/>
+      <ErrorModal/>
       <div className="left-menu">
         <Appearance/>
         <Layout/>

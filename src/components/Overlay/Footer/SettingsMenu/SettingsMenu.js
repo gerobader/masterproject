@@ -21,7 +21,7 @@ import uploadIcon from '../../../../assets/upload-icon.svg';
 
 const SettingsMenu = ({hideSettings}) => {
   const {orbitPreview, cameraControls} = useSelector((state) => state.settings);
-  const {nodes} = useSelector((state) => state.network);
+  const {nodes, elementGroup} = useSelector((state) => state.network);
   const menuRef = useRef();
   const dispatch = useDispatch();
 
@@ -38,7 +38,7 @@ const SettingsMenu = ({hideSettings}) => {
   }, [menuRef]);
 
   const centerView = () => {
-    cameraControls.target = nodes ? calculateAveragePosition(nodes) : new THREE.Vector3();
+    cameraControls.target = nodes ? calculateAveragePosition(nodes, elementGroup) : new THREE.Vector3();
   };
 
   return (

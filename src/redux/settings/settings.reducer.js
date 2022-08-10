@@ -15,7 +15,7 @@ import {
   SET_LAYOUT_CALCULATION_RUNNING,
   SET_SHOW_LOAD_NETWORK_MODAL,
   SET_AXES,
-  SET_SHOW_AXIS
+  SET_SHOW_AXIS, SET_ERROR_MESSAGE
 } from '../actionTypes';
 
 const initialState = {
@@ -26,6 +26,7 @@ const initialState = {
   showSaveNetworkModal: false,
   showLoadNetworkModal: true,
   showControlsModal: false,
+  errorMessage: undefined,
   layoutCalculationRunning: false,
   actionHistory: [],
   currentHistoryPosition: 0,
@@ -73,6 +74,11 @@ const settingsReducer = (state = initialState, action) => {
       return {
         ...state,
         showControlsModal: action.payload
+      };
+    case SET_ERROR_MESSAGE:
+      return {
+        ...state,
+        errorMessage: action.payload
       };
     case SET_LAYOUT_CALCULATION_RUNNING:
       return {

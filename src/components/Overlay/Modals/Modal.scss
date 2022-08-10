@@ -29,6 +29,7 @@
   }
   .menu-element {
     background: $menuWindowBackgroundNonBlur;
+    height: auto;
     .close-button{
       position: absolute;
       right: 24px;
@@ -40,6 +41,10 @@
     }
     .controls-wrapper{
       align-items: center;
+      .button-wrapper{
+        margin-top: 20px;
+        margin-bottom: 10px;
+      }
     }
   }
 }

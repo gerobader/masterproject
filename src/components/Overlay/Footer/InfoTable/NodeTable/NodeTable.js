@@ -119,7 +119,10 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
               </td>
               {Object.keys(node.data).map((dataPoint) => (
                 <td key={dataPoint} className="max-width">
-                  {Number.isNaN(node.data[dataPoint]) ? 'Path info missing!' : node.data[dataPoint]}
+                  {/* eslint-disable-next-line no-restricted-globals */}
+                  {(!isNaN(node.data[dataPoint]))
+                    ? Math.round(node.data[dataPoint] * 1000000) / 1000000
+                    : node.data[dataPoint]}
                 </td>
               ))}
             </tr>

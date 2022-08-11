@@ -7,7 +7,7 @@ class Edges {
     this.createEdges(edges, nodes);
   }
 
-  createEdges(edges, nodes) {
+  createEdges(edges) {
     const defaultMat = new THREE.MeshBasicMaterial();
     defaultMat.transparent = true;
     defaultMat.opacity = 0.3;
@@ -15,15 +15,7 @@ class Edges {
     const color = new THREE.Color();
     const instances = new THREE.InstancedMesh(geometry, defaultMat, edges.length);
     edges.forEach((edge, index) => {
-      const sourceNode = nodes.find((node) => {
-        if (typeof edge.source === 'string') return node.name === edge.source;
-        return node.id === edge.source;
-      });
-      const targetNode = nodes.find((node) => {
-        if (typeof edge.source === 'string') return node.name === edge.target;
-        return node.id === edge.target;
-      });
-      const edgeMatrix = this.getTransformMatrix(sourceNode.position.clone(), targetNode.position.clone());
+      const edgeMatrix = this.getTransformMatrix(edge.sourceNode.position.clone(), edge.targetNode.position.clone());
       if (edge.size) edgeMatrix.scale(new THREE.Vector3(edge.size, 1, edge.size));
       instances.setMatrixAt(index, edgeMatrix);
       instances.setColorAt(index, color.set(edge.color || '#ffffff'));

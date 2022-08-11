@@ -26,7 +26,6 @@ const InfoTable = ({setProgressInfo}) => {
   const [tableType, setTableType] = useState('Node Table');
   const [searchValue, setSearchValue] = useState('');
   const [calculationRunning, setCalculationRunning] = useState(false);
-  const [calcError, setCalcError] = useState(false);
   const dispatch = useDispatch();
 
   const changeSortValue = (value, e, prevX, elementType) => {
@@ -179,29 +178,32 @@ const InfoTable = ({setProgressInfo}) => {
         calculateStatisticalMeasures(nodeClones);
       } else if (event.data.type === 'progress') {
         setProgressInfo({
-          percentage: event.data.progress.percentage,
-          info: nodes[event.data.progress.nodeId].name,
+          percentage: (event.data.progress.progressCount / nodes.length) * 100,
+          info: `${nodes[event.data.progress.nodeId].name} (${event.data.progress.progressCount}/${nodes.length})`,
           type: 'Calculating shortest Paths between Nodes',
           remainingTime: getRemainingTime(),
           step: 1
         });
       } else if (event.data.type === 'error') {
         stopCalculation();
-        setCalcError(true);
         dispatch(setErrorMessage(event.data.message));
       }
     });
   };
 
   const adjustedSearchValue = searchValue.trim().toLowerCase();
-  let filteredElements;
-  if (tableType === 'Node Table') {
-    filteredElements = nodes.filter((node) => node.name.toLowerCase().includes(adjustedSearchValue));
-  } else {
-    filteredElements = edges.filter((edge) => (
-      edge.sourceNode.name.toLowerCase().includes(adjustedSearchValue)
-      || edge.targetNode.name.toLowerCase().includes(adjustedSearchValue)
-    ));
+  let filteredElements = tableType === 'Node Table' ? nodes : edges;
+  if (adjustedSearchValue) {
+    if (tableType === 'Node Table') {
+      filteredElements = nodes.filter((node) => (node.name ? node.name.toLowerCase().includes(adjustedSearchValue) : false));
+    } else {
+      filteredElements = edges.filter((edge) => {
+        let returnVal = false;
+        if (edge.sourceNode.name) returnVal = edge.sourceNode.name.toLowerCase().includes(adjustedSearchValue);
+        if (!returnVal && edge.targetNode.name) returnVal = edge.targetNode.name.toLowerCase().includes(adjustedSearchValue);
+        return returnVal;
+      });
+    }
   }
   return (
     <div className="info-table">
@@ -215,7 +217,7 @@ const InfoTable = ({setProgressInfo}) => {
         <TextInput value={searchValue} setValue={setSearchValue} placeholder="Search"/>
         {calculationRunning
           ? <Button className="danger" text="Stop Calculation" onClick={stopCalculation}/>
-          : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes} disabled={calcError}/>}
+          : <Button text="Analyse Network" onClick={calculateShortestPathBetweenNodes}/>}
       </div>
       {tableType === 'Node Table' ? (
         <NodeTable changeSortValue={changeSortValue} nodesToShow={filteredElements}/>

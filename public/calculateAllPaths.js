@@ -15,7 +15,7 @@ onmessage = (e) => {
       type: 'progress',
       progress: {
         nodeId: node.id,
-        percentage: ((index + 1) / nodeIds.length) * 100
+        progressCount: index + 1
       }
     });
     const nextStep = (allConnectedNodes, path, distance) => {
@@ -23,6 +23,7 @@ onmessage = (e) => {
         if (
           (nodePathMaps[nodeId][connectedNode.id] && nodePathMaps[nodeId][connectedNode.id].distance < distance)
           || connectedNode.id === nodeId
+          || distance >= 20
         ) {
           // return if connected node is starting node or if path length is already longer than another found path
           return;
@@ -48,7 +49,7 @@ onmessage = (e) => {
     try {
       nextStep(connectedNodes, [node], 1);
     } catch (err) {
-      postMessage({type: 'error', message: 'Network is too big for statistical calculation!'});
+      postMessage({type: 'error', message: 'There was an error calculating the shortest Paths!'});
     }
   });
   postMessage({type: 'finished', nodePathMaps});

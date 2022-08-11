@@ -23,7 +23,7 @@ import {
   setElementGroup
 } from '../../redux/network/network.actions';
 import {
-  addToActionHistory, undoAction, redoAction, setCameraControls, setAxes
+  addToActionHistory, undoAction, redoAction, setCameraControls, setAxes, setErrorMessage
 } from '../../redux/settings/settings.actions';
 import {calculateAveragePosition} from '../utility';
 import {initialCameraPosition, hoverElementOutlineColor, selectedElementOutlineColor} from '../constants';
@@ -289,7 +289,7 @@ class Renderer extends Component {
   updateSceneElements() {
     const {
       performanceMode, networkBoundarySize, showBoundary, boundaryOpacity, directed, nodes: serializedNodes,
-      edges: serializedEdges, _setNodesAndEdges, _setOctree, _setElementGroup, cameraControls, showLabel
+      edges: serializedEdges, _setNodesAndEdges, _setOctree, _setElementGroup, _setErrorMessage, cameraControls, showLabel
     } = this.props;
     const elementGroup = new THREE.Group();
     elementGroup.name = 'Network';
@@ -302,7 +302,7 @@ class Renderer extends Component {
         node.position.z,
         node.size,
         node.color,
-        node.id || index,
+        node.id !== undefined ? node.id : index,
         node.name,
         node.data,
         node.colorLocked,
@@ -319,20 +319,27 @@ class Renderer extends Component {
     });
     if (performanceMode) {
       nodeInstances = new Nodes(nodes);
-      edgeInstances = new Edges(serializedEdges, nodes);
+      // edgeInstances = new Edges(serializedEdges, nodes);
       nodes.forEach((node) => node.setNodeInstances(nodeInstances));
       elementGroup.add(nodeInstances.instances);
-      elementGroup.add(edgeInstances.instances);
+      // elementGroup.add(edgeInstances.instances);
     }
-    const edges = serializedEdges.map((edge, index) => {
+    const edges = [];
+    const brokenEdgeIds = [];
+    serializedEdges.forEach((edge, index) => {
       const sourceNode = nodes.find(
         (node) => (typeof edge.source === 'string' ? node.name === edge.source : node.id === edge.source)
       );
       const targetNode = nodes.find(
         (node) => (typeof edge.target === 'string' ? node.name === edge.target : node.id === edge.target)
       );
+      const edgeId = edge.id !== undefined ? edge.id : index;
+      if (!sourceNode || !targetNode) {
+        brokenEdgeIds.push(edgeId);
+        return;
+      }
       const edgeClass = new Edge(
-        edge.id || index,
+        edgeId,
         sourceNode,
         targetNode,
         edge.size,
@@ -340,13 +347,18 @@ class Renderer extends Component {
         edge.visible,
         edge.data,
         directed,
-        edgeInstances
+        edgeInstances,
+        performanceMode
       );
       sourceNode.addSourceEdge(edgeClass);
       targetNode.addTargetEdge(edgeClass);
       if (!performanceMode) elementGroup.add(edgeClass.instance);
-      return edgeClass;
+      edges.push(edgeClass);
     });
+    if (performanceMode) {
+      edgeInstances = new Edges(edges);
+      elementGroup.add(edgeInstances.instances);
+    }
     nodes.forEach((node) => {
       if (!node.visible) node.setVisibility(false);
       node.calculateDegree();
@@ -381,6 +393,9 @@ class Renderer extends Component {
     _setNodesAndEdges(nodes, edges, false);
     _setOctree(octree);
     _setElementGroup(elementGroup);
+    if (brokenEdgeIds.length) {
+      _setErrorMessage(`At least one Node is missing for the Edges with these IDs: ${brokenEdgeIds.toString()}`);
+    }
   }
 
   lookAt(elements) {
@@ -518,7 +533,7 @@ class Renderer extends Component {
     requestAnimationFrame(this.animate);
     if (orbitPreview) elementGroup.rotateY(0.003);
     this.cameraControls();
-    nodes.forEach((node) => node.label.updatePosition());
+    nodes.forEach((node) => node.updateLabelPosition());
     axes.updateLabelPositions();
     // this.drawOctree();
     if (!performanceMode && composer) {
@@ -580,7 +595,8 @@ const mapDispatchToProps = (dispatch) => ({
   _setOctree: (octree) => dispatch(setOctree(octree)),
   _setAveragePositionPlaceholder: (placeholder) => dispatch(setAveragePositionPlaceholder(placeholder)),
   _undoAction: () => dispatch(undoAction()),
-  _redoAction: () => dispatch(redoAction())
+  _redoAction: () => dispatch(redoAction()),
+  _setErrorMessage: (errorMessage) => dispatch(setErrorMessage(errorMessage))
 });
 
 export default connect(mapStateToPros, mapDispatchToProps)(memo(Renderer));

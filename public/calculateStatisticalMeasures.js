@@ -26,7 +26,7 @@ onmessage = (e) => {
       });
     });
     if (allShortestPathsCount === 0) return 0;
-    return (shortestPathPassThroughCount / allShortestPathsCount) * 100;
+    return shortestPathPassThroughCount / allShortestPathsCount;
   };
 
   const calculateLocalClusteringCoefficient = (node) => {

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
 import * as THREE from 'three';
@@ -9,7 +10,6 @@ import Checkbox from '../../UI/Checkbox/Checkbox';
 import Button from '../../UI/Button/Button';
 import Select from '../../UI/Select/Select';
 import Loader from '../../UI/Loader/Loader';
-import {createNodes, createEdges} from '../../../utility';
 import {
   setDirected,
   setNetworkName,
@@ -30,10 +30,13 @@ import * as middleSizedNetwork from '../../../../data/performanceTest/1_mittel.j
 import * as bigNetwork from '../../../../data/performanceTest/2_groesser.json';
 import * as programArchitecture from '../../../../data/programmArchitecture.json';
 import * as wikiMovies from '../../../../data/wiki-movies.json';
+import * as arctic from '../../../../data/arctic.json';
 
 import './LoadNetworkModal.scss';
 
-const networks = ['gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies', 'programArchitecture'];
+const networks = [
+  'gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies', 'programArchitecture', 'arctic'
+];
 
 const LoadNetworkModal = () => {
   const {nodes} = useSelector((state) => state.network);
@@ -45,8 +48,91 @@ const LoadNetworkModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
+  const createNodes = (nodeInfo, boundarySize) => {
+    const componentAlwaysZero = nodeInfo.every((node) => node.component === 0);
+    const newNodes = [];
+    nodeInfo.forEach((node) => {
+      if (node.id === undefined && !node.name && !node.text && !node.label) return;
+      let data = {};
+      if (node.data) {
+        if (node.data.centrality) {
+          if (typeof node.data.centrality === 'object') {
+            data = {...node.data.centrality};
+          } else {
+            data.centrality = node.data.centrality;
+          }
+          // eslint-disable-next-line no-param-reassign
+          delete node.data.centrality;
+        }
+        data = {...data, ...node.data};
+      }
+      if (node.attributes) {
+        if (node.attributes.centrality) {
+          if (typeof node.attributes.centrality === 'object') {
+            data = {...data, ...node.attributes.centrality};
+          } else {
+            data.centrality = node.attributes.centrality;
+          }
+          // eslint-disable-next-line no-param-reassign
+          delete node.attributes.centrality;
+        }
+        data = {...data, ...node.attributes};
+      }
+      if (node.group !== undefined) data.group = node.group;
+      if (node.component !== undefined && !componentAlwaysZero) data.component = node.component;
+      newNodes.push({
+        position: new THREE.Vector3(
+          node.position ? node.position.x : Math.random() * boundarySize - boundarySize / 2,
+          node.position ? node.position.y : Math.random() * boundarySize - boundarySize / 2,
+          node.position ? node.position.z : Math.random() * boundarySize - boundarySize / 2
+        ),
+        size: node.size || 1,
+        color: node.color || '#008799',
+        id: node.id !== undefined ? parseInt(node.id, 10) : undefined,
+        name: node.name || node.text || node.label,
+        data,
+        colorLocked: Boolean(node.colorLocked),
+        shape: node.shape || 'Sphere',
+        pathMap: node.pathMap,
+        visible: node.visible !== false
+      });
+    });
+    return newNodes;
+  };
+
+  const createEdges = (edgesInfo) => {
+    const edges = [];
+    edgesInfo.forEach((edgeInfo) => {
+      let source;
+      let target;
+      if (edgeInfo.source !== undefined) source = isNaN(edgeInfo.source) ? edgeInfo.source : parseInt(edgeInfo.source, 10);
+      else if (edgeInfo.sourceNode !== undefined) {
+        source = isNaN(edgeInfo.sourceNode) ? edgeInfo.sourceNode : parseInt(edgeInfo.sourceNode, 10);
+      } else return;
+
+      if (edgeInfo.target !== undefined) target = isNaN(edgeInfo.target) ? edgeInfo.target : parseInt(edgeInfo.target, 10);
+      else if (edgeInfo.targetNode !== undefined) {
+        target = isNaN(edgeInfo.targetNode) ? edgeInfo.targetNode : parseInt(edgeInfo.targetNode, 10);
+      } else return;
+      const edge = {
+        id: edgeInfo.id ? parseInt(edgeInfo.id, 10) : undefined,
+        source,
+        target,
+        size: edgeInfo.size || 1,
+        color: edgeInfo.color || '#ffffff',
+        visible: edgeInfo.visible !== false,
+        data: {}
+      };
+      if (edgeInfo.data) edge.data = edgeInfo.data;
+      if (edgeInfo.attributes) edge.data = {...edge.data, ...edgeInfo.attributes};
+      if (edgeInfo.value) edge.data.value = edgeInfo.value;
+      edges.push(edge);
+    });
+    return edges;
+  };
+
   const loadNetworkData = (network) => {
-    nodes.forEach((node) => node.label.removeFromDom());
+    nodes.forEach((node) => node.removeLabel());
     dispatch(setSelectedNodes([]));
     dispatch(setSelectedEdges([]));
     dispatch(setPerformanceMode(usePerformanceMode));
@@ -54,7 +140,7 @@ const LoadNetworkModal = () => {
     if (network.showLabel) dispatch(setShowLabel(network.showLabel));
     if (network.networkBoundarySize) dispatch(setNetworkBoundarySize(network.networkBoundarySize));
     dispatch(setDirected(Boolean(network.directed)));
-    const newNodes = createNodes(network.nodes, network.networkBoundarySize || networkBoundarySize);
+    const newNodes = createNodes(network.nodes || network.vertices, network.networkBoundarySize || networkBoundarySize);
     const newEdges = createEdges(network.edges || network.links);
     dispatch(setNodesAndEdges(newNodes, newEdges, true));
     dispatch(setNetworkStatistics(
@@ -206,6 +292,9 @@ const LoadNetworkModal = () => {
       } else if (selectedNetwork === 'wikiMovies') {
         edges = wikiMovies.default.links;
         newNodes = wikiMovies.default.nodes;
+      } else if (selectedNetwork === 'arctic') {
+        edges = arctic.default.edges;
+        newNodes = arctic.default.nodes;
       }
       loadNetworkData({
         name: selectedNetwork,

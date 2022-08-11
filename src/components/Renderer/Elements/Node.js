@@ -80,15 +80,22 @@ class Node {
 
   showLabel(changeLabelState) {
     if (this.visible) {
-      this.label.show();
+      if (this.label) this.label.show();
       this.labelVisible = true;
     }
     if (changeLabelState) this.labelVisible = true;
   }
 
   hideLabel(changeLabelState) {
-    this.label.hide();
+    if (this.label) this.label.hide();
     if (changeLabelState) this.labelVisible = false;
+  }
+
+  removeLabel() {
+    if (this.label) {
+      this.label.removeFromDom();
+      this.label = null;
+    }
   }
 
   setColorLock(lock) {
@@ -193,6 +200,10 @@ class Node {
     }
     this.updateAssociatedEdgePosition();
     this.label.updatePosition(this.position.clone());
+  }
+
+  updateLabelPosition() {
+    if (this.label) this.label.updatePosition();
   }
 
   addTargetEdge(edge) {

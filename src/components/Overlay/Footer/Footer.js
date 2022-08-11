@@ -25,7 +25,7 @@ const Footer = () => {
         <div className="left-info">
           <p className="margin-right">
             {`Nodes: ${nodes.length}${selectedNodes.length ? ` (${selectedNodes.length})` : ''}
-            ${selectedNodes.length === 1 ? ` (${selectedNodes[0].name})` : ''}`}
+            ${selectedNodes.length === 1 && selectedNodes[0].name ? ` (${selectedNodes[0].name})` : ''}`}
           </p>
           <p className="margin-right">
             {`Edges: ${edges.length}${selectedEdges.length ? ` (${selectedEdges.length})` : ''}`}

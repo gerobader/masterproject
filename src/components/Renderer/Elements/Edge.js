@@ -2,11 +2,11 @@ import * as THREE from 'three';
 import {halfPi} from '../../constants';
 
 class Edge {
-  constructor(id, sourceNode, targetNode, size, color, visible, data, isDirected, edgeInstances) {
+  constructor(id, sourceNode, targetNode, size, color, visible, data, isDirected, edgeInstances, performanceMode) {
     this.id = id;
     this.sourceNode = sourceNode;
     this.targetNode = targetNode;
-    this.performanceVersion = Boolean(edgeInstances);
+    this.performanceVersion = performanceMode;
     this.edgeInstances = edgeInstances;
     this.instance = null;
     this.size = size;
@@ -60,6 +60,7 @@ class Edge {
           // arrow position
           this.instance.children[1].position.y = (lineVector.length() / 2) - (this.targetNode.size) - (arrowLength / 2);
         } else {
+          this.instance.children[0].position.y = (this.sourceNode.size / 2) - (this.targetNode.size / 2);
           this.instance.children[0].scale.y = lineVector.length() - this.targetNode.size - this.sourceNode.size;
         }
         this.instance.position.set(this.position.x, this.position.y, this.position.z);
@@ -69,6 +70,7 @@ class Edge {
   }
 
   setRotation() {
+    console.log(this);
     const targetVector = new THREE.Vector3();
     this.targetNode.instance.getWorldPosition(targetVector);
     this.instance.lookAt(targetVector);

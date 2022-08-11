@@ -57,6 +57,7 @@ const Appearance = () => {
   useEffect(() => {
     if (selectedNodes.length === 1) {
       setFillColor(selectedNodes[0].color);
+      setElementSize(selectedNodes[0].size);
     }
   }, [selectedNodes]);
 

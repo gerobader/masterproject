@@ -435,7 +435,7 @@ class Renderer extends Component {
     if (intersects.length) {
       if (performanceMode) {
         const nodeInstanceElement = intersects.find((intersectedElement) => intersectedElement?.object.name === 'NodeInstances');
-        if (nodeInstanceElement) newHoveredElement = nodes[nodeInstanceElement.instanceId];
+        if (nodeInstanceElement) newHoveredElement = nodes.find((node) => node.id === nodeInstanceElement.instanceId);
       } else {
         newHoveredElement = intersects.find((intersectedElement) => (
           (intersectedElement?.object.name === 'Node'

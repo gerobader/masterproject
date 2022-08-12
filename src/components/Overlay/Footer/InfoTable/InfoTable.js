@@ -179,7 +179,7 @@ const InfoTable = ({setProgressInfo}) => {
       } else if (event.data.type === 'progress') {
         setProgressInfo({
           percentage: (event.data.progress.progressCount / nodes.length) * 100,
-          info: `${nodes[event.data.progress.nodeId].name} (${event.data.progress.progressCount}/${nodes.length})`,
+          info: `(${event.data.progress.progressCount}/${nodes.length}): ${nodes[event.data.progress.nodeId].name}`,
           type: 'Calculating shortest Paths between Nodes',
           remainingTime: getRemainingTime(),
           step: 1

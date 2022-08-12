@@ -135,6 +135,7 @@ const LoadNetworkModal = () => {
     nodes.forEach((node) => node.removeLabel());
     dispatch(setSelectedNodes([]));
     dispatch(setSelectedEdges([]));
+    dispatch(resetActionHistory());
     dispatch(setPerformanceMode(usePerformanceMode));
     dispatch(setNetworkName(network.name || fileName.split('.')[0]));
     if (network.showLabel) dispatch(setShowLabel(network.showLabel));
@@ -182,7 +183,6 @@ const LoadNetworkModal = () => {
         )
       ));
     }
-    dispatch(resetActionHistory());
     dispatch(setShowLoadNetworkModal(false));
     setIsLoading(false);
     setTimeout(() => {

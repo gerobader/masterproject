@@ -24,9 +24,6 @@ const SaveNetworkModal = () => {
     if (name) {
       const serializedNodes = nodes.map((node) => node.serialize(savePathMap));
       const serializedEdges = edges.map((edge) => edge.serialize());
-      const a = document.createElement('a');
-      document.body.appendChild(a);
-      a.style = 'display: none';
       const axesInfo = {
         showAxes,
         xAxis: {
@@ -51,7 +48,7 @@ const SaveNetworkModal = () => {
           }))
         }
       };
-      const json = JSON.stringify({
+      const data = new Blob([JSON.stringify({
         name,
         showLabel,
         networkBoundarySize,
@@ -65,9 +62,11 @@ const SaveNetworkModal = () => {
         directed,
         nodes: serializedNodes,
         edges: serializedEdges
-      });
-      const blob = new Blob([json], {type: 'octet/stream'});
-      const url = window.URL.createObjectURL(blob);
+      })], {type: 'octet/stream'});
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      const url = window.URL.createObjectURL(data);
       a.href = url;
       a.download = `${name}.json`;
       a.click();

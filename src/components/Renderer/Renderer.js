@@ -319,10 +319,8 @@ class Renderer extends Component {
     });
     if (performanceMode) {
       nodeInstances = new Nodes(nodes);
-      // edgeInstances = new Edges(serializedEdges, nodes);
       nodes.forEach((node) => node.setNodeInstances(nodeInstances));
       elementGroup.add(nodeInstances.instances);
-      // elementGroup.add(edgeInstances.instances);
     }
     const edges = [];
     const brokenEdgeIds = [];
@@ -347,7 +345,6 @@ class Renderer extends Component {
         edge.visible,
         edge.data,
         directed,
-        edgeInstances,
         performanceMode
       );
       sourceNode.addSourceEdge(edgeClass);
@@ -357,6 +354,7 @@ class Renderer extends Component {
     });
     if (performanceMode) {
       edgeInstances = new Edges(edges);
+      edges.forEach((edge) => edge.setEdgeInstances(edgeInstances));
       elementGroup.add(edgeInstances.instances);
     }
     nodes.forEach((node) => {

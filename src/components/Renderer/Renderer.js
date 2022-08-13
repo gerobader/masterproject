@@ -6,6 +6,7 @@ import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
+import Stats from 'stats.js';
 import Axes from './Elements/Axes';
 import Node from './Elements/Node';
 import Nodes from './Elements/Nodes';
@@ -38,6 +39,7 @@ let camera;
 let hoveredElement;
 let animationRunning = false;
 let boundaryBox;
+let stats;
 const controlKeys = ['f', 'escape', 'z'];
 const octGroup = new THREE.Group();
 
@@ -498,6 +500,13 @@ class Renderer extends Component {
     });
     window.addEventListener('keyup', this.handleKeyUp);
 
+    stats = new Stats();
+    stats.setMode(0);
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.left = '50%';
+    stats.domElement.style.top = '10px';
+    document.body.appendChild(stats.domElement);
+
     _setCameraControls(cameraControls);
     _setElementGroup(elementGroup);
     _setAxes(axes);
@@ -534,6 +543,7 @@ class Renderer extends Component {
     nodes.forEach((node) => node.updateLabelPosition());
     axes.updateLabelPositions();
     // this.drawOctree();
+    stats.update();
     if (!performanceMode && composer) {
       this.handleOutline();
       composer.render();

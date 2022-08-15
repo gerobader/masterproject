@@ -72,27 +72,23 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   };
 
   // eslint-disable-next-line no-shadow
-  const filterNodes = (nodes, filter, resultType) => {
+  const filterNodes = (nodes, filter) => {
     let resultNodes = [...nodes];
     if (filter.type === 'string') {
       resultNodes = resultNodes.filter((node) => {
         const filterDataLocation = filter.filterBy === 'name' || filter.filterBy === 'color' ? node : node.data;
         const nodeValue = filterDataLocation[filter.filterBy].toLowerCase();
-        let returnVal = true;
-        if (filter.selectFunction === 'contains') returnVal = nodeValue.includes(filter.value.toLowerCase());
-        else if (filter.selectFunction === 'doesn\'t contain') returnVal = !(nodeValue.includes(filter.value.toLowerCase()));
-        else if (filter.selectFunction === 'is not') returnVal = nodeValue !== filter.value.toLowerCase();
-        else if (filter.selectFunction === 'is') returnVal = nodeValue === filter.value.toLowerCase();
-        return resultType === 'Show' ? !returnVal : returnVal;
+        if (filter.selectFunction === 'contains') return nodeValue.includes(filter.value.toLowerCase());
+        if (filter.selectFunction === 'doesn\'t contain') return !(nodeValue.includes(filter.value.toLowerCase()));
+        if (filter.selectFunction === 'is not') return nodeValue !== filter.value.toLowerCase();
+        return nodeValue === filter.value.toLowerCase();
       });
     } else {
       resultNodes = resultNodes.filter((node) => {
         const filterDataLocation = filter.filterBy === 'size' ? node : node.data;
         const nodeValue = filterDataLocation[filter.filterBy];
-        let returnVal = true;
-        if (filter.selectFunction === 'is not') returnVal = nodeValue > filter.max || nodeValue < filter.min;
-        else if (filter.selectFunction === 'is') returnVal = nodeValue <= filter.max && nodeValue >= filter.min;
-        return resultType === 'Show' ? !returnVal : returnVal;
+        if (filter.selectFunction === 'is not') return nodeValue > filter.max || nodeValue < filter.min;
+        return nodeValue <= filter.max && nodeValue >= filter.min;
       });
     }
     return resultNodes;
@@ -111,7 +107,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
             && collectionElement.elements.length) {
             temporaryNodes = applyCollectionFilter(collectionElement, temporaryNodes);
           } else {
-            temporaryNodes = filterNodes(temporaryNodes, collectionElement, resultType);
+            temporaryNodes = filterNodes(temporaryNodes, collectionElement);
           }
         });
       } else {
@@ -119,7 +115,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
           if (collectionElement.type === 'collection') {
             temporaryNodes = [...temporaryNodes, ...applyCollectionFilter(collectionElement, availableNodes)];
           } else {
-            temporaryNodes = [...temporaryNodes, ...filterNodes(availableNodes, collectionElement, resultType)];
+            temporaryNodes = [...temporaryNodes, ...filterNodes(availableNodes, collectionElement)];
           }
         });
         // remove duplicate nodes
@@ -127,11 +123,13 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
       }
       return temporaryNodes;
     };
-    const finalNodes = applyCollectionFilter(filterCollection, nodes);
+    const filteredNodes = applyCollectionFilter(filterCollection, nodes);
     if (resultType === 'Select') {
-      dispatch(setSelectedNodes(finalNodes));
+      dispatch(setSelectedNodes(filteredNodes));
     } else {
-      finalNodes.forEach((node) => node.setVisibility(false));
+      nodes.forEach((node) => {
+        if (!filteredNodes.includes(node)) node.setVisibility(false);
+      });
     }
     dispatch(setNodes(nodes));
   };
@@ -218,7 +216,6 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     collection.elements.push(filter);
     updateFilterCollection(newFilterCollection);
   };
-
   const updateCollectionElement = (id, newElement) => {
     const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const elementToUpdate = findCollectionElementById(newFilterCollection, id);

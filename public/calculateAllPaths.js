@@ -25,7 +25,8 @@ onmessage = (e) => {
           || connectedNode.id === nodeId
           || distance >= 20
         ) {
-          // return if connected node is starting node or if path length is already longer than another found path
+          // return if connected node is starting node or if path length is already
+          // longer than another found path or the path is too long
           return;
         }
         const currentPath = [...path, connectedNode];

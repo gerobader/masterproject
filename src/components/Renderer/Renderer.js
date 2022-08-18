@@ -61,7 +61,7 @@ class Renderer extends Component {
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
-    this.lookAt = this.lookAt.bind(this);
+    this.centerView = this.centerView.bind(this);
     this.cameraControls = this.cameraControls.bind(this);
     this.handleOutline = this.handleOutline.bind(this);
     this.handleControls = this.handleControls.bind(this);
@@ -212,13 +212,13 @@ class Renderer extends Component {
 
   handleKeyUp(e) {
     const {
-      _setSelectedNodes, _setSelectedEdges, selectedNodes, selectedEdges, averagePositionPlaceholder,
-      _setAveragePositionPlaceholder, _addToActionHistory, keyboardInputsBlocked, _undoAction, _redoAction
+      _setSelectedNodes, _setSelectedEdges, selectedNodes, averagePositionPlaceholder, _setAveragePositionPlaceholder,
+      _addToActionHistory, keyboardInputsBlocked, _undoAction, _redoAction
     } = this.props;
     const key = e.key.toLowerCase();
     if (controlKeys.includes(key) && !keyboardInputsBlocked) {
       if (key === 'f') {
-        this.lookAt([...selectedNodes, ...selectedEdges]);
+        this.centerView();
       } else if (key === 'escape') {
         if (nodePositionChanges.length > 0) {
           selectedNodes.forEach((node, index) => {
@@ -398,16 +398,17 @@ class Renderer extends Component {
     }
   }
 
-  lookAt(elements) {
-    const {cameraControls, elementGroup} = this.props;
-    if (elements.length) {
-      interpolation = 0;
-      const position = calculateAveragePosition(elements, elementGroup);
-      cameraControls.target = position;
-      const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
-      targetQuaternion = new THREE.Quaternion();
-      targetQuaternion.setFromRotationMatrix(rotationMatrix);
-    }
+  centerView() {
+    const {
+      cameraControls, elementGroup, selectedNodes, selectedEdges, nodes
+    } = this.props;
+    const elements = [...selectedNodes, ...selectedEdges];
+    interpolation = 0;
+    const position = calculateAveragePosition(elements.length ? elements : nodes, elementGroup);
+    cameraControls.target = position;
+    const rotationMatrix = new THREE.Matrix4().lookAt(camera.position, position, camera.up);
+    targetQuaternion = new THREE.Quaternion();
+    targetQuaternion.setFromRotationMatrix(rotationMatrix);
   }
 
   cameraControls() {

@@ -14,6 +14,7 @@ class Edges {
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
     const color = new THREE.Color();
     const instances = new THREE.InstancedMesh(geometry, defaultMat, edges.length);
+    instances.name = 'EdgeInstances';
     edges.forEach((edge, index) => {
       const edgeMatrix = this.getTransformMatrix(edge.sourceNode.position.clone(), edge.targetNode.position.clone());
       if (edge.size) edgeMatrix.scale(new THREE.Vector3(edge.size, 1, edge.size));

@@ -25,6 +25,7 @@ class Node {
     this.performanceVersion = performanceVersion;
     this.position = new THREE.Vector3(x, y, z);
     this.networkBoundarySize = networkBoundarySize;
+    this.isSelected = false;
     if (!this.performanceVersion) this.buildGeometry();
     if (label) this.label = new Label(this.name, this.position, camera, hideLabel);
   }
@@ -215,6 +216,22 @@ class Node {
   addSourceEdge(edge) {
     if (edge) {
       this.sourceForEdges.push(edge);
+    }
+  }
+
+  select() {
+    if (!this.isSelected) {
+      this.isSelected = true;
+      this.setSize(this.size + 0.5);
+      this.nodeInstances.setColorFor(this.id, '#00ff00');
+    }
+  }
+
+  deselect() {
+    if (this.isSelected) {
+      this.isSelected = false;
+      this.setSize(this.size - 0.5);
+      this.nodeInstances.setColorFor(this.id, this.color);
     }
   }
 

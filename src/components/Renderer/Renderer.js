@@ -6,7 +6,6 @@ import {RenderPass} from 'three/examples/jsm/postprocessing/RenderPass';
 import {OutlinePass} from 'three/examples/jsm/postprocessing/OutlinePass';
 import {TransformControls} from 'three/examples/jsm/controls/TransformControls';
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls';
-import Stats from 'stats.js';
 import Axes from './Elements/Axes';
 import Node from './Elements/Node';
 import Nodes from './Elements/Nodes';
@@ -39,7 +38,6 @@ let camera;
 let hoveredElement;
 let animationRunning = false;
 let boundaryBox;
-let stats;
 const controlKeys = ['f', 'escape', 'z'];
 const octGroup = new THREE.Group();
 
@@ -98,8 +96,9 @@ class Renderer extends Component {
     let newSelectedEdges = [...selectedEdges];
     let newSelectedNodes = [...selectedNodes];
     if (!controls.dragging) {
-      if (hoveredElement.type === 'Group') {
-        const newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
+      if (hoveredElement.type === 'Group' || (performanceMode && hoveredElement instanceof Edge)) {
+        let newSelectedEdge = hoveredElement;
+        if (!performanceMode) newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
         if (e.ctrlKey && !connectedSelect) {
           if (selectedEdges.includes(newSelectedEdge)) {
             newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
@@ -111,12 +110,8 @@ class Renderer extends Component {
           newSelectedEdges = [newSelectedEdge];
         }
       } else {
-        let newSelectedNode;
-        if (performanceMode) {
-          newSelectedNode = hoveredElement;
-        } else {
-          newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
-        }
+        let newSelectedNode = hoveredElement;
+        if (!performanceMode) newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
         if (e.ctrlKey && !connectedSelect) {
           if (selectedNodes.includes(newSelectedNode)) {
             newSelectedNodes = selectedNodes.filter((node) => node !== newSelectedNode);
@@ -154,7 +149,6 @@ class Renderer extends Component {
       _addToActionHistory(nodePositionChanges);
       nodePositionChanges = [];
     }
-
     if (hoveredElement) {
       if (e.button === 0) {
         const [newSelectedNodes, newSelectedEdges] = this.handleClickOnElement(e);
@@ -428,7 +422,7 @@ class Renderer extends Component {
   }
 
   checkIntersect(e) {
-    const {nodes, performanceMode} = this.props;
+    const {nodes, edges, performanceMode} = this.props;
     const {clientX, clientY} = e;
     mousePosition.x = (clientX / window.innerWidth) * 2 - 1;
     mousePosition.y = -(clientY / window.innerHeight) * 2 + 1;
@@ -437,8 +431,13 @@ class Renderer extends Component {
     const intersects = raycaster.intersectObjects(scene.children, true);
     if (intersects.length) {
       if (performanceMode) {
-        const nodeInstanceElement = intersects.find((intersectedElement) => intersectedElement?.object.name === 'NodeInstances');
-        if (nodeInstanceElement) newHoveredElement = nodes.find((node) => node.id === nodeInstanceElement.instanceId);
+        let instanceElement;
+        instanceElement = intersects.find((intersectedElement) => intersectedElement?.object.name === 'NodeInstances');
+        if (instanceElement) newHoveredElement = nodes.find((node) => node.id === instanceElement.instanceId);
+        else {
+          instanceElement = intersects.find((intersectedElement) => intersectedElement?.object.name === 'EdgeInstances');
+          if (instanceElement) newHoveredElement = edges.find((edge) => edge.id === instanceElement.instanceId);
+        }
       } else {
         newHoveredElement = intersects.find((intersectedElement) => (
           (intersectedElement?.object.name === 'Node'
@@ -501,13 +500,6 @@ class Renderer extends Component {
     });
     window.addEventListener('keyup', this.handleKeyUp);
 
-    stats = new Stats();
-    stats.setMode(0);
-    stats.domElement.style.position = 'absolute';
-    stats.domElement.style.left = '50%';
-    stats.domElement.style.top = '10px';
-    document.body.appendChild(stats.domElement);
-
     _setCameraControls(cameraControls);
     _setElementGroup(elementGroup);
     _setAxes(axes);
@@ -544,7 +536,6 @@ class Renderer extends Component {
     nodes.forEach((node) => node.updateLabelPosition());
     axes.updateLabelPositions();
     // this.drawOctree();
-    stats.update();
     if (!performanceMode && composer) {
       this.handleOutline();
       composer.render();

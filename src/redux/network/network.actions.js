@@ -61,20 +61,34 @@ const updateSelectedNodes = (nodes) => ({
 });
 
 export const setSelectedNodes = (selectedNodes) => (dispatch, getState) => {
-  const {showLabel} = getState().settings;
-  const {nodes} = getState().network;
+  const {showLabel, performanceMode} = getState().settings;
+  const {nodes, selectedNodes: oldSelectedNodes} = getState().network;
   if (showLabel === 1) {
     nodes.forEach((node) => node.hideLabel(true));
     selectedNodes.forEach((node) => node.showLabel(true));
+  }
+  if (performanceMode) {
+    oldSelectedNodes.forEach((node) => node.deselect());
+    selectedNodes.forEach((node) => node.select());
   }
   dispatch(setNodes(nodes));
   dispatch(updateSelectedNodes(selectedNodes));
 };
 
-export const setSelectedEdges = (edges) => ({
+export const updateSelectedEdges = (edges) => ({
   type: SET_SELECTED_EDGES,
   payload: edges
 });
+
+export const setSelectedEdges = (edges) => (dispatch, getState) => {
+  const {performanceMode} = getState().settings;
+  const {selectedEdges} = getState().network;
+  if (performanceMode) {
+    selectedEdges.forEach((edge) => edge.deselect());
+    edges.forEach((edge) => edge.select());
+  }
+  dispatch(updateSelectedEdges(edges));
+};
 
 export const setOctree = (octree) => ({
   type: SET_OCTREE,

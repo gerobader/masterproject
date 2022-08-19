@@ -15,6 +15,7 @@ class Edge {
     this.isDirected = isDirected;
     this.position = new THREE.Vector3(0, 0, 0);
     this.data = data || {};
+    this.isSelected = false;
     if (!this.performanceVersion) this.buildGeometry();
   }
 
@@ -115,6 +116,22 @@ class Edge {
         if (this.isDirected) this.instance.children[1].scale.set(newSize, newSize, newSize);
         this.updatePosition();
       }
+    }
+  }
+
+  select() {
+    if (!this.isSelected) {
+      this.isSelected = true;
+      this.setSize(this.size + 1);
+      this.edgeInstances.setColorFor(this.id, '#00ff00');
+    }
+  }
+
+  deselect() {
+    if (this.isSelected) {
+      this.isSelected = false;
+      this.setSize(this.size - 1);
+      this.edgeInstances.setColorFor(this.id, this.color);
     }
   }
 

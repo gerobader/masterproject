@@ -8,6 +8,7 @@ onmessage = (e) => {
     node.sourceForEdges.forEach((outgoingEdge) => connectedNodes.add(nodes[outgoingEdge.targetNode]));
     return [...connectedNodes];
   };
+  const start = new Date();
   nodeIds.forEach((nodeId, index) => {
     const node = nodes[nodeId];
     nodePathMaps[nodeId] = {};
@@ -47,12 +48,20 @@ onmessage = (e) => {
       });
     };
     const connectedNodes = getConnectedNodes(node);
+    connectedNodes.forEach((connectedNode) => {
+      nodePathMaps[nodeId][connectedNode.id] = {
+        target: connectedNode,
+        paths: [node, connectedNode],
+        distance: 1
+      };
+    });
     try {
       nextStep(connectedNodes, [node], 1);
     } catch (err) {
       postMessage({type: 'error', message: 'There was an error calculating the shortest Paths!'});
     }
   });
+  console.log('endtime:', new Date() - start);
   postMessage({type: 'finished', nodePathMaps});
   // eslint-disable-next-line no-restricted-globals
   self.close();

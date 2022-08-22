@@ -1,5 +1,7 @@
+import {eigs} from 'mathjs';
+
 onmessage = (e) => {
-  const {nodeClones, directed} = e.data;
+  const {nodeClones, adjacencyMatrix, directed} = e.data;
   const nodeIds = Object.keys(nodeClones);
 
   const calculateCloseness = (node) => {
@@ -27,6 +29,17 @@ onmessage = (e) => {
     });
     if (allShortestPathsCount === 0) return 0;
     return shortestPathPassThroughCount / allShortestPathsCount;
+  };
+
+  const calculateEigenvectors = () => {
+    const {values, vectors} = eigs(adjacencyMatrix);
+    const maxEigenvalue = Math.max(...values);
+    const correspondingVector = vectors.map((vector) => vector[values.indexOf(maxEigenvalue)]);
+    const maxVectorValue = Math.max(...correspondingVector);
+    correspondingVector.forEach((value, index) => {
+      correspondingVector[index] = value / maxVectorValue;
+    });
+    nodeIds.forEach((nodeId) => nodeClones[nodeId].data.eigenvector = correspondingVector[nodeId]);
   };
 
   const calculateLocalClusteringCoefficient = (node) => {
@@ -60,6 +73,7 @@ onmessage = (e) => {
       nodeId: parseInt(nodeId, 10)
     });
   });
+  calculateEigenvectors();
   postMessage({type: 'finished', updatedClones: nodeClones});
   // eslint-disable-next-line no-restricted-globals
   self.close();

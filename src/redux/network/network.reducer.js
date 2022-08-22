@@ -10,7 +10,7 @@ import {
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
   SET_DIRECTED, SET_OCTREE,
-  SET_ELEMENT_GROUP
+  SET_ELEMENT_GROUP, SET_ADJACENCY_MATRIX
 } from '../actionTypes';
 import {sortArray} from '../../components/utility';
 
@@ -23,6 +23,7 @@ const initialState = {
   reciprocity: undefined,
   density: undefined,
   directed: true,
+  adjacencyMatrix: undefined,
   elementGroup: undefined,
   nodes: [],
   edges: [],
@@ -78,6 +79,11 @@ const networkReducer = (state = initialState, action) => {
         averageDegree: action.averageDegree,
         reciprocity: action.reciprocity,
         density: action.density
+      };
+    case SET_ADJACENCY_MATRIX:
+      return {
+        ...state,
+        adjacencyMatrix: action.payload
       };
     case SET_ELEMENT_GROUP:
       return {

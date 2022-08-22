@@ -39,8 +39,12 @@ class Node {
     if (this.shape && this.shape !== 'Sphere') this.setShape(this.shape);
   }
 
-  calculateDegree() {
+  calculateDegree(isDirectedGraph) {
     this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
+    if (isDirectedGraph) {
+      this.data.inDegree = this.targetForEdges.length;
+      this.data.outDegree = this.sourceForEdges.length;
+    }
   }
 
   setColor(color) {
@@ -200,7 +204,7 @@ class Node {
       this.instance.position.set(this.position.x, this.position.y, this.position.z);
     }
     this.updateAssociatedEdgePosition();
-    this.label.updatePosition(this.position.clone());
+    this.updateLabelPosition();
   }
 
   updateLabelPosition() {

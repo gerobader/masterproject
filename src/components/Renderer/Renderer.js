@@ -20,7 +20,8 @@ import {
   setAveragePositionPlaceholder,
   setDirected,
   setOctree,
-  setElementGroup
+  setElementGroup,
+  setAdjacencyMatrix
 } from '../../redux/network/network.actions';
 import {
   addToActionHistory, undoAction, redoAction, setCameraControls, setAxes, setErrorMessage
@@ -284,13 +285,15 @@ class Renderer extends Component {
 
   updateSceneElements() {
     const {
-      performanceMode, networkBoundarySize, showBoundary, boundaryOpacity, directed, nodes: serializedNodes,
+      performanceMode, networkBoundarySize, showBoundary, boundaryOpacity, directed, nodes: serializedNodes, _setAdjacencyMatrix,
       edges: serializedEdges, _setNodesAndEdges, _setOctree, _setElementGroup, _setErrorMessage, cameraControls, showLabel
     } = this.props;
     const elementGroup = new THREE.Group();
     elementGroup.name = 'Network';
+    const adjacencyMatrix = [];
     let nodeInstances;
     let edgeInstances;
+    const nodeIdMap = {};
     const nodes = serializedNodes.map((node, index) => {
       const nodeClass = new Node(
         node.position.x,
@@ -298,7 +301,7 @@ class Renderer extends Component {
         node.position.z,
         node.size,
         node.color,
-        node.id !== undefined ? node.id : index,
+        index,
         node.name,
         node.data,
         node.colorLocked,
@@ -310,7 +313,10 @@ class Renderer extends Component {
         networkBoundarySize,
         showLabel !== 2
       );
+      if (node.id !== undefined) nodeIdMap[node.id] = index;
+      else nodeIdMap[index] = index;
       if (!performanceMode) elementGroup.add(nodeClass.instance);
+      adjacencyMatrix.push(serializedNodes.map(() => 0));
       return nodeClass;
     });
     if (performanceMode) {
@@ -321,12 +327,15 @@ class Renderer extends Component {
     const edges = [];
     const brokenEdgeIds = [];
     serializedEdges.forEach((edge, index) => {
-      const sourceNode = nodes.find(
-        (node) => (typeof edge.source === 'string' ? node.name === edge.source : node.id === edge.source)
-      );
-      const targetNode = nodes.find(
-        (node) => (typeof edge.target === 'string' ? node.name === edge.target : node.id === edge.target)
-      );
+      let sourceNode;
+      let targetNode;
+      if (typeof edge.source === 'string') {
+        sourceNode = nodes.find((node) => node.name === edge.source);
+        targetNode = nodes.find((node) => node.name === edge.target);
+      } else {
+        sourceNode = nodes[nodeIdMap[edge.source]];
+        targetNode = nodes[nodeIdMap[edge.target]];
+      }
       const edgeId = edge.id !== undefined ? edge.id : index;
       if (!sourceNode || !targetNode) {
         brokenEdgeIds.push(edgeId);
@@ -347,6 +356,8 @@ class Renderer extends Component {
       targetNode.addTargetEdge(edgeClass);
       if (!performanceMode) elementGroup.add(edgeClass.instance);
       edges.push(edgeClass);
+      adjacencyMatrix[sourceNode.id][targetNode.id] = edge.data.value || 1;
+      if (!directed) adjacencyMatrix[targetNode.id][sourceNode.id] = edge.data.value || 1;
     });
     if (performanceMode) {
       edgeInstances = new Edges(edges);
@@ -355,7 +366,7 @@ class Renderer extends Component {
     }
     nodes.forEach((node) => {
       if (!node.visible) node.setVisibility(false);
-      node.calculateDegree();
+      node.calculateDegree(directed);
     });
     boundaryBox = new BoundaryBox(networkBoundarySize, showBoundary, boundaryOpacity);
     elementGroup.add(boundaryBox.instance);
@@ -385,6 +396,7 @@ class Renderer extends Component {
       cameraControls.enableDamping = false;
     }
     _setNodesAndEdges(nodes, edges, false);
+    _setAdjacencyMatrix(adjacencyMatrix);
     _setOctree(octree);
     _setElementGroup(elementGroup);
     if (brokenEdgeIds.length) {
@@ -589,6 +601,7 @@ const mapDispatchToProps = (dispatch) => ({
   _addToActionHistory: (positionChanges) => dispatch(addToActionHistory(positionChanges)),
   _setDirected: (directed) => dispatch(setDirected(directed)),
   _setNodesAndEdges: (nodes, edges, shouldUpdateScene) => dispatch(setNodesAndEdges(nodes, edges, shouldUpdateScene)),
+  _setAdjacencyMatrix: (adjacencyMatrix) => dispatch(setAdjacencyMatrix(adjacencyMatrix)),
   _setElementGroup: (elementGroup) => dispatch(setElementGroup(elementGroup)),
   _setSelectedNodes: (nodes) => dispatch(setSelectedNodes(nodes)),
   _setSelectedEdges: (edges) => dispatch(setSelectedEdges(edges)),

@@ -1,5 +1,7 @@
 import React, {useState} from 'react';
 import {useSelector, useDispatch} from 'react-redux';
+// eslint-disable-next-line import/no-unresolved, import/no-webpack-loader-syntax
+import StatisticalMeasuresWorker from 'worker-loader!./calculateStatisticalMeasures';
 import NodeTable from './NodeTable/NodeTable';
 import EdgeTable from './EdgeTable/EdgeTable';
 import Select from '../../UI/Select/Select';
@@ -21,7 +23,8 @@ let startTime;
 const InfoTable = ({setProgressInfo}) => {
   const {
     nodes, edges, directed, name: networkName, diameter: networkDiameter, radius: networkRadius, density: networkDensity,
-    averageGeodesicDistance: networkAverageGeodesicDistance, averageDegree: networkAverageDegree, reciprocity: networkReciprocity
+    averageGeodesicDistance: networkAverageGeodesicDistance, averageDegree: networkAverageDegree, reciprocity: networkReciprocity,
+    adjacencyMatrix
   } = useSelector((state) => state.network);
   const [tableType, setTableType] = useState('Node Table');
   const [searchValue, setSearchValue] = useState('');
@@ -102,8 +105,8 @@ const InfoTable = ({setProgressInfo}) => {
   };
 
   const calculateStatisticalMeasures = (nodeClones) => {
-    statisticalMeasuresWorker = new Worker('calculateStatisticalMeasures.js');
-    statisticalMeasuresWorker.postMessage({nodeClones, directed});
+    statisticalMeasuresWorker = new StatisticalMeasuresWorker();
+    statisticalMeasuresWorker.postMessage({nodeClones, adjacencyMatrix, directed});
     resetTimeVars();
     statisticalMeasuresWorker.addEventListener('message', (e) => {
       const {type, nodeId, updatedClones} = e.data;

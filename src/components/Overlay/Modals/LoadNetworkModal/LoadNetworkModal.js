@@ -31,11 +31,13 @@ import * as bigNetwork from '../../../../data/performanceTest/2_groesser.json';
 import * as programArchitecture from '../../../../data/programmArchitecture.json';
 import * as wikiMovies from '../../../../data/wiki-movies.json';
 import * as arctic from '../../../../data/arctic.json';
+import * as testNetwork from '../../../../data/testNetwork.json';
 
 import './LoadNetworkModal.scss';
 
 const networks = [
-  'gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies', 'programArchitecture', 'arctic'
+  'gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies',
+  'programArchitecture', 'arctic', 'testNetwork'
 ];
 
 const LoadNetworkModal = () => {
@@ -295,6 +297,9 @@ const LoadNetworkModal = () => {
       } else if (selectedNetwork === 'arctic') {
         edges = arctic.default.edges;
         newNodes = arctic.default.nodes;
+      } else if (selectedNetwork === 'testNetwork') {
+        edges = testNetwork.default.edges;
+        newNodes = testNetwork.default.nodes;
       }
       loadNetworkData({
         name: selectedNetwork,

@@ -10,7 +10,7 @@ import {
   SET_NETWORK_NAME,
   SET_NETWORK_STATISTICS,
   SET_DIRECTED, SET_OCTREE,
-  SET_ELEMENT_GROUP
+  SET_ELEMENT_GROUP, SET_ADJACENCY_MATRIX
 } from '../actionTypes';
 
 export const setNetworkName = (name) => ({
@@ -31,6 +31,11 @@ export const setNetworkStatistics = (diameter, radius, averageGeodesicDistance, 
   averageDegree,
   reciprocity,
   density
+});
+
+export const setAdjacencyMatrix = (adjacencyMatrix) => ({
+  type: SET_ADJACENCY_MATRIX,
+  payload: adjacencyMatrix
 });
 
 export const setElementGroup = (elementGroup) => ({

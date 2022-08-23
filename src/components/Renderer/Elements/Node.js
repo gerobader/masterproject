@@ -14,10 +14,10 @@ class Node {
     this.targetForEdges = [];
     this.sourceForEdges = [];
     this.color = color;
+    this.colorLocked = colorLocked;
     this.size = size;
     this.disp = new THREE.Vector3();
     this.pathMap = pathMap;
-    this.colorLocked = colorLocked;
     this.shape = shape;
     this.visible = visible;
     this.labelVisible = false;
@@ -96,6 +96,22 @@ class Node {
     if (changeLabelState) this.labelVisible = false;
   }
 
+  setLabelColor(color) {
+    if (color) {
+      this.label.setColor(color);
+    }
+  }
+
+  setLabelSize(size) {
+    if (size) {
+      this.label.setSize(size);
+    }
+  }
+
+  updateLabelPosition() {
+    if (this.label) this.label.updatePosition();
+  }
+
   removeLabel() {
     if (this.label) {
       this.label.removeFromDom();
@@ -164,18 +180,6 @@ class Node {
     }
   }
 
-  setLabelColor(color) {
-    if (color) {
-      this.label.setColor(color);
-    }
-  }
-
-  setLabelSize(size) {
-    if (size) {
-      this.label.setSize(size);
-    }
-  }
-
   setData(name, value) {
     this.data[name] = value;
   }
@@ -207,10 +211,6 @@ class Node {
     this.updateLabelPosition();
   }
 
-  updateLabelPosition() {
-    if (this.label) this.label.updatePosition();
-  }
-
   addTargetEdge(edge) {
     if (edge) {
       this.targetForEdges.push(edge);
@@ -226,16 +226,20 @@ class Node {
   select() {
     if (!this.isSelected) {
       this.isSelected = true;
-      this.setSize(this.size + 0.5);
-      this.nodeInstances.setColorFor(this.id, '#00ff00');
+      if (this.performanceVersion) {
+        this.setSize(this.size + 0.5);
+        this.nodeInstances.setColorFor(this.id, '#00ff00');
+      }
     }
   }
 
   deselect() {
     if (this.isSelected) {
       this.isSelected = false;
-      this.setSize(this.size - 0.5);
-      this.nodeInstances.setColorFor(this.id, this.color);
+      if (this.performanceVersion) {
+        this.setSize(this.size - 0.5);
+        this.nodeInstances.setColorFor(this.id, this.color);
+      }
     }
   }
 

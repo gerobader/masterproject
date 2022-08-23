@@ -216,6 +216,7 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     collection.elements.push(filter);
     updateFilterCollection(newFilterCollection);
   };
+
   const updateCollectionElement = (id, newElement) => {
     const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const elementToUpdate = findCollectionElementById(newFilterCollection, id);

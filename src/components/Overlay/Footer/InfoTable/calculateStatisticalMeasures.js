@@ -1,4 +1,4 @@
-import {eigs} from 'mathjs';
+import {Matrix, EigenvalueDecomposition} from 'ml-matrix';
 
 onmessage = (e) => {
   const {nodeClones, adjacencyMatrix, directed} = e.data;
@@ -32,14 +32,18 @@ onmessage = (e) => {
   };
 
   const calculateEigenvectors = () => {
-    const {values, vectors} = eigs(adjacencyMatrix);
-    const maxEigenvalue = Math.max(...values);
-    const correspondingVector = vectors.map((vector) => vector[values.indexOf(maxEigenvalue)]);
-    const maxVectorValue = Math.max(...correspondingVector);
-    correspondingVector.forEach((value, index) => {
-      correspondingVector[index] = value / maxVectorValue;
-    });
-    nodeIds.forEach((nodeId) => nodeClones[nodeId].data.eigenvector = correspondingVector[nodeId]);
+    try {
+      const {realEigenvalues, eigenvectorMatrix} = new EigenvalueDecomposition(new Matrix(adjacencyMatrix));
+      const maxEigenvalue = Math.max(...realEigenvalues);
+      const correspondingVector = eigenvectorMatrix.data.map((vector) => vector[realEigenvalues.indexOf(maxEigenvalue)]);
+      const maxVectorValue = Math.max(...correspondingVector);
+      correspondingVector.forEach((value, index) => {
+        correspondingVector[index] = value / maxVectorValue;
+      });
+      nodeIds.forEach((nodeId) => nodeClones[nodeId].data.eigenvector = correspondingVector[nodeId]);
+    } catch (err) {
+      postMessage({type: 'error', message: 'Error calculating Eigenvectors', error: err});
+    }
   };
 
   const calculateLocalClusteringCoefficient = (node) => {
@@ -73,7 +77,7 @@ onmessage = (e) => {
       nodeId: parseInt(nodeId, 10)
     });
   });
-  calculateEigenvectors();
+  if (!directed) calculateEigenvectors();
   postMessage({type: 'finished', updatedClones: nodeClones});
   // eslint-disable-next-line no-restricted-globals
   self.close();

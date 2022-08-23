@@ -21,7 +21,8 @@ import {
 import {
   resetActionHistory,
   setNetworkBoundarySize,
-  setPerformanceMode, setShowAxes,
+  setPerformanceMode,
+  setShowAxes,
   setShowLabel,
   setShowLoadNetworkModal
 } from '../../../../redux/settings/settings.actions';
@@ -298,6 +299,7 @@ const LoadNetworkModal = () => {
         edges = arctic.default.edges;
         newNodes = arctic.default.nodes;
       } else if (selectedNetwork === 'testNetwork') {
+        isDirected = testNetwork.default.directed;
         edges = testNetwork.default.edges;
         newNodes = testNetwork.default.nodes;
       }

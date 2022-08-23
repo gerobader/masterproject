@@ -517,6 +517,7 @@ class Renderer extends Component {
     _setAxes(axes);
   }
 
+  /** draws the octree into the scene for test purposes */
   drawOctree() {
     const {octree} = this.props;
     if (!octree || !octree.update) return;

@@ -8,6 +8,35 @@ onmessage = (e) => {
     node.sourceForEdges.forEach((outgoingEdge) => connectedNodes.add(nodes[outgoingEdge.targetNode]));
     return [...connectedNodes];
   };
+  const nextStep = (allConnectedNodes, path, distance, startNodeId) => {
+    allConnectedNodes.forEach((connectedNode) => {
+      if (
+        (nodePathMaps[startNodeId][connectedNode.id] && nodePathMaps[startNodeId][connectedNode.id].distance < distance)
+        || connectedNode.id === startNodeId
+        || distance >= 20
+      ) {
+        // return if connected node is starting node or if path length is already
+        // longer than another found path or the path is too long
+        return;
+      }
+      const currentPath = [...path, connectedNode];
+      let allPaths = [];
+      // remove all paths to this node that are longer than the current path
+      if (nodePathMaps[startNodeId][connectedNode.id]) {
+        allPaths = nodePathMaps[startNodeId][connectedNode.id].paths.filter(
+          (existingPath) => existingPath.length <= currentPath.length
+        );
+      }
+      nodePathMaps[startNodeId][connectedNode.id] = {
+        target: connectedNode,
+        paths: [...allPaths, currentPath],
+        distance
+      };
+      const nextConnectedNodes = getConnectedNodes(connectedNode);
+      nextStep(nextConnectedNodes, currentPath, distance + 1, startNodeId);
+    });
+  };
+
   nodeIds.forEach((nodeId, index) => {
     const node = nodes[nodeId];
     nodePathMaps[nodeId] = {};
@@ -18,34 +47,6 @@ onmessage = (e) => {
         progressCount: index + 1
       }
     });
-    const nextStep = (allConnectedNodes, path, distance) => {
-      allConnectedNodes.forEach((connectedNode) => {
-        if (
-          (nodePathMaps[nodeId][connectedNode.id] && nodePathMaps[nodeId][connectedNode.id].distance < distance)
-          || connectedNode.id === nodeId
-          || distance >= 20
-        ) {
-          // return if connected node is starting node or if path length is already
-          // longer than another found path or the path is too long
-          return;
-        }
-        const currentPath = [...path, connectedNode];
-        let allPaths = [];
-        // remove all paths to this node that are longer than the current path
-        if (nodePathMaps[nodeId][connectedNode.id]) {
-          allPaths = nodePathMaps[nodeId][connectedNode.id].paths.filter(
-            (existingPath) => existingPath.length <= currentPath.length
-          );
-        }
-        nodePathMaps[nodeId][connectedNode.id] = {
-          target: connectedNode,
-          paths: [...allPaths, currentPath],
-          distance
-        };
-        const nextConnectedNodes = getConnectedNodes(connectedNode);
-        nextStep(nextConnectedNodes, currentPath, distance + 1);
-      });
-    };
     const connectedNodes = getConnectedNodes(node);
     connectedNodes.forEach((connectedNode) => {
       nodePathMaps[nodeId][connectedNode.id] = {
@@ -55,7 +56,7 @@ onmessage = (e) => {
       };
     });
     try {
-      nextStep(connectedNodes, [node], 1);
+      nextStep(connectedNodes, [node], 1, nodeId);
     } catch (err) {
       postMessage({type: 'error', message: 'There was an error calculating the shortest Paths!'});
     }

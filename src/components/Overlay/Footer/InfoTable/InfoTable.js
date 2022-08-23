@@ -108,8 +108,8 @@ const InfoTable = ({setProgressInfo}) => {
     statisticalMeasuresWorker = new StatisticalMeasuresWorker();
     statisticalMeasuresWorker.postMessage({nodeClones, adjacencyMatrix, directed});
     resetTimeVars();
-    statisticalMeasuresWorker.addEventListener('message', (e) => {
-      const {type, nodeId, updatedClones} = e.data;
+    statisticalMeasuresWorker.addEventListener('message', (event) => {
+      const {type, nodeId, updatedClones} = event.data;
       if (type === 'finished') {
         nodes.forEach((node) => {
           Object.keys(updatedClones[node.id].data).forEach((dataPointName) => {
@@ -129,6 +129,8 @@ const InfoTable = ({setProgressInfo}) => {
           type: 'Calculating statistical measures',
           step: 2
         });
+      } else if (type === 'error') {
+        dispatch(setErrorMessage(event.data.message));
       }
     });
   };

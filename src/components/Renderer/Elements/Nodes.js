@@ -8,8 +8,6 @@ class Nodes {
 
   createNodes(nodes) {
     const defaultMat = new THREE.MeshLambertMaterial();
-    defaultMat.transparent = true;
-    defaultMat.opacity = 1;
     const geometry = new THREE.SphereGeometry(1, 8, 8);
     const instances = new THREE.InstancedMesh(geometry, defaultMat, nodes.length);
     const color = new THREE.Color();

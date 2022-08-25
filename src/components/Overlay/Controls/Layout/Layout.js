@@ -162,7 +162,7 @@ const Layout = () => {
 
   const startCalculation = () => {
     if (!nodes.length) {
-      dispatch(setErrorMessage('Please load a network to run the Layout calculation'));
+      dispatch(setErrorMessage('Please load a Network first.'));
       return;
     }
     nodes.forEach((node) => {

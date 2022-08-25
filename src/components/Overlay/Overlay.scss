@@ -1,6 +1,7 @@
 @import '../../assets/settings';
 #user-interface{
   color: $menuWindowFontColor;
+  font-size: $uiElementFontSize;
   #filter-clone-wrapper{
     position: fixed;
     z-index: 10;
@@ -18,6 +19,12 @@
     right: 20px;
     .filter-menu{
       height: 840px;
+    }
+  }
+  @media (max-width: 1920px) {
+    font-size: $uiElementFontSizeSmall;
+    .right-menu .filter-menu{
+      height: 640px;
     }
   }
 }

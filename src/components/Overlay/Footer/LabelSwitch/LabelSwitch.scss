@@ -4,6 +4,9 @@
   display: flex;
   flex-direction: row;
   height: 34px;
+  @media (max-width: 1920px) {
+    height: 30px;
+  }
   align-items: center;
   margin-right: 10px;
   .label{

@@ -11,6 +11,10 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
     position: relative;
+    @media (max-width: 1920px) {
+      max-height: 515px;
+      height: 515px;
+    }
     &::-webkit-scrollbar{
       display: none;
     }

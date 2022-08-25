@@ -105,9 +105,9 @@ const InfoTable = ({setProgressInfo}) => {
   };
 
   const calculateStatisticalMeasures = (nodeClones) => {
+    resetTimeVars();
     statisticalMeasuresWorker = new StatisticalMeasuresWorker();
     statisticalMeasuresWorker.postMessage({nodeClones, adjacencyMatrix, directed});
-    resetTimeVars();
     statisticalMeasuresWorker.addEventListener('message', (event) => {
       const {type, nodeId, updatedClones} = event.data;
       if (type === 'finished') {

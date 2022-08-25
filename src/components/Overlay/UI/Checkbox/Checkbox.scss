@@ -28,8 +28,12 @@
     &:checked::after{
       content: '';
       background: url('../../../../assets/tick.svg') center no-repeat;
-      width: 14px;
-      height: 14px;
+      width: $uiElementFontSize;
+      height: $uiElementFontSize;
+      @media (max-width: 1920px) {
+        height: $uiElementFontSizeSmall;
+        width: $uiElementFontSizeSmall;
+      }
       position: absolute;
       top: 4px;
       left: 3px;
@@ -46,6 +50,18 @@
         width: 10px;
         height: 10px;
         background-size: 10px;
+      }
+    }
+  }
+}
+@media (max-width: 1920px) {
+  .checkbox-wrapper{
+    height: $uiElementHeightSmall;
+    input {
+      padding: 9px;
+      &:checked::after {
+        height: $uiElementFontSizeSmall;
+        width: $uiElementFontSizeSmall;
       }
     }
   }

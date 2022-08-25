@@ -32,4 +32,12 @@
     background: $uiElementBackgroundNotTransparent;
     opacity: 0.5;
   }
+  @media (max-width: 1920px) {
+    font-size: $uiElementFontSizeSmall;
+    height: $uiElementHeightSmall;
+    min-width: 90px;
+    &.reset{
+      min-width: 40px;
+    }
+  }
 }

@@ -91,7 +91,7 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
               key={node.id}
             >
               <td>{node.id}</td>
-              <td style={{userSelect: 'all'}} className="max-width big">{node.name}</td>
+              <td style={{userSelect: 'text'}} className="max-width big">{node.name}</td>
               <td>{node.size}</td>
               <td>
                 {node.color}

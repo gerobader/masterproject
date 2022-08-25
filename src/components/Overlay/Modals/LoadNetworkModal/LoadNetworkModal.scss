@@ -31,6 +31,12 @@
       margin-bottom: 0;
       padding: 0 4px;
     }
+    @media (max-width: 1920px) {
+      margin: 10px 0;
+      p{
+        margin-top: -8px;
+      }
+    }
   }
   .vis-select{
     margin-bottom: 25px;

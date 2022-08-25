@@ -1,10 +1,14 @@
 @import '../../../../assets/settings';
 .expandable-setting{
   flex-direction: column;
-  max-height: 24px;
+  max-height: $uiElementHeight;
   overflow: hidden;
   //transition: max-height 0.2s ease-in-out;
   margin-bottom: 20px;
+  @media (max-width: 1920px) {
+    max-height: $uiElementHeightSmall;
+    margin-bottom: 18px;
+  }
   &.open{
     max-height: unset;
     .arrow{
@@ -30,5 +34,12 @@
     margin-top: 10px;
     padding: 0 10px;
     border-left: 1px solid $menuWindowBorderColor;
+  }
+  @media (max-width: 1920px) {
+    max-height: $uiElementHeightSmall;
+    margin-bottom: 18px;
+    .expandable-label{
+      line-height: $uiElementHeightSmall;
+    }
   }
 }

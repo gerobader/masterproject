@@ -7,6 +7,9 @@
   .footer{
     height: 35px;
     width: 100vw;
+    @media (max-width: 1920px) {
+      height: 30px;
+    }
     box-sizing: border-box;
     color: $menuWindowFontColor;
     background: $menuWindowBackgroundNonBlur;
@@ -15,7 +18,6 @@
     }
     border-top: 1px solid $menuWindowBorderColor;
     backdrop-filter: blur($menuWindowBackgroundBlur);
-    font-size: $uiElementFontSize;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -25,6 +27,7 @@
     .left-info{
       display: flex;
       flex-direction: row;
+      align-items: center;
       .margin-right{
         margin: 0 10px 0 0;
       }
@@ -47,6 +50,16 @@
         }
         &.settings{
           background-image: url('../../../assets/setting-icon.svg');
+        }
+        @media (max-width: 1920px) {
+          height: 30px;
+          width: 30px;
+          &.table{
+            background-size: 20px;
+          }
+          &.settings{
+            background-size: 18px;
+          }
         }
       }
     }

@@ -11,6 +11,9 @@
   .settings {
     padding: 0 10px 15px;
     max-height: 235px;
+    @media (max-width: 1920px) {
+      max-height: 135px;
+    }
     overflow: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;

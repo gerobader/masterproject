@@ -60,7 +60,7 @@ const SettingsMenu = ({hideSettings}) => {
       <MenuSetting menuText="Rotate Network" onClick={() => dispatch(setOrbitPreview(!orbitPreview))}>
         <Checkbox name="rotation-active" checked={orbitPreview} small/>
       </MenuSetting>
-      <MenuSetting menuText="Center View" onClick={centerView}/>
+      <MenuSetting menuText="Center View on Network" onClick={centerView}/>
       <MenuSetting menuText="Show Controls" onClick={() => dispatch(setShowControlsModal(true))}/>
     </div>
   );

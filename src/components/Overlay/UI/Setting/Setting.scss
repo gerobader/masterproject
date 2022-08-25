@@ -19,4 +19,14 @@
     flex-direction: row;
     width: 55%;
   }
+  @media (max-width: 1920px) {
+    margin-bottom: 18px;
+    .label{
+      width: 50%;
+      line-height: $uiElementHeightSmall;
+    }
+    .config{
+      width: 50%;
+    }
+  }
 }

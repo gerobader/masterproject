@@ -30,6 +30,13 @@
     .vis-select, .vis-text-input{
       margin-bottom: 20px;
     }
+    @media (max-width: 1920px) {
+      width: 200px;
+      min-width: 200px;
+      .vis-select, .vis-text-input{
+        margin-bottom: 18px;
+      }
+    }
   }
   .table-wrapper{
     overflow: auto;
@@ -52,6 +59,9 @@
         th{
           padding: 0 20px;
           line-height: $uiElementHeight;
+          @media (max-width: 1920px) {
+            line-height: $uiElementHeightSmall;
+          }
           background: $uiElementBackgroundNotTransparent;
           border-right: 1px solid $menuWindowBorderColor;
           font-weight: 400;
@@ -83,6 +93,9 @@
           }
           &:not(:first-child){
             min-width: 50px;
+            @media (max-width: 1920px) {
+              min-width: 40px;
+            }
           }
         }
       }
@@ -98,6 +111,9 @@
           td{
             padding: 0 8px;
             line-height: $uiElementHeight;
+            @media (max-width: 1920px) {
+              line-height: $uiElementHeightSmall;
+            }
             border-right: 1px solid $menuWindowBorderColor;
             position: relative;
             white-space: nowrap;
@@ -144,6 +160,9 @@
                 width: 12px;
                 height: 7px;
                 top: calc(50% - 3px);
+                @media (max-width: 1920px) {
+                  top: calc(50% - 4px);
+                }
                 background-size: 12px 7px;
                 &.open{
                   background-image: url('../../../../assets/open-eye.svg');
@@ -172,8 +191,16 @@
     border-right: 1px solid $menuWindowBorderColor;
     .heading{
       line-height: $uiElementHeight;
+
       background: $uiElementBackgroundNotTransparent;
       text-align: center;
+    }
+    @media (max-width: 1920px) {
+      min-width: 400px;
+      max-width: 400px;
+      .heading{
+        line-height: $uiElementHeightSmall;
+      }
     }
     .info-wrapper{
       padding: 5px 10px;
@@ -188,6 +215,9 @@
           display: flex;
           flex-direction: row;
           line-height: $uiElementHeight;
+          @media (max-width: 1920px) {
+            line-height: $uiElementHeightSmall;
+          }
           span{
             cursor: default;
             &.property-name{
@@ -197,7 +227,6 @@
           .vis-text-input{
             background: none;
             padding: 0;
-            font-size: 16px;
             border-radius: 0;
             border: none;
           }

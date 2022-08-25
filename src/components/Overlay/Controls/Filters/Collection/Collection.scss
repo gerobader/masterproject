@@ -64,4 +64,19 @@
       background: $buttonBackgroundColor url('../../../../../assets/plus-icon.svg') center no-repeat;
     }
   }
+  @media (max-width: 1920px) {
+    &:not(.is-root){
+      margin: 8px 0;
+    }
+    .remove-button{
+      margin-top: 4px;
+    }
+    .add-filter-wrapper{
+      .add-button{
+        height: $uiElementHeightSmall;
+        width: $uiElementHeightSmall;
+        background-size: $uiElementHeightSmall - 6px;
+      }
+    }
+  }
 }

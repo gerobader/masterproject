@@ -8,7 +8,11 @@ import Setting from '../../UI/Setting/Setting';
 import SmallNumberInput from '../../UI/SmallNumberInput/SmallNumberInput';
 import Checkbox from '../../UI/Checkbox/Checkbox';
 import Loader from '../../UI/Loader/Loader';
-import {addToActionHistory, setLayoutCalculationRunning} from '../../../../redux/settings/settings.actions';
+import {
+  addToActionHistory,
+  setErrorMessage,
+  setLayoutCalculationRunning
+} from '../../../../redux/settings/settings.actions';
 import {
   fruchtAndReinAttraction, fruchtAndReinRepulsion, eadesAttraction, eadesRepulsion
 } from './forceFunctions';
@@ -36,6 +40,7 @@ const Layout = () => {
   const [zSeparationValue, setZSeparationValue] = useState('none');
   const [freezeAxisSeparation, setFreezeAxisSeparation] = useState(false);
   const dispatch = useDispatch();
+  const noeDataPoints = nodes.length ? Object.keys(nodes[0].data) : [];
 
   const stopCalculation = () => {
     clearInterval(interval);
@@ -156,6 +161,10 @@ const Layout = () => {
   };
 
   const startCalculation = () => {
+    if (!nodes.length) {
+      dispatch(setErrorMessage('Please load a network to run the Layout calculation'));
+      return;
+    }
     nodes.forEach((node) => {
       const elementChanges = {element: node, type: 'graphElement'};
       elementChanges.setPositionAbsolute = {before: node.position.clone()};
@@ -243,7 +252,7 @@ const Layout = () => {
             <>
               <Setting name="X-Axis">
                 <Select
-                  options={['none', ...Object.keys(nodes[0].data)]}
+                  options={['none', ...noeDataPoints]}
                   value={xSeparationValue}
                   setSelected={setXSeparationValue}
                   alwaysShowArrow
@@ -251,7 +260,7 @@ const Layout = () => {
               </Setting>
               <Setting name="Y-Axis">
                 <Select
-                  options={['none', ...Object.keys(nodes[0].data)]}
+                  options={['none', ...noeDataPoints]}
                   value={ySeparationValue}
                   setSelected={setYSeparationValue}
                   alwaysShowArrow
@@ -259,7 +268,7 @@ const Layout = () => {
               </Setting>
               <Setting name="Z-Axis">
                 <Select
-                  options={['none', ...Object.keys(nodes[0].data)]}
+                  options={['none', ...noeDataPoints]}
                   value={zSeparationValue}
                   setSelected={setZSeparationValue}
                   alwaysShowArrow

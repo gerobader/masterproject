@@ -48,6 +48,14 @@
     {
       "source": 4,
       "target": 5
+    },
+    {
+      "source": 4,
+      "target": 6
+    },
+    {
+      "source": 4,
+      "target": 8
     }
   ]
 }

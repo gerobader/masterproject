@@ -10,6 +10,9 @@ class Octree {
     this.divided = false;
   }
 
+  /**
+   * subdivides one cube of the octree into 8
+   */
   subdivide() {
     const {max, min} = this.boundary;
     const middleX = (min.x + max.x) / 2;
@@ -36,6 +39,11 @@ class Octree {
     this.divided = true;
   }
 
+  /**
+   * inserts a node into the octree
+   * @param node - the node to insert
+   * @returns {boolean|*} - used to indicate of the node was already inserted or not when trying all the child-cubes
+   */
   insert(node) {
     if (!this.boundary.containsPoint(node.position)) return false;
     if (this.nodes.length < this.capacity) {
@@ -55,6 +63,12 @@ class Octree {
     );
   }
 
+  /**
+   * get the nodes in a specified area
+   * @param searchArea - the area to search
+   * @param found - an array of all the found nodes
+   * @returns {[]} - array of the found nodes
+   */
   query(searchArea, found) {
     // eslint-disable-next-line no-param-reassign
     if (!found) found = [];
@@ -81,6 +95,9 @@ class Octree {
     return found;
   }
 
+  /**
+   * removes all the subdivisions and nodes from the octree
+   */
   empty() {
     this.nodes = [];
     this.divided = false;
@@ -94,6 +111,10 @@ class Octree {
     this.bottomFrontRight = undefined;
   }
 
+  /**
+   * used to draw the octree in the scene for debug purposes
+   * @returns {LineSegments} - a three.js representation of the octree using lines
+   */
   getBox() {
     const {max, min} = this.boundary;
     const width = max.x - min.x;

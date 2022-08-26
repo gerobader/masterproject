@@ -11,11 +11,21 @@ const Filter = ({
   const newFilter = {...filter};
   const isMoving = filterCloneSettings ? filterCloneSettings.id === filter.id : false;
 
+  /**
+   * calls the updateFilter function to update the filter settings
+   * @param filterOption - the part of the filter that should be updated
+   * @param newVal - the new value of that filter port
+   */
   const changeFilterConfig = (filterOption, newVal) => {
     newFilter[filterOption] = newVal;
     updateFilter(id, newFilter);
   };
 
+  /**
+   * sets the selected filter collection for use in the clone version that is displayed at the
+   * mouse position while moving it around
+   * @param e - the event info
+   */
   const moveFieldClick = (e) => {
     setCurrentFilterLocation({collectionId, position: filter.position, elementId: id});
     setFilterCloneSettings(filter);

@@ -11,6 +11,9 @@
         .loader{
           position: absolute;
           top: 4px;
+          @media (max-width: 1920px) {
+            top: 2px;
+          }
         }
       }
     }

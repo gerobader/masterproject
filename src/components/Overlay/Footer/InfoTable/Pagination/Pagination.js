@@ -4,6 +4,10 @@ import './Pagination.scss';
 
 const Pagination = ({activePage, pageCount, setPage}) => {
   if (pageCount < 2) return null;
+  /**
+   * creates the JSX of the page buttons based on page count
+   * @returns {JSX.Element|unknown[]} - JSX of page buttons
+   */
   const getPageButtons = () => {
     if (pageCount < 7) {
       return [...Array(pageCount).keys()].map((page) => (

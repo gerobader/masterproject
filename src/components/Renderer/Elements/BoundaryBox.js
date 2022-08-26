@@ -9,6 +9,9 @@ class BoundaryBox {
     this.buildGeometry();
   }
 
+  /**
+   * creates the geometries and materials of the box to be displayed in the scene
+   */
   buildGeometry() {
     const group = new THREE.Group();
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -27,16 +30,28 @@ class BoundaryBox {
     this.instance.position.set(0, 0, 0);
   }
 
+  /**
+   * sets the size of the boundary box
+   * @param size - the new size
+   */
   setSize(size) {
     this.size = size;
     this.instance.scale.set(size, size, size);
   }
 
+  /**
+   * sets the opacity of the material for the boundary box
+   * @param opacity - the new material
+   */
   setOpacity(opacity) {
     this.opacity = opacity;
     this.instance.children[1].material.opacity = opacity;
   }
 
+  /**
+   * sets the visibility of the boundary box
+   * @param visibility - the new visibility
+   */
   setVisibility(visibility) {
     this.visible = visibility;
     this.instance.visible = visibility;

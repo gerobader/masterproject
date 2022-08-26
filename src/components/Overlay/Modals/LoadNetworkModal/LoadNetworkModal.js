@@ -32,13 +32,11 @@ import * as bigNetwork from '../../../../data/performanceTest/2_groesser.json';
 import * as programArchitecture from '../../../../data/programmArchitecture.json';
 import * as wikiMovies from '../../../../data/wiki-movies.json';
 import * as arctic from '../../../../data/arctic.json';
-import * as testNetwork from '../../../../data/testNetwork.json';
 
 import './LoadNetworkModal.scss';
 
 const networks = [
-  'gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies',
-  'programArchitecture', 'arctic', 'testNetwork'
+  'gameofthrones', 'movies', 'twitter', 'smallSize', 'midSize', 'largeSize', 'wikiMovies', 'programArchitecture', 'arctic'
 ];
 
 const LoadNetworkModal = () => {
@@ -51,6 +49,12 @@ const LoadNetworkModal = () => {
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * creates node objects based on data from the network file
+   * @param nodeInfo - data for node creation
+   * @param boundarySize - info about where nodes can be placed
+   * @returns {[]} - array of objects that contain all info for node creation
+   */
   const createNodes = (nodeInfo, boundarySize) => {
     const componentAlwaysZero = nodeInfo.every((node) => node.component === 0);
     const newNodes = [];
@@ -103,6 +107,11 @@ const LoadNetworkModal = () => {
     return newNodes;
   };
 
+  /**
+   * creates edge objects based on data from the network file
+   * @param edgesInfo - data for edge creation
+   * @returns {[]} - array of objects that contain all info for edge creation
+   */
   const createEdges = (edgesInfo) => {
     const edges = [];
     edgesInfo.forEach((edgeInfo) => {
@@ -134,6 +143,10 @@ const LoadNetworkModal = () => {
     return edges;
   };
 
+  /**
+   * processes network data from the file
+   * @param network - all network data that was loaded
+   */
   const loadNetworkData = (network) => {
     nodes.forEach((node) => node.removeLabel());
     dispatch(setSelectedNodes([]));
@@ -153,7 +166,6 @@ const LoadNetworkModal = () => {
     ));
     if (network.axesInfo) {
       dispatch(setShowAxes(network.axesInfo.showAxes));
-      axes.setVisibility(network.axesInfo.showAxes);
       axes.setPosition(network.networkBoundarySize);
       axes.setAxisLabel('x', network.axesInfo.xAxis.text);
       axes.setAxisLabel('y', network.axesInfo.yAxis.text);
@@ -195,6 +207,9 @@ const LoadNetworkModal = () => {
     }, 500);
   };
 
+  /**
+   * get the network data from neo4j database or example network files
+   */
   const getNetworkData = async () => {
     if (selectedNetwork && !isLoading) {
       dispatch(setNetworkName(selectedNetwork));
@@ -298,10 +313,6 @@ const LoadNetworkModal = () => {
       } else if (selectedNetwork === 'arctic') {
         edges = arctic.default.edges;
         newNodes = arctic.default.nodes;
-      } else if (selectedNetwork === 'testNetwork') {
-        isDirected = testNetwork.default.directed;
-        edges = testNetwork.default.edges;
-        newNodes = testNetwork.default.nodes;
       }
       loadNetworkData({
         name: selectedNetwork,
@@ -312,6 +323,9 @@ const LoadNetworkModal = () => {
     }
   };
 
+  /**
+   * starts the network loading process
+   */
   const loadNetwork = () => {
     if (!isLoading) {
       setIsLoading(true);
@@ -322,6 +336,11 @@ const LoadNetworkModal = () => {
     }
   };
 
+  /**
+   * manages the network upload and select fields
+   * @param network - network data
+   * @param type - which field was used
+   */
   const manageNetworkInputs = (network, type) => {
     if (type === 'upload') {
       setNetworkData(network);
@@ -367,7 +386,7 @@ const LoadNetworkModal = () => {
         name="use-performance-mode"
       />
       <div className="button-wrapper">
-        <Button text="Load Network" onClick={loadNetwork} disabled={!networkData && !selectedNetwork}/>
+        <Button text="Load Network" onClick={loadNetwork} disabled={(!networkData && !selectedNetwork) || isLoading}/>
         {isLoading && <Loader/>}
       </div>
     </Modal>

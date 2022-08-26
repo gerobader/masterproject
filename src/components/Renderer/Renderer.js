@@ -67,10 +67,19 @@ class Renderer extends Component {
     this.updateSceneElements = this.updateSceneElements.bind(this);
   }
 
+  /**
+   * called when the component is first mounted by react
+   */
   componentDidMount() {
     this.createScene();
   }
 
+  /**
+   * called when the props of the component update. Used to update the scene elements
+   * @param prevProps
+   * @param prevState
+   * @param snapshot
+   */
   // eslint-disable-next-line no-unused-vars
   componentDidUpdate(prevProps, prevState, snapshot) {
     const {
@@ -90,7 +99,12 @@ class Renderer extends Component {
     }
   }
 
-  handleClickOnElement(e, connectedSelect = false) {
+  /**
+   * manages the selection of nodes and edges when the user clicks on one of them in the scene
+   * @param e - the mouse-up event
+   * @returns {*[][]} - array of the selected nodes and edges
+   */
+  handleClickOnElement(e) {
     const {
       nodes, edges, selectedNodes, selectedEdges, averagePositionPlaceholder, _setAveragePositionPlaceholder, performanceMode
     } = this.props;
@@ -100,7 +114,7 @@ class Renderer extends Component {
       if (hoveredElement.type === 'Group' || (performanceMode && hoveredElement instanceof Edge)) {
         let newSelectedEdge = hoveredElement;
         if (!performanceMode) newSelectedEdge = edges.find((edge) => edge.instance.uuid === hoveredElement.uuid);
-        if (e.ctrlKey && !connectedSelect) {
+        if (e.ctrlKey) {
           if (selectedEdges.includes(newSelectedEdge)) {
             newSelectedEdges = selectedEdges.filter((edge) => edge !== newSelectedEdge);
           } else {
@@ -113,7 +127,7 @@ class Renderer extends Component {
       } else {
         let newSelectedNode = hoveredElement;
         if (!performanceMode) newSelectedNode = nodes.find((node) => node.instance.uuid === hoveredElement.object.uuid);
-        if (e.ctrlKey && !connectedSelect) {
+        if (e.ctrlKey) {
           if (selectedNodes.includes(newSelectedNode)) {
             newSelectedNodes = selectedNodes.filter((node) => node !== newSelectedNode);
           } else {
@@ -130,6 +144,10 @@ class Renderer extends Component {
     return [newSelectedNodes, newSelectedEdges];
   }
 
+  /**
+   * used to interrupt the camera animation when focusing on a network element with the centerView() function
+   * @param e - the mouse-down event
+   */
   // eslint-disable-next-line class-methods-use-this
   handleMouseDown(e) {
     e.preventDefault();
@@ -137,6 +155,11 @@ class Renderer extends Component {
     interpolation = 0;
   }
 
+  /**
+   * called when the mouse button is released. Adds changes to the node positions to the action history, manages clicks
+   * on elements by calling the handleClickOnElement() function and adding them to the redux store.
+   * @param e - the mouse-up event
+   */
   handleMouseUp(e) {
     const {
       selectedNodes: currentlySelectedNodes, _addToActionHistory, _setSelectedNodes, _setSelectedEdges, cameraControls
@@ -184,6 +207,10 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * checks if the mouse is hovering above an element of the network and updates dragged node positions
+   * @param e - the mouse-move event
+   */
   handleMouseMove(e) {
     const {selectedNodes, averagePositionPlaceholder, cameraControls} = this.props;
     this.checkIntersect(e);
@@ -205,6 +232,10 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * handles keystrokes from the keyboard to enable shortcuts
+   * @param e - the key-up event
+   */
   handleKeyUp(e) {
     const {
       _setSelectedNodes, _setSelectedEdges, selectedNodes, averagePositionPlaceholder, _setAveragePositionPlaceholder,
@@ -235,6 +266,9 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * adds outlines to network elements when the performance mode is not active
+   */
   handleOutline() {
     const {selectedNodes, selectedEdges, performanceMode} = this.props;
     if (hoveredElement) {
@@ -250,6 +284,10 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * adds the positions controls when network elements are selected and removes them if all are deselected
+   * @param newSelectedNodes
+   */
   handleControls(newSelectedNodes) {
     const {averagePositionPlaceholder, _setAveragePositionPlaceholder, elementGroup} = this.props;
     if (newSelectedNodes.length === 0) {
@@ -283,6 +321,9 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * updates the scene elements and all related matters when a new network has been loaded.
+   */
   updateSceneElements() {
     const {
       performanceMode, networkBoundarySize, showBoundary, boundaryOpacity, directed, nodes: serializedNodes, _setAdjacencyMatrix,
@@ -404,6 +445,9 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * centers the view on the selected elements via an animation
+   */
   centerView() {
     const {
       cameraControls, elementGroup, selectedNodes, selectedEdges, nodes
@@ -417,6 +461,9 @@ class Renderer extends Component {
     targetQuaternion.setFromRotationMatrix(rotationMatrix);
   }
 
+  /**
+   * enables a smooth centering of the camera on an element
+   */
   cameraControls() {
     const {cameraControls} = this.props;
     const delta = clock.getDelta();
@@ -433,6 +480,10 @@ class Renderer extends Component {
     }
   }
 
+  /**
+   * check of the mouse hovers above a network element
+   * @param e - a mouse-move event
+   */
   checkIntersect(e) {
     const {nodes, edges, performanceMode} = this.props;
     const {clientX, clientY} = e;
@@ -464,6 +515,10 @@ class Renderer extends Component {
     hoveredElement = newHoveredElement;
   }
 
+  /**
+   * creates the groundwork of a three.js scene which includes the scene itself, the camera, lights, the position controls
+   * and the axes and boundary box
+   */
   createScene() {
     const {
       _setCameraControls, _setAxes, _setElementGroup, networkBoundarySize, showBoundary, boundaryOpacity
@@ -517,7 +572,7 @@ class Renderer extends Component {
     _setAxes(axes);
   }
 
-  /** draws the octree into the scene for test purposes */
+  /** draws the octree into the scene for testing purposes */
   drawOctree() {
     const {octree} = this.props;
     if (!octree || !octree.update) return;
@@ -539,6 +594,9 @@ class Renderer extends Component {
     addToGroup(octree);
   }
 
+  /**
+   * the animation loop
+   */
   animate() {
     const {
       orbitPreview, nodes, performanceMode, axes, elementGroup

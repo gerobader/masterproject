@@ -3,6 +3,10 @@ import React from 'react';
 import './SmallNumberInput.scss';
 
 const SmallNumberInput = ({value, setValue, disableHistory}) => {
+  /**
+   * disables the build in undo- and redo-functions that interfere with the implemented history functionality
+   * @param e
+   */
   const updateValue = (e) => {
     if (disableHistory && (e.nativeEvent.inputType === 'historyUndo' || e.nativeEvent.inputType === 'historyRedo')) return;
     setValue(e.target.value);

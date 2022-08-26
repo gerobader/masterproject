@@ -22,6 +22,9 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
   const [currentFilterLocation, setCurrentFilterLocation] = useState();
   const [newFilterLocation, setNewFilterLocation] = useState();
   const dispatch = useDispatch();
+  /**
+   * all node-values that require string filters
+   */
   const stringFilterTypes = useMemo(() => {
     if (nodes.length === 0) return [];
     const filterTypes = ['name', 'color'];
@@ -30,6 +33,9 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     });
     return filterTypes;
   }, [nodes]);
+  /**
+   * all node-values that require number filters
+   */
   const numberFilterTypes = useMemo(() => {
     if (nodes.length === 0) return [];
     const filterTypes = ['size'];
@@ -39,6 +45,10 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     return filterTypes;
   }, [nodes]);
 
+  /**
+   * updates the filter collection and adds the change to the action history
+   * @param newFilterCollection - the new filter settings
+   */
   const updateFilterCollection = (newFilterCollection) => {
     const filterChange = [{
       type: 'filterChange',
@@ -49,6 +59,12 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     dispatch(setFilterCollection(newFilterCollection));
   };
 
+  /**
+   * find element in the filter collection by id
+   * @param collection - the collection to search
+   * @param id - the id of the element (filter or collection) to find
+   * @returns the found element
+   */
   const findCollectionElementById = (collection, id) => {
     let result;
     if (id === collection.id) {
@@ -71,6 +87,12 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     return result;
   };
 
+  /**
+   * filter through the node collection
+   * @param nodes - nodes to filter
+   * @param filter - the filter to use
+   * @returns {*[]} - the filtered nodes
+   */
   // eslint-disable-next-line no-shadow
   const filterNodes = (nodes, filter) => {
     let resultNodes = [...nodes];
@@ -94,6 +116,11 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     return resultNodes;
   };
 
+  /**
+   * apply all created filters to the nodes
+   * @param filterCollection - all the filters
+   * @param resultType - should the filtered node be selected or should the nodes that don't match the filter be made invisible
+   */
   // eslint-disable-next-line no-shadow
   const applyFilters = (filterCollection, resultType) => {
     nodes.forEach((node) => node.setVisibility(true));
@@ -134,6 +161,9 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     dispatch(setNodes(nodes));
   };
 
+  /**
+   * enabled the movement of filters to a different position or collection
+   */
   const moveFilter = () => {
     if (currentFilterLocation && newFilterLocation && !(
       currentFilterLocation.position === newFilterLocation.position
@@ -193,6 +223,10 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     if (autoRefresh) applyFilters(filterCollection, filterResultType);
   }, [autoRefresh, filterCollection, filterResultType]);
 
+  /**
+   * adds a filter to a collection
+   * @param collectionId - the id of the collection to add the filter to
+   */
   const addFilter = (collectionId) => {
     const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const collection = findCollectionElementById(newFilterCollection, collectionId);
@@ -217,6 +251,11 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     updateFilterCollection(newFilterCollection);
   };
 
+  /**
+   * updates a filter or collection element
+   * @param id - the id of the element to update
+   * @param newElement - info about the new settings
+   */
   const updateCollectionElement = (id, newElement) => {
     const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const elementToUpdate = findCollectionElementById(newFilterCollection, id);
@@ -224,6 +263,11 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     updateFilterCollection(newFilterCollection);
   };
 
+  /**
+   * removes a filter or collection element
+   * @param collectionId - the collection id of the collection the element should be removed from
+   * @param elementId - the id of the element that should be removed
+   */
   const removeElementFromCollection = (collectionId, elementId) => {
     const newFilterCollection = JSON.parse(JSON.stringify(filterCollection));
     const collection = findCollectionElementById(newFilterCollection, collectionId);
@@ -232,17 +276,29 @@ const Filters = ({filterCloneSettings, setFilterCloneSettings, setFilterClonePos
     updateFilterCollection(newFilterCollection);
   };
 
+  /**
+   * when a filter or collection is dragged, this sets the location the mouse is hovered above
+   * @param locationSettings - info about the location
+   */
   const updateNewFilterLocation = (locationSettings) => {
     if (filterCloneSettings) {
       setNewFilterLocation(locationSettings);
     }
   };
 
+  /**
+   * set the result type of the filter window
+   * @param type - the result type
+   */
   const updateFilterResultType = (type) => {
     if (filterResultType === 'Select' && type === 'Show') dispatch(setSelectedNodes([]));
     setFilterResultType(type);
   };
 
+  /**
+   * updates the auto refresh feature
+   * @param enabled - the new state of the feature
+   */
   const updateAutoRefresh = (enabled) => {
     setAutoRefresh(enabled);
     applyFilters(filterCollection, filterResultType);

@@ -175,16 +175,88 @@
     {
       "id": 43,
       "name": "KeyBinding"
+    },
+    {
+      "id": 44,
+      "name": "Error Modal"
+    },
+    {
+      "id": 45,
+      "name": "KeyBinding"
+    },
+    {
+      "id": 46,
+      "name": "StatisticalMeasuresWorker"
+    },
+    {
+      "id": 47,
+      "name": "Axes"
+    },
+    {
+      "id": 48,
+      "name": "Node"
+    },
+    {
+      "id": 49,
+      "name": "Nodes"
+    },
+    {
+      "id": 50,
+      "name": "Edge"
+    },
+    {
+      "id": 51,
+      "name": "Edges"
+    },
+    {
+      "id": 52,
+      "name": "BoundaryBox"
+    },
+    {
+      "id": 53,
+      "name": "Octree"
+    },
+    {
+      "id": 54,
+      "name": "Label"
     }
   ],
   "links": [
     {
-      "source": 0,
-      "target": 1
+      "source": "NetworkVisualizer",
+      "target": "Renderer"
     },
     {
-      "source": 0,
-      "target": 2
+      "source": "NetworkVisualizer",
+      "target": "Overlay"
+    },
+    {
+      "source": 1,
+      "target": 47
+    },
+    {
+      "source": 1,
+      "target": 48
+    },
+    {
+      "source": 1,
+      "target": 49
+    },
+    {
+      "source": 1,
+      "target": 50
+    },
+    {
+      "source": 1,
+      "target": 51
+    },
+    {
+      "source": 1,
+      "target": 52
+    },
+    {
+      "source": 1,
+      "target": 53
     },
     {
       "source": 2,
@@ -337,6 +409,10 @@
     {
       "source": 8,
       "target": 9
+    },
+    {
+      "source": 8,
+      "target": 45
     },
     {
       "source": 9,
@@ -495,6 +571,10 @@
       "target": 24
     },
     {
+      "source": 35,
+      "target": 46
+    },
+    {
       "source": 36,
       "target": 12
     },
@@ -521,6 +601,22 @@
     {
       "source": 43,
       "target": 8
+    },
+    {
+      "source": 44,
+      "target": 9
+    },
+    {
+      "source": 44,
+      "target": 11
+    },
+    {
+      "source": 47,
+      "target": 54
+    },
+    {
+      "source": 48,
+      "target": 54
     }
   ]
 }

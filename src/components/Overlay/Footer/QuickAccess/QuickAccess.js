@@ -6,12 +6,8 @@ import {setShowAxes} from '../../../../redux/settings/settings.actions';
 import './QuickAccess.scss';
 
 const QuickAccess = ({showInfoTable}) => {
-  const {axes, showAxes} = useSelector((state) => state.settings);
+  const {showAxes} = useSelector((state) => state.settings);
   const dispatch = useDispatch();
-  const setAxesVisibility = () => {
-    axes.setVisibility(!showAxes);
-    dispatch(setShowAxes(!showAxes));
-  };
 
   return (
     <div className={`quick-access-wrapper${showInfoTable ? ' move-up' : ''}`}>
@@ -19,7 +15,7 @@ const QuickAccess = ({showInfoTable}) => {
       <div
         className={`quick-menu show-axes${showAxes ? ' active' : ''}`}
         title={showAxes ? 'Hide Axes' : 'Show Axes'}
-        onClick={setAxesVisibility}
+        onClick={() => dispatch(setShowAxes(!showAxes))}
       />
     </div>
   );

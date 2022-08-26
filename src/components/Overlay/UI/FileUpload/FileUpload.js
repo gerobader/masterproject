@@ -5,6 +5,10 @@ import './FileUpload.scss';
 const FileUpload = ({
   id, labelText, onFileLoaded, fileName, setFileName
 }) => {
+  /**
+   * creates a file reader, that ready the uploaded file as text
+   * @param e - the change event
+   */
   const onFileUpload = (e) => {
     setFileName(e.target.files[0].name);
     const fileReader = new FileReader();

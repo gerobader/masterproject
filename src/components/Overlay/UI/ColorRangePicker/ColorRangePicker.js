@@ -23,6 +23,10 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
     }
   }, [colorRangePicker, indicators]);
 
+  /**
+   * adds a color indicator at the mouse position
+   * @param e - the click event
+   */
   const addIndicator = (e) => {
     const positionPercent = Math.ceil((e.nativeEvent.layerX / e.target.offsetWidth) * 100);
     const position = (e.nativeEvent.layerX / e.target.offsetWidth) * e.target.offsetWidth - 3;
@@ -33,6 +37,9 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
     setIndicators(newIndicators);
   };
 
+  /**
+   * delete the selected indicator
+   */
   const deleteIndicator = () => {
     if (selectedIndicatorId && selectedIndicatorId > 1) {
       const newIndicators = indicators.filter((indicator, index) => index !== selectedIndicatorId);
@@ -51,18 +58,31 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
     };
   }, [deleteIndicator]);
 
+  /**
+   * set the  color for an indicator
+   * @param color
+   * @param id - id of the indicator
+   */
   const setIndicatorColor = (color, id) => {
     const newIndicators = [...indicators];
     newIndicators[id].color = color;
     setIndicators(newIndicators);
   };
 
+  /**
+   * manages the mouse-down event
+   * @param e
+   * @param indicatorId
+   */
   const handleMouseDown = (e, indicatorId) => {
     setSelectedIndicatorId(indicatorId);
     setStartX(e.clientX);
     setLastX(e.clientX);
   };
 
+  /**
+   * manages the mouse-up event
+   */
   const handleMouseUp = () => {
     if (selectedIndicatorId) {
       setStartX(undefined);
@@ -75,6 +95,10 @@ const ColorRangePicker = ({indicators, setIndicators}) => {
     }
   };
 
+  /**
+   * enables the dragging of a color indicator by the mouse
+   * @param e - mouse move event
+   */
   const dragIndicator = (e) => {
     if (startX && !indicators[selectedIndicatorId].isFixed) {
       indicators[selectedIndicatorId].isDragged = true;

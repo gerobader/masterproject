@@ -42,6 +42,9 @@ const Layout = () => {
   const dispatch = useDispatch();
   const noeDataPoints = nodes.length ? Object.keys(nodes[0].data) : [];
 
+  /**
+   * stops the layout calculation and adds the changes to the action history
+   */
   const stopCalculation = () => {
     clearInterval(interval);
     interval = undefined;
@@ -53,6 +56,14 @@ const Layout = () => {
     changes = [];
   };
 
+  /**
+   * calculate the repulsive forces between the nodes
+   * @param repulsiveForce - function that determines the strength of the force
+   * @param k - fruchterman and reingold parameter
+   * @param searchArea - fruchterman and reingold parameter
+   * @param type - the type of force directed algorithm (eades or fruchterman and reingold)
+   * @param useOctree - should the octree be used or not
+   */
   const calculateRepulsiveForces = (repulsiveForce, k, searchArea, type, useOctree) => {
     nodes.forEach((v) => {
       if (!v.visible) return;
@@ -75,6 +86,11 @@ const Layout = () => {
     });
   };
 
+  /**
+   * calculates the attractive forces between the nodes
+   * @param attractiveForce - function that determines the strength of the force
+   * @param k - furchterman and reingold parameter
+   */
   const calculateAttractiveForces = (attractiveForce, k) => {
     edges.forEach((edge) => {
       if (!edge.visible) return;
@@ -89,6 +105,12 @@ const Layout = () => {
     });
   };
 
+  /**
+   * manages the force directed layout calculation
+   * @param type - the type of algorithm to use
+   * @param attractiveForce - function that determines the strength of the attractive force
+   * @param repulsiveForce  - function that determines the strength of the repulsive force
+   */
   const forceDirectedPlacement = (type, attractiveForce, repulsiveForce) => {
     let temp = parseFloat(startTemp);
     if (type === 'frucht' && !temp) return;
@@ -128,6 +150,11 @@ const Layout = () => {
     }
   };
 
+  /**
+   * calculates node position by separation based on their attributes
+   * @param axis - the axis to separate on
+   * @param separationValue - the node datapoint to use for the separation
+   */
   const separateNodes = (axis, separationValue) => {
     const dataValuesSet = new Set();
     nodes.forEach((node) => dataValuesSet.add(node.data[separationValue]));
@@ -160,6 +187,9 @@ const Layout = () => {
     if (zSeparationValue === 'none') axes.setAxisLabel('z', 'none');
   };
 
+  /**
+   * manages the initial start of the different layout calculations
+   */
   const startCalculation = () => {
     if (!nodes.length) {
       dispatch(setErrorMessage('Please load a Network first.'));

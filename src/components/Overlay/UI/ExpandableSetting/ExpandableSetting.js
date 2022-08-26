@@ -11,6 +11,11 @@ const ExpandableSetting = ({
   const [expanded, setExpanded] = useState(false);
   const useMappingTypeInput = dataPoints && dataPoints[mappingValue] && typeof dataPoints[mappingValue][0] !== 'string';
 
+  /**
+   * checks if the newly selected mapping value is compatible with the selected mapping type and if not,
+   * sets the mapping type to a compatible value
+   * @param value
+   */
   const checkNewMappingValue = (value) => {
     const compatibleWithRelativeInput = dataPoints && dataPoints[value] && typeof dataPoints[value][0] !== 'string';
     if (!compatibleWithRelativeInput && setMappingType) setMappingType('absolute');

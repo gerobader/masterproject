@@ -19,6 +19,9 @@ class Edge {
     if (!this.performanceVersion) this.buildGeometry();
   }
 
+  /**
+   * initializes the 3d objects used for the edge
+   */
   buildGeometry() {
     const group = new THREE.Group();
     const geometry = new THREE.CylinderGeometry(0.1, 0.1, 1, 6);
@@ -40,6 +43,9 @@ class Edge {
     if (this.size !== 1) this.setSize(this.size, true);
   }
 
+  /**
+   * sets the position of the edge based on its source and target node
+   */
   updatePosition() {
     if (this.visible) {
       const targetVector = this.targetNode.position.clone();
@@ -70,6 +76,9 @@ class Edge {
     }
   }
 
+  /**
+   * sets the rotation of the edge based on its target node
+   */
   setRotation() {
     const targetVector = new THREE.Vector3();
     this.targetNode.instance.getWorldPosition(targetVector);
@@ -77,6 +86,10 @@ class Edge {
     this.instance.rotateX(halfPi); // rotate by 90 degrees
   }
 
+  /**
+   * sets the color of the edge
+   * @param color - the new color
+   */
   setColor(color) {
     if (color) {
       if (this.performanceVersion) {
@@ -89,6 +102,10 @@ class Edge {
     }
   }
 
+  /**
+   * sets the visibility of the edge
+   * @param visibility - the new visibility (true / false)
+   */
   setVisibility(visibility) {
     if (this.performanceVersion) {
       const targetVector = this.targetNode.position.clone();
@@ -102,6 +119,11 @@ class Edge {
     this.visible = visibility;
   }
 
+  /**
+   * sets the size of the edge
+   * @param size - the new size
+   * @param skipCheck - indicates if the check against the previous size should be skipped
+   */
   setSize(size, skipCheck) {
     let newSize = size;
     if (newSize === 0) newSize = 0.001;
@@ -119,6 +141,9 @@ class Edge {
     }
   }
 
+  /**
+   * called when the edge is selected (used in performance mode for highlighting)
+   */
   select() {
     if (!this.isSelected) {
       this.isSelected = true;
@@ -127,6 +152,9 @@ class Edge {
     }
   }
 
+  /**
+   * called when the edge is deselected (used in performance mode for highlighting)
+   */
   deselect() {
     if (this.isSelected) {
       this.isSelected = false;
@@ -135,10 +163,18 @@ class Edge {
     }
   }
 
+  /**
+   * set the edge instances (used in performance mode)
+   * @param edgeInstances
+   */
   setEdgeInstances(edgeInstances) {
     this.edgeInstances = edgeInstances;
   }
 
+  /**
+   * serializes the edge information
+   * @returns {{visible, isDirected, size, color, data: (*|{}), id, source, target}}
+   */
   serialize() {
     return {
       id: this.id,

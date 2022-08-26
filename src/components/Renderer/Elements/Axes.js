@@ -17,6 +17,9 @@ class Axes {
     this.createAxis();
   }
 
+  /**
+   * creates the axis elements including lines, arrowheads and initial labels
+   */
   createAxis() {
     const axisGroup = new THREE.Group();
     axisGroup.name = 'Axis';
@@ -84,6 +87,11 @@ class Axes {
     this.setVisibility(this.visible);
   }
 
+  /**
+   * sets the label of an axis
+   * @param axis - the axis to set the label for
+   * @param label - the text of the label
+   */
   setAxisLabel(axis, label) {
     if (axis === 'x') this.xAxisLabel.setText(label);
     if (axis === 'y') this.yAxisLabel.setText(label);
@@ -91,6 +99,9 @@ class Axes {
     this.removeDivisionsFromAxis(axis);
   }
 
+  /**
+   * update the position of all labels currently shown on the axes
+   */
   updateLabelPositions() {
     if (!this.visible) return;
     this.xAxisLabel.updatePosition();
@@ -101,6 +112,10 @@ class Axes {
     this.zAxisDivisions.forEach((label) => label.updatePosition());
   }
 
+  /**
+   * set the position and size of the axes according to the network boundary size
+   * @param networkBoundarySize - the size of the network boundary
+   */
   setPosition(networkBoundarySize) {
     const oldSize = this.size;
     this.size = networkBoundarySize;
@@ -151,6 +166,11 @@ class Axes {
     });
   }
 
+  /**
+   * adds 10 divisions to an axis based on the value the nodes where separated by
+   * @param axis - the axis to set the divisions on
+   * @param positions - the positions of the different values in the environment
+   */
   addDivisionToAxis(axis, positions) {
     this.removeDivisionsFromAxis(axis);
     let divisions;
@@ -196,6 +216,10 @@ class Axes {
     });
   }
 
+  /**
+   * removes all divisions from an axis
+   * @param axis - the axis to remove the divisions from
+   */
   removeDivisionsFromAxis(axis) {
     if (axis === 'x') {
       this.xAxisDivisions.forEach((label) => label.removeFromDom());
@@ -209,6 +233,10 @@ class Axes {
     }
   }
 
+  /**
+   * shows or hides all the axis and their labels
+   * @param visibility - should it be shown (true) or hidden (false)
+   */
   setVisibility(visibility) {
     this.visible = visibility;
     this.instance.visible = visibility;

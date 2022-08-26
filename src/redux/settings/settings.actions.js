@@ -15,7 +15,8 @@ import {
   SET_BOUNDARY_OPACITY,
   SET_LAYOUT_CALCULATION_RUNNING,
   SET_AXES,
-  SET_SHOW_AXIS, SET_ERROR_MESSAGE
+  SET_SHOW_AXES,
+  SET_ERROR_MESSAGE
 } from '../actionTypes';
 import {setNodes} from '../network/network.actions';
 import {setFilterCollection} from '../filter/filter.action';
@@ -156,10 +157,16 @@ export const setBoundaryOpacity = (opacity) => ({
   payload: opacity
 });
 
-export const setShowAxes = (show) => ({
-  type: SET_SHOW_AXIS,
+const showAxes = (show) => ({
+  type: SET_SHOW_AXES,
   payload: show
 });
+
+export const setShowAxes = (show) => (dispatch, getState) => {
+  const {axes} = getState().settings;
+  axes.setVisibility(show);
+  dispatch(showAxes(show));
+};
 
 export const setAxes = (axes) => ({
   type: SET_AXES,

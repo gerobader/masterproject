@@ -13,6 +13,9 @@ class Label {
     this.createLabel();
   }
 
+  /**
+   * creates the label as a DOM element
+   */
   createLabel() {
     const label = document.createElement('div');
     label.className = 'scene-label';
@@ -24,10 +27,18 @@ class Label {
     this.container.appendChild(this.instance);
   }
 
+  /**
+   * removes the label from the DOM
+   */
   removeFromDom() {
     this.instance.remove();
   }
 
+  /**
+   * updates the label position
+   * @param newParentPosition - the position of the parent of the label
+   * @param forceUpdate - force the position update event when the edge is hidden
+   */
   updatePosition(newParentPosition, forceUpdate) {
     if (!this.isHidden || forceUpdate) {
       if (newParentPosition) {
@@ -49,6 +60,10 @@ class Label {
     }
   }
 
+  /**
+   * set the color of the label
+   * @param color - the new color
+   */
   setColor(color) {
     if (color) {
       this.color = color;
@@ -56,6 +71,10 @@ class Label {
     }
   }
 
+  /**
+   * set the size of the label font
+   * @param size - the new font size
+   */
   setSize(size) {
     if (size) {
       this.size = size;
@@ -63,11 +82,18 @@ class Label {
     }
   }
 
+  /**
+   * set the text of the label
+   * @param text - the new text for the label
+   */
   setText(text) {
     this.text = text;
     this.instance.innerHTML = text;
   }
 
+  /**
+   * hide the label
+   */
   hide() {
     if (!this.isHidden) {
       this.isHidden = true;
@@ -75,6 +101,9 @@ class Label {
     }
   }
 
+  /**
+   * show the label
+   */
   show() {
     if (this.isHidden) {
       this.isHidden = false;

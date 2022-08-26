@@ -5,9 +5,14 @@ import './Indicator.scss';
 const Indicator = ({
   color, position, id, onMouseDown, setColor, shouldOpenPicker
 }) => {
+  /**
+   * prevents the color picker element provided by the browser to open if the shouldOpenPicker parameter is false
+   * @param e - the click event
+   */
   const onClickOnColorInput = (e) => {
     if (!shouldOpenPicker) e.preventDefault();
   };
+
   return (
     <div
       className="indicator"

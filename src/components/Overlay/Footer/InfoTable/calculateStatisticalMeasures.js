@@ -4,6 +4,11 @@ onmessage = (e) => {
   const {nodeClones, adjacencyMatrix, directed} = e.data;
   const nodeIds = Object.keys(nodeClones);
 
+  /**
+   * calculates the closeness value of a node
+   * @param node - the node to calculate the value for
+   * @returns {number} - the closeness value
+   */
   const calculateCloseness = (node) => {
     if (!node.pathMap) return 0;
     const reachableNodeIds = Object.keys(node.pathMap);
@@ -12,6 +17,11 @@ onmessage = (e) => {
     return reachableNodeIds.length / distanceSum;
   };
 
+  /**
+   * calculates the betweenness value of a node
+   * @param currentNode - the node to calculate the value for
+   * @returns {number} - the betweenness value
+   */
   const calculateBetweenness = (currentNode) => {
     let allShortestPathsCount = 0;
     let shortestPathPassThroughCount = 0;
@@ -31,6 +41,9 @@ onmessage = (e) => {
     return shortestPathPassThroughCount / allShortestPathsCount;
   };
 
+  /**
+   * calculates the eigenvectors for all nodes
+   */
   const calculateEigenvectors = () => {
     try {
       const {realEigenvalues, eigenvectorMatrix} = new EigenvalueDecomposition(new Matrix(adjacencyMatrix));
@@ -46,6 +59,11 @@ onmessage = (e) => {
     }
   };
 
+  /**
+   * calculates the local clustering coefficient of a node
+   * @param node - the node to calculate the value for
+   * @returns {number} - the local clustering coefficient value
+   */
   const calculateLocalClusteringCoefficient = (node) => {
     const degree = node.targetForEdges.length + node.sourceForEdges.length;
     let maxPossibleLinks = degree * (degree - 1);

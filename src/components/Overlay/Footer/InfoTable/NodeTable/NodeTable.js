@@ -28,6 +28,12 @@ const NodeTable = ({changeSortValue, nodesToShow}) => {
     lastSelectedIndex = undefined;
   }, [page]);
 
+  /**
+   * select a node by clicking on it in the table
+   * @param e - the click event
+   * @param node - the node to select
+   * @param index - index of the node in to node table - used for multi select
+   */
   const selectNodes = (e, node, index) => {
     if (e.target.classList[0] !== 'extra-button' && node.visible) {
       let newSelectedNodes = [node];

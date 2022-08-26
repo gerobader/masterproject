@@ -15,6 +15,10 @@ const BoundaryMenu = () => {
   } = useSelector((state) => state.settings);
   const dispatch = useDispatch();
 
+  /**
+   * updates the size of the boundary box
+   * @param size - the new size for the boundary box
+   */
   const updateNetworkBoundarySize = (size) => {
     if (layoutCalculationRunning) return;
     const octree = new Octree(

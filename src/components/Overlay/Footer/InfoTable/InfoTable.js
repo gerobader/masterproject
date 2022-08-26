@@ -31,12 +31,22 @@ const InfoTable = ({setProgressInfo}) => {
   const [calculationRunning, setCalculationRunning] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * change the sort value, if the mouse hasn't moved since it was first clicked
+   * @param value - the value to sort by
+   * @param e - the click event
+   * @param prevX - the x location of the mouse when it was clicked
+   * @param elementType - edge or node
+   */
   const changeSortValue = (value, e, prevX, elementType) => {
     if (e.clientX === prevX) {
       dispatch(elementType === 'node' ? setSortNodesBy(value) : setSortEdgesBy(value));
     }
   };
 
+  /**
+   * stop the network analysis calculation
+   */
   const stopCalculation = () => {
     if (statisticalMeasuresWorker) statisticalMeasuresWorker.terminate();
     if (shortestPathWorker) shortestPathWorker.terminate();
@@ -44,12 +54,19 @@ const InfoTable = ({setProgressInfo}) => {
     setProgressInfo(undefined);
   };
 
+  /**
+   * reset the time variables used for duration estimation
+   */
   const resetTimeVars = () => {
     timeArray = [];
     progressCount = 0;
     startTime = new Date();
   };
 
+  /**
+   * get the time that remains for the current calculation
+   * @returns {number} - the time in milliseconds
+   */
   const getRemainingTime = () => {
     const timeTaken = new Date() - startTime;
     startTime = new Date();
@@ -60,6 +77,10 @@ const InfoTable = ({setProgressInfo}) => {
     return averageTimePerNode * (nodes.length - progressCount);
   };
 
+  /**
+   * calculates the statistics for the network as a whole
+   * @param nodes - all nodes of the network
+   */
   // eslint-disable-next-line no-shadow
   const calculateNetworkStatistics = (nodes) => {
     const nodeEccentricities = [];
@@ -104,6 +125,10 @@ const InfoTable = ({setProgressInfo}) => {
     dispatch(setNetworkStatistics(diameter, radius, averageGeodesicDistance, averageDegree, reciprocity, density));
   };
 
+  /**
+   * starts and manages the web worker that calculates the statistical measures per node
+   * @param nodeClones - simplified clones of all the nodes
+   */
   const calculateStatisticalMeasures = (nodeClones) => {
     resetTimeVars();
     statisticalMeasuresWorker = new StatisticalMeasuresWorker();
@@ -135,6 +160,9 @@ const InfoTable = ({setProgressInfo}) => {
     });
   };
 
+  /**
+   * starts and manages the web worker that calculates the shortest paths between all nodes
+   */
   const calculateShortestPathBetweenNodes = () => {
     if (calculationRunning) return;
     setCalculationRunning(true);

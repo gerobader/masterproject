@@ -8,12 +8,20 @@ const LabelSwitch = () => {
   const {showLabel, performanceMode} = useSelector((state) => state.settings);
   const {nodes, selectedNodes} = useSelector((state) => state.network);
   const dispatch = useDispatch();
+
+  /**
+   * convert showLabel value into human-readable form
+   * @returns {string}
+   */
   const getLabel = () => {
     if (showLabel === 0) return 'No Labels';
     if (showLabel === 1) return 'Labels for selected Nodes';
     return 'All Labels';
   };
 
+  /**
+   * sets the showLabel state and hides / show the labels accordingly
+   */
   const updateShowLabelState = () => {
     const modeCount = performanceMode ? 2 : 3;
     const newState = (showLabel + 1) % modeCount;

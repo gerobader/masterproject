@@ -20,6 +20,9 @@ const SaveNetworkModal = () => {
   const [savePathMap, setSavePathMap] = useState(false);
   const dispatch = useDispatch();
 
+  /**
+   * save the network to a json file
+   */
   const saveNetwork = () => {
     if (name) {
       const serializedNodes = nodes.map((node) => node.serialize(savePathMap));

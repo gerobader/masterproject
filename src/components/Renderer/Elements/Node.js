@@ -30,6 +30,9 @@ class Node {
     if (label) this.label = new Label(this.name, this.position, camera, hideLabel);
   }
 
+  /**
+   * build the node geometry
+   */
   buildGeometry() {
     const geometry = new THREE.SphereGeometry(this.size, 8, 8);
     const material = new THREE.MeshLambertMaterial({color: this.color});
@@ -39,6 +42,10 @@ class Node {
     if (this.shape && this.shape !== 'Sphere') this.setShape(this.shape);
   }
 
+  /**
+   * calculate the degree, in-degree and out-degree (for directed networks) of the node
+   * @param isDirectedGraph
+   */
   calculateDegree(isDirectedGraph) {
     this.data.degree = this.targetForEdges.length + this.sourceForEdges.length;
     if (isDirectedGraph) {
@@ -47,6 +54,10 @@ class Node {
     }
   }
 
+  /**
+   * set the color of the node
+   * @param color - the new color
+   */
   setColor(color) {
     if (color && !this.colorLocked) {
       if (this.performanceVersion) {
@@ -58,6 +69,10 @@ class Node {
     }
   }
 
+  /**
+   * set the visibility of the node
+   * @param visibility - the new visibility
+   */
   setVisibility(visibility) {
     this.visible = visibility;
     if (this.performanceVersion) {
@@ -83,6 +98,10 @@ class Node {
     else if (this.labelVisible) this.showLabel(false);
   }
 
+  /**
+   * show the label of the node
+   * @param changeLabelState - change the label state to visible, regardless of if the node is visible ot not
+   */
   showLabel(changeLabelState) {
     if (this.visible) {
       if (this.label) this.label.show();
@@ -91,27 +110,45 @@ class Node {
     if (changeLabelState) this.labelVisible = true;
   }
 
+  /**
+   * hide the label
+   * @param changeLabelState - change the label state to invisible, regardless of if the node is visible or not
+   */
   hideLabel(changeLabelState) {
     if (this.label) this.label.hide();
     if (changeLabelState) this.labelVisible = false;
   }
 
+  /**
+   * set the color of the node label
+   * @param color - the new color
+   */
   setLabelColor(color) {
     if (color) {
       this.label.setColor(color);
     }
   }
 
+  /**
+   * set the font size of the node label
+   * @param size - the new font size
+   */
   setLabelSize(size) {
     if (size) {
       this.label.setSize(size);
     }
   }
 
+  /**
+   * update the position of the node label
+   */
   updateLabelPosition() {
     if (this.label) this.label.updatePosition();
   }
 
+  /**
+   * remove the label from the node
+   */
   removeLabel() {
     if (this.label) {
       this.label.removeFromDom();
@@ -119,10 +156,18 @@ class Node {
     }
   }
 
+  /**
+   * set the color lock. if it is true, the color of the node cannot be changed by any means
+   * @param lock - true of false
+   */
   setColorLock(lock) {
     if (lock === true || lock === false) this.colorLocked = lock;
   }
 
+  /**
+   * set the size of the node
+   * @param size - the new size
+   */
   setSize(size) {
     let newSize = size;
     if (newSize === 0) newSize = 0.001;
@@ -140,6 +185,10 @@ class Node {
     }
   }
 
+  /**
+   * set the shape of the node
+   * @param shape - the new shape
+   */
   setShape(shape) {
     if (this.performanceVersion) return;
     this.instance.geometry.dispose();
@@ -180,10 +229,18 @@ class Node {
     }
   }
 
+  /**
+   * add a property to the data attribute of the node
+   * @param name - the name of the property
+   * @param value - the value of the property
+   */
   setData(name, value) {
     this.data[name] = value;
   }
 
+  /**
+   * updates the positions of the edges that are connected to this node when it is moved
+   */
   updateAssociatedEdgePosition() {
     this.targetForEdges.forEach((edge) => {
       edge.updatePosition();
@@ -193,12 +250,20 @@ class Node {
     });
   }
 
+  /**
+   * update the position of the node relative to its current position
+   * @param position - the change in position
+   */
   setPositionRelative(position) {
     const newPosition = this.position.clone();
     newPosition.add(position);
     this.setPositionAbsolute(newPosition);
   }
 
+  /**
+   * set the position of the node
+   * @param position - the new position
+   */
   setPositionAbsolute(position) {
     position.clampScalar(-this.networkBoundarySize / 2, this.networkBoundarySize / 2);
     this.position.set(position.x, position.y, position.z);
@@ -211,18 +276,29 @@ class Node {
     this.updateLabelPosition();
   }
 
+  /**
+   * add an edge that has this node as its target
+   * @param edge - the edge to be added
+   */
   addTargetEdge(edge) {
     if (edge) {
       this.targetForEdges.push(edge);
     }
   }
 
+  /**
+   * add an edge that has this node as its source
+   * @param edge - the edge to be added
+   */
   addSourceEdge(edge) {
     if (edge) {
       this.sourceForEdges.push(edge);
     }
   }
 
+  /**
+   * called when the node is selected (used in performance mode for highlighting)
+   */
   select() {
     if (!this.isSelected) {
       this.isSelected = true;
@@ -233,6 +309,9 @@ class Node {
     }
   }
 
+  /**
+   * called when the node is deselected (used in performance mode for highlighting)
+   */
   deselect() {
     if (this.isSelected) {
       this.isSelected = false;
@@ -243,14 +322,27 @@ class Node {
     }
   }
 
+  /**
+   * set the node instances (used in performance mode)
+   * @param nodeInstances
+   */
   setNodeInstances(nodeInstances) {
     this.nodeInstances = nodeInstances;
   }
 
+  /**
+   * set the size of the boundary so that the node can't be placed outside it
+   * @param size
+   */
   setNetworkBoundarySize(size) {
     this.networkBoundarySize = size;
   }
 
+  /**
+   * check if this node is a neighbor of the given node
+   * @param node - the node to check against
+   * @returns {boolean}
+   */
   isNeighborOf(node) {
     let neighbor;
     neighbor = this.targetForEdges.find((edge) => edge.sourceNode.id === node.id);
@@ -260,6 +352,10 @@ class Node {
     return Boolean(neighbor);
   }
 
+  /**
+   * unserializes the path map. used when loading network files that have that info in them
+   * @param nodes
+   */
   unserializePathMap(nodes) {
     if (this.pathMap) {
       const unserializedPathMap = {};
@@ -275,6 +371,11 @@ class Node {
     }
   }
 
+  /**
+   * serializes the node information
+   * @param savePathMap - specifies if the path map should be included in the serialized object or not
+   * @returns {{}} - the serialized node object
+   */
   serialize(savePathMap) {
     let serializedPathMap;
     if (savePathMap && this.pathMap) {

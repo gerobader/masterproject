@@ -23,6 +23,9 @@ const NodeMappingMenu = ({
 }) => {
   const {nodes} = useSelector((state) => state.network);
   const {performanceMode} = useSelector((state) => state.settings);
+  /**
+   * gets all types of data from the data attribute of the nodes
+   */
   const nodeDataPoints = useMemo(() => {
     const data = {};
     nodes.forEach((node) => {
@@ -45,6 +48,15 @@ const NodeMappingMenu = ({
     return data;
   }, [nodes]);
 
+  /**
+   * creates inputs for the different types of property settings
+   * @param mappingProperty - property of the edge like color or size that should be changed
+   * @param mappingValue - property of the edge the change should be based on
+   * @param mappingType - relative or absolute mapping
+   * @param rangeMapping - the value range provided by the user
+   * @param rangeMappingSetter - the setter function for the value range
+   * @returns {JSX.Element|null|*} - elements that build the frontend
+   */
   const createMappingInputs = (mappingProperty, mappingValue, mappingType, rangeMapping, rangeMappingSetter) => {
     if (!mappingValue) return null;
     if (mappingType === 'relative' && mappingProperty !== 'shape') {

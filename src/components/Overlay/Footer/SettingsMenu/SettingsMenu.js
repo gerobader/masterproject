@@ -37,6 +37,9 @@ const SettingsMenu = ({hideSettings}) => {
     };
   }, [menuRef]);
 
+  /**
+   * center the view on the network
+   */
   const centerView = () => {
     cameraControls.target = nodes ? calculateAveragePosition(nodes, elementGroup) : new THREE.Vector3();
   };

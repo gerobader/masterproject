@@ -9,6 +9,11 @@ const Collection = ({
   updateNewFilterLocation, stringFilterTypes, numberFilterTypes, setFilterCloneSettings, setFilterClonePosition,
   setCurrentFilterLocation, addFilter
 }) => {
+  /**
+   * sets the selected filter collection for use in the clone version that is displayed at the
+   * mouse position while moving it around
+   * @param e - the event info
+   */
   const moveFieldClick = (e) => {
     setCurrentFilterLocation({collectionId: parentCollection.id, position: collection.position, elementId: collection.id});
     setFilterCloneSettings(collection);

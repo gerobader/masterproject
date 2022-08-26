@@ -15,6 +15,9 @@ const EdgeMappingMenu = ({
   edgeSizeMapping
 }) => {
   const {edges} = useSelector((state) => state.network);
+  /**
+   * gets all types of data from the data attribute of the edges
+   */
   const edgeDataPoints = useMemo(() => {
     const data = {};
     if (edges.length && Object.keys(edges[0].data).length === 0) return {};
@@ -41,7 +44,17 @@ const EdgeMappingMenu = ({
     return <p className="message">The Edges do not have any data to map against</p>;
   }
 
+  /**
+   * creates inputs for the different types of property settings
+   * @param mappingProperty - property of the edge like color or size that should be changed
+   * @param mappingValue - property of the edge the change should be based on
+   * @param mappingType - relative or absolute mapping
+   * @param rangeMapping - the value range provided by the user
+   * @param rangeMappingSetter - the setter function for the value range
+   * @returns {JSX.Element|null|*} - elements that build the frontend
+   */
   const createMappingInputs = (mappingProperty, mappingValue, mappingType, rangeMapping, rangeMappingSetter) => {
+    console.log(mappingProperty, mappingValue);
     if (!mappingValue) return null;
     if (mappingType === 'relative') {
       return (

@@ -15,7 +15,8 @@ import {
   SET_LAYOUT_CALCULATION_RUNNING,
   SET_SHOW_LOAD_NETWORK_MODAL,
   SET_AXES,
-  SET_SHOW_AXIS, SET_ERROR_MESSAGE
+  SET_SHOW_AXES,
+  SET_ERROR_MESSAGE
 } from '../actionTypes';
 
 const initialState = {
@@ -122,7 +123,7 @@ const settingsReducer = (state = initialState, action) => {
         ...state,
         boundaryOpacity: action.payload
       };
-    case SET_SHOW_AXIS:
+    case SET_SHOW_AXES:
       return {
         ...state,
         showAxes: action.payload

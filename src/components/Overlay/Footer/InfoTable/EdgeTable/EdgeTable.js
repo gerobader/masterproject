@@ -28,6 +28,12 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
     lastSelectedIndex = undefined;
   }, [page]);
 
+  /**
+   * select an edge by clicking on it in the table
+   * @param e - the click event
+   * @param edge - the edge to select
+   * @param index - index of the edge in to edge table - used for multi select
+   */
   const selectEdges = (e, edge, index) => {
     if (!edge.visible) return;
     let newSelectedEdges = [edge];
@@ -54,6 +60,11 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
     dispatch(setSelectedEdges(newSelectedEdges));
   };
 
+  /**
+   * select a node by clicking on it in the table
+   * @param e - the click event
+   * @param node - the node to select
+   */
   const selectNodes = (e, node) => {
     let newSelectedNodes = [node];
     if (e.ctrlKey) {
@@ -66,6 +77,7 @@ const EdgeTable = ({changeSortValue, edgesToShow}) => {
     dispatch(setSelectedNodes(newSelectedNodes));
   };
   const additionalKeys = edgesToShow.length ? Object.keys(edgesToShow[0].data) : [];
+
   return (
     <div className="table-wrapper" ref={tableWrapper}>
       <table>

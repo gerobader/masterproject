@@ -1,5 +1,7 @@
 # 3D Graph Visualizer using Three.js and React
 
+A deployment of this project can be found here: https://sonean.herokuapp.com/
+
 ## How to run
 
 - Requires Node 16.15
